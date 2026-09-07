@@ -1,0 +1,70 @@
+# ══════════════════════════════════════════════════════
+# .htaccess — GestiónComercial v1.0
+# Servidor: Apache (XAMPP)
+# ══════════════════════════════════════════════════════
+
+AddDefaultCharset UTF-8
+
+# ── Tipos MIME explícitos (crítico para PWA y scripts) ─
+AddType text/css                  .css
+AddType text/javascript           .js
+AddType application/json          .json
+AddType image/png                 .png
+AddType image/x-icon              .ico
+
+# ── Headers ──────────────────────────────────────────
+<IfModule mod_headers.c>
+  <FilesMatch "sw\.js$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+    Header set Service-Worker-Allowed "/pescaderia/"
+  </FilesMatch>
+
+  <FilesMatch "manifest\.json$">
+    Header set Cache-Control "max-age=86400"
+    Header set Content-Type "application/manifest+json"
+  </FilesMatch>
+
+  <FilesMatch "\.php$">
+    Header set Cache-Control "no-cache, no-store"
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type"
+  </FilesMatch>
+
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+</IfModule>
+
+# ── Compresión ────────────────────────────────────────
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/javascript application/json
+</IfModule>
+
+# ── Rewrite SPA (reglas corregidas) ──────────────────
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /pescaderia/
+
+  # 1. Si es un archivo real que existe → servirlo directo SIN tocar
+  RewriteCond %{REQUEST_FILENAME} -f
+  RewriteRule ^ - [L]
+
+  # 2. Si es un directorio real que existe → servirlo directo
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # 3. Rutas de API → api/index.php
+  RewriteRule ^api/(.*)$ api/index.php [QSA,L]
+
+  # 4. Todo lo demás (rutas SPA) → index.php
+  RewriteRule ^ index.php [QSA,L]
+</IfModule>
+
+Options -Indexes
+
+# ── Bloquear archivos sensibles ───────────────────────
+<FilesMatch "\.(sql|sh|env)$">
+  Require all denied
+</FilesMatch>
