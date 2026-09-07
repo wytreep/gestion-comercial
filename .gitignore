@@ -1,0 +1,26 @@
+# ── Sistema operativo ────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Configuración local con credenciales reales ──────
+# ⚠️  NUNCA subas config.php si tiene contraseña real
+# Usa config.example.php como plantilla
+api/config.php
+
+# ── Logs ─────────────────────────────────────────────
+*.log
+error_log
+
+# ── IDEs ─────────────────────────────────────────────
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# ── Iconos generados (se regeneran con generate_icons.php) ──
+assets/img/icon-192.png
+assets/img/icon-512.png
+
+# ── Node (por si alguien agrega herramientas de build) ──
+node_modules/
