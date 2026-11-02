@@ -1,0 +1,57 @@
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+    container_name: gcom_nginx
+    ports: [ "8080:80" ]
+    depends_on: [ php ]
+    networks: [ gcom_net ]
+    restart: unless-stopped
+
+  php:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: gcom_php
+    volumes:
+      - "./backend:/var/www:cached"
+      # Conserva el vendor instalado en la imagen aunque el bind mount tape /var/www
+      - "/var/www/vendor"
+    env_file: [ .env ]
+    depends_on:
+      db: { condition: service_healthy }
+    networks: [ gcom_net ]
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    container_name: gcom_db
+    # Sin puerto publicado: MySQL solo es accesible desde la red interna de
+    # Docker. Para una consola usa: docker compose exec db mysql -u root -p
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?falta DB_ROOT_PASSWORD en .env}
+      MYSQL_DATABASE: ${DB_NAME:-gestion_comercial}
+      MYSQL_USER: ${DB_USER:-gcom_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?falta DB_PASSWORD en .env}
+    volumes:
+      - gcom_db_data:/var/lib/mysql
+      # Solo el esquema se ejecuta en instalaciones nuevas. Los dumps con
+      # datos reales viven en database/private y se importan a mano.
+      - ./database/migrations/001_schema.sql:/docker-entrypoint-initdb.d/001_schema.sql:ro
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:?falta DB_ROOT_PASSWORD}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks: [ gcom_net ]
+    restart: unless-stopped
+
+networks:
+  gcom_net:
+    driver: bridge
+
+volumes:
+  gcom_db_data:
+    driver: local

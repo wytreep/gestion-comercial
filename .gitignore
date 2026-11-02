@@ -1,0 +1,18 @@
+.env
+!.env.example
+backend/vendor/
+client/node_modules/
+client/dist/
+backend/coverage/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+docker/db/data/
+*.log
+
+# Datos reales de clientes/ventas: nunca versionar.
+database/private/
+# Red de seguridad: solo el esquema puede entrar al repositorio.
+database/migrations/*.sql
+!database/migrations/001_schema.sql

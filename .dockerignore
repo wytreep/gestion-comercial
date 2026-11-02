@@ -1,0 +1,12 @@
+.git
+.gitignore
+.env
+.env.*
+backend/vendor
+backend/coverage
+client/node_modules
+client/dist
+**/*.log
+**/.DS_Store
+**/Thumbs.db
+database/private

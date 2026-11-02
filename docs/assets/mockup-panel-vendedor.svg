@@ -1,0 +1,238 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" width="1440" height="900" role="img" aria-label="Mockup del panel operativo del vendedor">
+  <defs>
+    <filter id="shadow2" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#101828" flood-opacity="0.06"/>
+    </filter>
+  </defs>
+
+  <rect width="1440" height="900" fill="#f4f6f9"/>
+
+  <!-- Barra superior -->
+  <rect width="1440" height="54" fill="#0f1b2d"/>
+  <rect x="12" y="13" width="28" height="28" rx="3" fill="#0b5cab"/>
+  <rect x="18" y="27" width="3.5" height="8" fill="#ffffff"/>
+  <rect x="23" y="23" width="3.5" height="12" fill="#ffffff"/>
+  <rect x="28" y="25" width="3.5" height="10" fill="#ffffff"/>
+  <text x="48" y="25" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="12.5" font-weight="600" fill="#ffffff">Gestión Comercial</text>
+  <text x="48" y="37.5" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="7.5" font-weight="600" letter-spacing="1.5" fill="#64748b">ERP DE DISTRIBUCIÓN</text>
+
+  <rect x="196" y="0" width="72" height="54" fill="#ffffff" fill-opacity="0.07"/>
+  <rect x="196" y="52" width="72" height="2" fill="#7eb3e8"/>
+  <text x="214" y="32" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="11.5" font-weight="600" fill="#ffffff">Panel</text>
+  <text x="286" y="32" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="11.5" fill="#94a3b8">Ventas</text>
+  <text x="360" y="32" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="11.5" fill="#94a3b8">Cartera</text>
+
+  <rect x="1172" y="14" width="98" height="26" rx="3" fill="#0b5cab"/>
+  <text x="1221" y="31" text-anchor="middle" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="10.5" font-weight="600" fill="#ffffff">+ Nueva venta</text>
+  <circle cx="1294" cy="27" r="14" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.10"/>
+  <path d="M1290 22 h8 v7 h-8 z M1289 21 h10 M1293 29 v3" stroke="#94a3b8" stroke-width="1.2" fill="none"/>
+  <circle cx="1302" cy="20" r="4" fill="#b42318"/>
+  <line x1="1318" y1="15" x2="1318" y2="39" stroke="#ffffff" stroke-opacity="0.10"/>
+  <circle cx="1334" cy="27" r="13" fill="#ffffff" fill-opacity="0.10" stroke="#ffffff" stroke-opacity="0.15"/>
+  <text x="1334" y="31" text-anchor="middle" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="9" font-weight="600" fill="#e2e8f0">VP</text>
+  <text x="1354" y="24" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="10.5" font-weight="500" fill="#e2e8f0">Vendedor</text>
+  <text x="1354" y="36" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="8.5" fill="#64748b">vendedor</text>
+
+  <!-- Riel lateral: sin compras ni administración -->
+  <rect x="0" y="54" width="58" height="846" fill="#ffffff"/>
+  <line x1="57.5" y1="54" x2="57.5" y2="900" stroke="#dfe4ea"/>
+
+  <rect x="15" y="70" width="28" height="28" rx="3" fill="#eff6fd" stroke="#0b5cab" stroke-opacity="0.15"/>
+  <circle cx="29" cy="84" r="7" stroke="#0b5cab" stroke-width="1.4" fill="none"/>
+  <path d="M29 80 v8 M25 84 h8" stroke="#0b5cab" stroke-width="1.4"/>
+  <text x="29" y="108" text-anchor="middle" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="7" fill="#64748b">Venta</text>
+
+  <circle cx="29" cy="134" r="4" stroke="#94a3b8" stroke-width="1.2" fill="none"/>
+  <path d="M21 148 c0-5 4-7 8-7 s8 2 8 7" stroke="#94a3b8" stroke-width="1.2" fill="none"/>
+  <text x="29" y="162" text-anchor="middle" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="7" fill="#64748b">Clientes</text>
+
+  <path d="M20 186 l9-4 9 4 -9 4 z M20 191 l9 4 9-4 M20 196 l9 4 9-4" stroke="#94a3b8" stroke-width="1.1" fill="none"/>
+  <text x="29" y="216" text-anchor="middle" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="7" fill="#64748b">Productos</text>
+
+  <path d="M19 242 h20 M29 235 v14 M24 238 l5-3 5 3 M24 246 l5 3 5-3" stroke="#94a3b8" stroke-width="1.2" fill="none"/>
+  <text x="29" y="270" text-anchor="middle" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="7" fill="#64748b">Stock</text>
+
+  <path d="M22 298 c0-4 3-7 7-7 s7 3 7 7 v5 h-14 z M29 303 v3" stroke="#94a3b8" stroke-width="1.2" fill="none"/>
+  <text x="29" y="324" text-anchor="middle" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="7" fill="#64748b">Alertas</text>
+
+  <circle cx="29" cy="800" r="8" stroke="#94a3b8" stroke-width="1.2" fill="none"/>
+  <path d="M25 800 h8 M29 796 v8" stroke="#94a3b8" stroke-width="1.2"/>
+
+  <!-- Encabezado -->
+  <text x="82" y="92" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="20" font-weight="600" fill="#0f172a">Panel de control</text>
+  <text x="82" y="110" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="11.5" fill="#64748b">Resumen operativo · noviembre de 2026</text>
+
+  <rect x="1218" y="76" width="96" height="30" rx="3" fill="#ffffff" stroke="#dfe4ea"/>
+  <text x="1266" y="95" text-anchor="middle" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="10.5" font-weight="500" fill="#334155">Cobrar cartera</text>
+  <rect x="1320" y="76" width="96" height="30" rx="3" fill="#0b5cab"/>
+  <text x="1368" y="95" text-anchor="middle" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="10.5" font-weight="600" fill="#ffffff">+ Nueva venta</text>
+
+  <!-- Aviso de alertas -->
+  <rect x="82" y="122" width="1334" height="34" rx="4" fill="#fdf6ec" stroke="#f0d9b5"/>
+  <path d="M100 132 l6 11 h-12 z M100 137 v3" stroke="#b45309" stroke-width="1.2" fill="none"/>
+  <text x="114" y="143" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="10.5" font-weight="500" fill="#92400e">3 alertas pendientes: 2 deudas vencidas y 1 producto con stock bajo</text>
+  <text x="1398" y="143" text-anchor="end" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="9.5" fill="#92400e">Revisar →</text>
+
+  <!-- KPIs -->
+  <g filter="url(#shadow2)">
+    <rect x="82" y="172" width="316" height="96" rx="5" fill="#ffffff" stroke="#dfe4ea"/>
+    <rect x="412" y="172" width="316" height="96" rx="5" fill="#ffffff" stroke="#dfe4ea"/>
+    <rect x="742" y="172" width="316" height="96" rx="5" fill="#ffffff" stroke="#dfe4ea"/>
+    <rect x="1072" y="172" width="316" height="96" rx="5" fill="#ffffff" stroke="#dfe4ea"/>
+  </g>
+
+  <text x="98" y="196" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="8.5" font-weight="600" letter-spacing="1.3" fill="#64748b">VENTAS DEL MES</text>
+  <text x="98" y="228" font-family="IBM Plex Mono, Consolas, monospace" font-size="22" font-weight="600" fill="#0f172a">$ 680.000</text>
+  <text x="98" y="249" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="9.5" fill="#94a3b8">17 pedidos</text>
+
+  <text x="428" y="196" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="8.5" font-weight="600" letter-spacing="1.3" fill="#64748b">COBRADO EN EL MES</text>
+  <text x="428" y="228" font-family="IBM Plex Mono, Consolas, monospace" font-size="22" font-weight="600" fill="#157347">$ 480.000</text>
+  <text x="428" y="249" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="9.5" fill="#94a3b8">Pagos recibidos</text>
+
+  <text x="758" y="196" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="8.5" font-weight="600" letter-spacing="1.3" fill="#64748b">CARTERA PENDIENTE</text>
+  <text x="758" y="228" font-family="IBM Plex Mono, Consolas, monospace" font-size="22" font-weight="600" fill="#b45309">$ 940.000</text>
+  <text x="758" y="249" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="9.5" fill="#94a3b8">Saldo por cobrar</text>
+
+  <text x="1088" y="196" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="8.5" font-weight="600" letter-spacing="1.3" fill="#64748b">TICKET PROMEDIO</text>
+  <text x="1088" y="228" font-family="IBM Plex Mono, Consolas, monospace" font-size="22" font-weight="600" fill="#0f172a">$ 40.000</text>
+  <text x="1088" y="249" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="9.5" fill="#94a3b8">Por pedido</text>
+
+  <!-- Últimas ventas -->
+  <rect x="82" y="284" width="880" height="300" rx="5" fill="#ffffff" stroke="#dfe4ea"/>
+  <text x="98" y="310" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="12" font-weight="600" fill="#1e293b">Últimas ventas</text>
+  <text x="98" y="326" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="9" fill="#94a3b8">Movimientos recientes</text>
+  <text x="928" y="320" text-anchor="end" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="10" font-weight="500" fill="#0b5cab">Ver todas →</text>
+
+  <rect x="82" y="340" width="880" height="28" fill="#f8fafc"/>
+  <text x="98" y="358" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="8" font-weight="600" letter-spacing="0.8" fill="#64748b">#</text>
+  <text x="136" y="358" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="8" font-weight="600" letter-spacing="0.8" fill="#64748b">CLIENTE</text>
+  <text x="360" y="358" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="8" font-weight="600" letter-spacing="0.8" fill="#64748b">FECHA</text>
+  <text x="520" y="358" text-anchor="end" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="8" font-weight="600" letter-spacing="0.8" fill="#64748b">TOTAL</text>
+  <text x="640" y="358" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="8" font-weight="600" letter-spacing="0.8" fill="#64748b">PAGO</text>
+  <text x="770" y="358" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="8" font-weight="600" letter-spacing="0.8" fill="#64748b">PEDIDO</text>
+  <text x="896" y="358" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="8" font-weight="600" letter-spacing="0.8" fill="#64748b">ACCIÓN</text>
+
+  <text x="98" y="392" font-family="IBM Plex Mono, Consolas, monospace" font-size="9" fill="#94a3b8">#43</text>
+  <text x="136" y="392" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="10" font-weight="500" fill="#334155">Cliente A</text>
+  <text x="360" y="392" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="9.5" fill="#64748b">01/11/2026</text>
+  <text x="520" y="392" text-anchor="end" font-family="IBM Plex Mono, Consolas, monospace" font-size="10" font-weight="600" fill="#0f172a">$ 40.000</text>
+  <rect x="636" y="380" width="52" height="18" rx="9" fill="#fdf6ec"/>
+  <text x="662" y="393" text-anchor="middle" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="8.5" fill="#b45309">Pendiente</text>
+  <rect x="766" y="380" width="42" height="18" rx="9" fill="#eff6fd"/>
+  <text x="787" y="393" text-anchor="middle" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="8.5" fill="#0b5cab">Nuevo</text>
+  <text x="896" y="392" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="9.5" font-weight="500" fill="#157347">Abonar</text>
+  <line x1="98" y1="406" x2="946" y2="406" stroke="#f1f5f9"/>
+
+  <text x="98" y="432" font-family="IBM Plex Mono, Consolas, monospace" font-size="9" fill="#94a3b8">#42</text>
+  <text x="136" y="432" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="10" font-weight="500" fill="#334155">Cliente B</text>
+  <text x="360" y="432" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="9.5" fill="#64748b">01/11/2026</text>
+  <text x="520" y="432" text-anchor="end" font-family="IBM Plex Mono, Consolas, monospace" font-size="10" font-weight="600" fill="#0f172a">$ 40.000</text>
+  <rect x="636" y="420" width="52" height="18" rx="9" fill="#eaf5ef"/>
+  <text x="662" y="433" text-anchor="middle" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="8.5" fill="#157347">Pagado</text>
+  <rect x="766" y="420" width="58" height="18" rx="9" fill="#eff6fd"/>
+  <text x="795" y="433" text-anchor="middle" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="8.5" fill="#0b5cab">Entregado</text>
+  <line x1="98" y1="446" x2="946" y2="446" stroke="#f1f5f9"/>
+
+  <text x="98" y="472" font-family="IBM Plex Mono, Consolas, monospace" font-size="9" fill="#94a3b8">#41</text>
+  <text x="136" y="472" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="10" font-weight="500" fill="#334155">Cliente C</text>
+  <text x="360" y="472" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="9.5" fill="#64748b">01/11/2026</text>
+  <text x="520" y="472" text-anchor="end" font-family="IBM Plex Mono, Consolas, monospace" font-size="10" font-weight="600" fill="#0f172a">$ 40.000</text>
+  <rect x="636" y="460" width="52" height="18" rx="9" fill="#fdf6ec"/>
+  <text x="662" y="473" text-anchor="middle" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="8.5" fill="#b45309">Pendiente</text>
+  <rect x="766" y="460" width="42" height="18" rx="9" fill="#eff6fd"/>
+  <text x="787" y="473" text-anchor="middle" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="8.5" fill="#0b5cab">Nuevo</text>
+  <text x="896" y="472" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="9.5" font-weight="500" fill="#157347">Abonar</text>
+  <line x1="98" y1="486" x2="946" y2="486" stroke="#f1f5f9"/>
+
+  <text x="98" y="512" font-family="IBM Plex Mono, Consolas, monospace" font-size="9" fill="#94a3b8">#40</text>
+  <text x="136" y="512" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="10" font-weight="500" fill="#334155">Cliente D</text>
+  <text x="360" y="512" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="9.5" fill="#64748b">01/11/2026</text>
+  <text x="520" y="512" text-anchor="end" font-family="IBM Plex Mono, Consolas, monospace" font-size="10" font-weight="600" fill="#0f172a">$ 40.000</text>
+  <rect x="636" y="500" width="52" height="18" rx="9" fill="#fdf6ec"/>
+  <text x="662" y="513" text-anchor="middle" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="8.5" fill="#b45309">Pendiente</text>
+  <rect x="766" y="500" width="42" height="18" rx="9" fill="#eff6fd"/>
+  <text x="787" y="513" text-anchor="middle" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="8.5" fill="#0b5cab">Nuevo</text>
+  <text x="896" y="512" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="9.5" font-weight="500" fill="#157347">Abonar</text>
+  <line x1="98" y1="526" x2="946" y2="526" stroke="#f1f5f9"/>
+
+  <text x="98" y="552" font-family="IBM Plex Mono, Consolas, monospace" font-size="9" fill="#94a3b8">#39</text>
+  <text x="136" y="552" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="10" font-weight="500" fill="#334155">Cliente E</text>
+  <text x="360" y="552" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="9.5" fill="#64748b">01/11/2026</text>
+  <text x="520" y="552" text-anchor="end" font-family="IBM Plex Mono, Consolas, monospace" font-size="10" font-weight="600" fill="#0f172a">$ 40.000</text>
+  <rect x="636" y="540" width="52" height="18" rx="9" fill="#eaf5ef"/>
+  <text x="662" y="553" text-anchor="middle" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="8.5" fill="#157347">Pagado</text>
+  <rect x="766" y="540" width="58" height="18" rx="9" fill="#eff6fd"/>
+  <text x="795" y="553" text-anchor="middle" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="8.5" fill="#0b5cab">Entregado</text>
+
+  <!-- Stock -->
+  <rect x="976" y="284" width="440" height="300" rx="5" fill="#ffffff" stroke="#dfe4ea"/>
+  <text x="992" y="310" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="12" font-weight="600" fill="#1e293b">Stock disponible</text>
+  <text x="1400" y="310" text-anchor="end" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="9" fill="#94a3b8">Precio de venta</text>
+
+  <text x="992" y="342" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="10.5" font-weight="500" fill="#334155">Pescado (media canasta)</text>
+  <text x="992" y="355" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="8.5" fill="#94a3b8">$ 15.000 / kg</text>
+  <text x="1400" y="346" text-anchor="end" font-family="IBM Plex Mono, Consolas, monospace" font-size="11" font-weight="600" fill="#0f172a">18,0 kg</text>
+  <line x1="992" y1="368" x2="1400" y2="368" stroke="#f1f5f9"/>
+
+  <text x="992" y="392" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="10.5" font-weight="500" fill="#334155">Queso</text>
+  <text x="992" y="405" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="8.5" fill="#94a3b8">$ 8.000 / kg</text>
+  <text x="1400" y="396" text-anchor="end" font-family="IBM Plex Mono, Consolas, monospace" font-size="11" font-weight="600" fill="#0f172a">24,5 kg</text>
+  <line x1="992" y1="418" x2="1400" y2="418" stroke="#f1f5f9"/>
+
+  <text x="992" y="442" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="10.5" font-weight="500" fill="#334155">Carne Serrana</text>
+  <text x="992" y="455" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="8.5" fill="#94a3b8">$ 25.000 / kg</text>
+  <text x="1400" y="446" text-anchor="end" font-family="IBM Plex Mono, Consolas, monospace" font-size="11" font-weight="600" fill="#0f172a">12,0 kg</text>
+
+  <rect x="992" y="478" width="408" height="90" rx="4" fill="#f8fafc" stroke="#eef2f6"/>
+  <text x="1004" y="498" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="8" font-weight="600" letter-spacing="1" fill="#64748b">NOTA</text>
+  <text x="1004" y="516" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="9.5" fill="#475569">El precio mostrado es de venta. Los costos y</text>
+  <text x="1004" y="531" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="9.5" fill="#475569">márgenes no están disponibles para este rol.</text>
+  <text x="1004" y="552" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="9" fill="#94a3b8">Consulta a administración para cambios.</text>
+
+  <!-- Cartera -->
+  <rect x="82" y="600" width="1334" height="274" rx="5" fill="#ffffff" stroke="#dfe4ea"/>
+  <text x="98" y="626" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="12" font-weight="600" fill="#1e293b">Cartera por cobrar</text>
+  <text x="98" y="642" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="9" fill="#94a3b8">Clientes con saldo pendiente</text>
+  <text x="1400" y="632" text-anchor="end" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="10" font-weight="500" fill="#0b5cab">Ir a cartera →</text>
+
+  <rect x="82" y="656" width="1334" height="28" fill="#f8fafc"/>
+  <text x="98" y="674" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="8" font-weight="600" letter-spacing="0.8" fill="#64748b">CLIENTE</text>
+  <text x="430" y="674" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="8" font-weight="600" letter-spacing="0.8" fill="#64748b">TELÉFONO</text>
+  <text x="700" y="674" text-anchor="end" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="8" font-weight="600" letter-spacing="0.8" fill="#64748b">PEDIDOS</text>
+  <text x="900" y="674" text-anchor="end" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="8" font-weight="600" letter-spacing="0.8" fill="#64748b">TOTAL VENTAS</text>
+  <text x="1100" y="674" text-anchor="end" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="8" font-weight="600" letter-spacing="0.8" fill="#64748b">TOTAL PAGADO</text>
+  <text x="1320" y="674" text-anchor="end" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="8" font-weight="600" letter-spacing="0.8" fill="#64748b">SALDO</text>
+
+  <text x="98" y="708" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="10" font-weight="500" fill="#334155">Cliente A</text>
+  <text x="430" y="708" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="9.5" fill="#64748b">300 123 4567</text>
+  <text x="700" y="708" text-anchor="end" font-family="IBM Plex Mono, Consolas, monospace" font-size="9.5" fill="#475569">2</text>
+  <text x="900" y="708" text-anchor="end" font-family="IBM Plex Mono, Consolas, monospace" font-size="9.5" fill="#0f172a">$ 35.000</text>
+  <text x="1100" y="708" text-anchor="end" font-family="IBM Plex Mono, Consolas, monospace" font-size="9.5" fill="#0f172a">$ 0</text>
+  <text x="1320" y="708" text-anchor="end" font-family="IBM Plex Mono, Consolas, monospace" font-size="9.5" font-weight="600" fill="#b45309">$ 35.000</text>
+  <line x1="98" y1="720" x2="1400" y2="720" stroke="#f1f5f9"/>
+
+  <text x="98" y="746" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="10" font-weight="500" fill="#334155">Cliente F</text>
+  <text x="430" y="746" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="9.5" fill="#64748b">310 555 0198</text>
+  <text x="700" y="746" text-anchor="end" font-family="IBM Plex Mono, Consolas, monospace" font-size="9.5" fill="#475569">1</text>
+  <text x="900" y="746" text-anchor="end" font-family="IBM Plex Mono, Consolas, monospace" font-size="9.5" fill="#0f172a">$ 42.000</text>
+  <text x="1100" y="746" text-anchor="end" font-family="IBM Plex Mono, Consolas, monospace" font-size="9.5" fill="#0f172a">$ 0</text>
+  <text x="1320" y="746" text-anchor="end" font-family="IBM Plex Mono, Consolas, monospace" font-size="9.5" font-weight="600" fill="#b45309">$ 42.000</text>
+  <line x1="98" y1="758" x2="1400" y2="758" stroke="#f1f5f9"/>
+
+  <text x="98" y="784" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="10" font-weight="500" fill="#334155">Cliente G</text>
+  <text x="430" y="784" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="9.5" fill="#64748b">320 441 7722</text>
+  <text x="700" y="784" text-anchor="end" font-family="IBM Plex Mono, Consolas, monospace" font-size="9.5" fill="#475569">1</text>
+  <text x="900" y="784" text-anchor="end" font-family="IBM Plex Mono, Consolas, monospace" font-size="9.5" fill="#0f172a">$ 27.000</text>
+  <text x="1100" y="784" text-anchor="end" font-family="IBM Plex Mono, Consolas, monospace" font-size="9.5" fill="#0f172a">$ 0</text>
+  <text x="1320" y="784" text-anchor="end" font-family="IBM Plex Mono, Consolas, monospace" font-size="9.5" font-weight="600" fill="#b45309">$ 27.000</text>
+  <line x1="98" y1="796" x2="1400" y2="796" stroke="#f1f5f9"/>
+
+  <text x="98" y="822" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="10" font-weight="500" fill="#334155">Cliente E</text>
+  <text x="430" y="822" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="9.5" fill="#64748b">315 200 8899</text>
+  <text x="700" y="822" text-anchor="end" font-family="IBM Plex Mono, Consolas, monospace" font-size="9.5" fill="#475569">1</text>
+  <text x="900" y="822" text-anchor="end" font-family="IBM Plex Mono, Consolas, monospace" font-size="9.5" fill="#0f172a">$ 18.000</text>
+  <text x="1100" y="822" text-anchor="end" font-family="IBM Plex Mono, Consolas, monospace" font-size="9.5" fill="#0f172a">$ 0</text>
+  <text x="1320" y="822" text-anchor="end" font-family="IBM Plex Mono, Consolas, monospace" font-size="9.5" font-weight="600" fill="#b45309">$ 18.000</text>
+
+  <text x="1400" y="888" text-anchor="end" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="8" fill="#cbd5e1">Mockup · Panel del vendedor · v3.0</text>
+</svg>
