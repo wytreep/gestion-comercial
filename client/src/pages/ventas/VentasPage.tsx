@@ -5,8 +5,9 @@ import { ventasApi, productosApi, clientesApi } from '../../api/endpoints';
 import { Spinner, Empty, Modal, Confirm, BadgeEstadoPago, BadgeEstadoPedido, BadgeMedioPago, BadgeDestino, NumberInput } from '../../components/ui';
 import { formatCOP, formatCantidad, formatDate, formatDateTime, today, firstDayOfMonth, OPCIONES_MEDIO_PAGO, OPCIONES_DESTINO, OPCIONES_ESTADO_PEDIDO, num, parseMoneyInput, parseDecimalInput } from '../../utils/format';
 import type { FiltrosVenta, Venta, EstadoPago, EstadoPedido } from '../../types';
-import { Eye, Pencil, Trash2, Plus, X } from 'lucide-react';
+import { Eye, Pencil, Trash2, Plus, X, QrCode } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import CobroQrModal from '../../components/cobro/CobroQrModal';
 
 const EP: { value: EstadoPago | ''; label: string }[] = [{ value: '', label: 'Todos' }, { value: 'pagado', label: 'Pagado' }, { value: 'abono', label: 'Abono' }, { value: 'pendiente', label: 'Pendiente' }, { value: 'fiado', label: 'Fiado' }];
 const EPed: { value: EstadoPedido | ''; label: string }[] = [{ value: '', label: 'Todos' }, { value: 'nuevo', label: 'Nuevo' }, { value: 'en_preparacion', label: 'En prep.' }, { value: 'entregado', label: 'Entregado' }, { value: 'cancelado', label: 'Cancelado' }];
@@ -18,6 +19,7 @@ export default function VentasPage() {
   const [detalle, setDetalle] = useState<Venta | null>(null);
   const [editando, setEditando] = useState<Venta | null>(null);
   const [abonando, setAbonando] = useState<Venta | null>(null);
+  const [cobrando, setCobrando] = useState<Venta | null>(null);
   const [confirm, setConfirm] = useState<{ id: number; tienePagos: boolean } | null>(null);
 
   const { data: ventas = [], isLoading } = useQuery({ queryKey: ['ventas', filtros], queryFn: () => ventasApi.listar(filtros) });
@@ -66,6 +68,7 @@ export default function VentasPage() {
                         <button onClick={() => verDetalle(v.id)} className="btn-secondary btn-sm" aria-label={`Ver detalle de la venta ${v.id}`} title="Ver detalle"><Eye size={13} aria-hidden="true" /></button>
                         <button onClick={() => ventasApi.detalle(v.id).then(full => setEditando(full))} className="btn-secondary btn-sm" aria-label={`Editar la venta ${v.id}`} title="Editar"><Pencil size={13} aria-hidden="true" /></button>
                         {v.saldo_pendiente > 0 && <button onClick={() => setAbonando(v)} className="btn-success btn-sm">Abonar</button>}
+                        {v.saldo_pendiente > 0 && <button onClick={() => setCobrando(v)} className="btn-secondary btn-sm" aria-label={`Cobrar con QR la venta ${v.id}`} title="Cobrar con QR"><QrCode size={13} aria-hidden="true" /></button>}
                         {isAdmin && v.estado_pedido !== 'cancelado' && <button onClick={() => setConfirm({ id: v.id, tienePagos: v.total_pagado > 0 })} className="btn-danger btn-sm" aria-label={`Cancelar la venta ${v.id}`} title="Cancelar venta"><Trash2 size={13} aria-hidden="true" /></button>}
                       </div>
                     </td>
@@ -78,7 +81,7 @@ export default function VentasPage() {
       )}
 
       <Modal open={!!detalle} onClose={() => setDetalle(null)} title={`Venta #${detalle?.id}`} size="lg">
-        {detalle && <DetalleVenta venta={detalle} onAbonar={() => setAbonando(detalle)} />}
+        {detalle && <DetalleVenta venta={detalle} onAbonar={() => setAbonando(detalle)} onCobrarQr={() => { setCobrando(detalle); setDetalle(null); }} />}
       </Modal>
       <Modal open={!!editando} onClose={() => setEditando(null)} title={`Editar Venta #${editando?.id}`} size="lg">
         {editando && <EditarVenta venta={editando} onSuccess={() => { setEditando(null); qc.invalidateQueries({ queryKey: ['ventas'] }); }} />}
@@ -86,12 +89,15 @@ export default function VentasPage() {
       <Modal open={!!abonando} onClose={() => setAbonando(null)} title={`Registrar pago — #${abonando?.id}`}>
         {abonando && <AbonarVenta venta={abonando} onSuccess={() => { setAbonando(null); qc.invalidateQueries(); }} />}
       </Modal>
+      <Modal open={!!cobrando} onClose={() => setCobrando(null)} title={`Cobro con QR — #${cobrando?.id}`}>
+        {cobrando && <CobroQrModal venta={cobrando} onClose={() => setCobrando(null)} onSuccess={() => qc.invalidateQueries()} />}
+      </Modal>
       <Confirm open={!!confirm} danger title={confirm?.tienePagos ? 'Cancelar venta' : 'Eliminar venta'} message={confirm?.tienePagos ? 'Tiene pagos. Se marcará como cancelada.' : 'Se eliminará y revertirá el stock.'} onConfirm={() => confirm && eliminarMut.mutate(confirm.id)} onCancel={() => setConfirm(null)} />
     </div>
   );
 }
 
-function DetalleVenta({ venta, onAbonar }: { venta: Venta; onAbonar: () => void }) {
+function DetalleVenta({ venta, onAbonar, onCobrarQr }: { venta: Venta; onAbonar: () => void; onCobrarQr: () => void }) {
   return (
     <div className="space-y-5">
       <div className="flex items-center gap-3 flex-wrap">
@@ -119,7 +125,12 @@ function DetalleVenta({ venta, onAbonar }: { venta: Venta; onAbonar: () => void 
       </div>
       <div className="flex items-center justify-between pt-2 border-t border-gray-100">
         <div className="text-sm">Saldo: <span className={`font-mono font-bold ${venta.saldo_pendiente > 0 ? 'text-danger' : 'text-success'}`}>{formatCOP(venta.saldo_pendiente)}</span></div>
-        {venta.saldo_pendiente > 0 && <button onClick={onAbonar} className="btn-success">Registrar pago</button>}
+        {venta.saldo_pendiente > 0 && (
+          <div className="flex flex-wrap gap-2">
+            <button onClick={onCobrarQr} className="btn-secondary">Cobrar con QR</button>
+            <button onClick={onAbonar} className="btn-success">Registrar pago</button>
+          </div>
+        )}
       </div>
     </div>
   );

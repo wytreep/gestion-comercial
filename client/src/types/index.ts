@@ -131,6 +131,23 @@ export interface Venta {
   pagos:            Pago[];
 }
 
+export type EstadoCobroQr = 'pendiente' | 'pagado' | 'expirado' | 'anulado';
+
+export interface CobroQr {
+  id:           number;
+  venta_id:     number;
+  codigo:       string;
+  monto:        number;
+  estado:       EstadoCobroQr;
+  expira_at:    string;
+  expira_en:    number;
+  pagado_at:    string | null;
+  referencia:   string | null;
+  pago_id:      number | null;
+  created_at:   string;
+  contenido_qr: string;
+}
+
 export interface FiltrosVenta {
   estado_pago?:   EstadoPago | '';
   estado_pedido?: EstadoPedido | '';

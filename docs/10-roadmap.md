@@ -17,7 +17,7 @@ códigos QR**, solicitado como siguiente evolución del producto.
 
 | Fase | Foco | Periodo estimado | Prioridad | Estado |
 |---|---|---|---|---|
-| 1 | Escáner QR y códigos de barras | Q1 2027 | P0 | Parcial: escaneo de producto listo |
+| 1 | Escáner QR y códigos de barras | Q1 2027 | P0 | Parcial: escaneo y cobro QR listos |
 | 2 | Facturación electrónica e IVA | Q2 2027 | P0 | Planificada |
 | 3 | Inventario avanzado | Q3 2027 | P1 | Planificada |
 | 4 | Operación móvil y cliente | Q3–Q4 2027 | P1 | Planificada |
@@ -45,9 +45,9 @@ gantt
 
 ## Fase 1 · Escáner QR y códigos de barras
 
-> **Estado:** el escaneo de producto en ventas (1.1) ya está implementado en la
-> versión 3.0.0. El cobro con QR, las etiquetas y la consulta de recibos siguen
-> en roadmap.
+> **Estado:** el escaneo de producto en ventas (1.1) y el cobro con QR (1.2) ya
+> están implementados en la versión 3.0.0. Las etiquetas y la consulta de
+> recibos siguen en roadmap.
 
 ### Objetivo
 
@@ -158,6 +158,22 @@ stateDiagram-v2
     anulado --> [*]
 ```
 
+Implementado en la versión 3.0.0:
+
+- Tabla `cobros_qr` con código aleatorio `GCOM-C-XXXXXXXXXXXX`, vencimiento de
+  15 minutos y estados `pendiente`, `pagado`, `expirado` y `anulado`.
+- Un solo cobro activo por venta: al generar uno nuevo, el anterior se anula.
+- La confirmación exige la referencia de la transacción y reutiliza
+  `VentaService::registrarPago` dentro de la misma transacción. Así se actualizan
+  `pagos`, el saldo de la venta y la cartera sin duplicar validaciones.
+- El QR contiene `GCOM-COBRO|<codigo>|VENTA:<id>|MONTO:<monto>` y se genera
+  desde **Ventas → Cobrar con QR**. También puede copiarse el código o guardarse
+  la imagen.
+- La aplicación no se conecta a pasarelas bancarias: el vendedor verifica el
+  pago en su banco o billetera y luego lo confirma en la app.
+- La tabla se crea en `001_schema.sql` para instalaciones nuevas y en
+  `002_cobros_qr.sql` para bases existentes.
+
 ### 1.3 Etiquetas QR
 
 - QR por producto para conteo rápido.
@@ -223,7 +239,9 @@ CREATE TABLE cobros_qr (
 - Un código desconocido muestra un mensaje claro y permite buscarlo manualmente.
   **Verificado en 3.0.0.**
 - El cobro con QR genera un código único y expira.
+  **Verificado en 3.0.0.**
 - La confirmación manual del pago actualiza la cartera.
+  **Verificado en 3.0.0.**
 - Funciona en móvil y escritorio.
 - No se accede a la cámara sin acción del usuario.
 
@@ -327,7 +345,7 @@ Mayor control en productos perecederos y mejor costo real.
 | Función | Prioridad | Impacto | Esfuerzo | Fase |
 |---|---|---|---|---|
 | Escáner QR de producto en ventas | P0 | Alto | Medio | 1 · implementado |
-| Cobro con QR | P0 | Alto | Medio | 1 |
+| Cobro con QR | P0 | Alto | Medio | 1 · implementado |
 | Etiquetas QR | P1 | Medio | Bajo | 1 |
 | Facturación electrónica | P0 | Alto | Alto | 2 |
 | IVA | P0 | Alto | Medio | 2 |

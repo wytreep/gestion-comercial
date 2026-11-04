@@ -193,6 +193,59 @@ Authorization: Bearer <token>
 | `estado_pedido` | `nuevo` |
 | `cliente_id` | `12` |
 
+### Cobro con QR
+
+| Método | Ruta | Rol | Descripción |
+|---|---|---|---|
+| GET | `/ventas/{id}/cobros-qr` | Todos | Cobros generados para la venta |
+| POST | `/ventas/{id}/cobros-qr` | Admin, vendedor | Genera un cobro pendiente |
+| GET | `/cobros-qr/{codigo}` | Todos | Consulta estado y vencimiento |
+| POST | `/cobros-qr/{codigo}/confirmar` | Admin, vendedor | Registra el pago confirmado |
+| POST | `/cobros-qr/{codigo}/anular` | Admin, vendedor | Anula un cobro pendiente |
+
+El monto es opcional al crear: si se omite, se cobra el saldo pendiente. El
+cobro vence a los 15 minutos y solo puede existir uno activo por venta. Al
+generar uno nuevo, el anterior queda anulado.
+
+```http
+POST /api/v1/ventas/49/cobros-qr
+Authorization: Bearer <token>
+
+{ "monto": 20000 }
+```
+
+Respuesta:
+
+```json
+{
+  "success": true,
+  "data": {
+    "codigo": "GCOM-C-94DA5354E0DC",
+    "monto": 20000,
+    "estado": "pendiente",
+    "expira_en": 900,
+    "contenido_qr": "GCOM-COBRO|GCOM-C-94DA5354E0DC|VENTA:49|MONTO:20000.00"
+  }
+}
+```
+
+Confirmación manual:
+
+```http
+POST /api/v1/cobros-qr/GCOM-C-94DA5354E0DC/confirmar
+Authorization: Bearer <token>
+
+{
+  "referencia": "88451203",
+  "medio_pago": "transferencia",
+  "destino_dinero": "billetera_nequi"
+}
+```
+
+La confirmación exige `referencia`, registra el pago en `pagos` y actualiza el
+saldo de la venta y la cartera en una sola transacción. Un cobro vencido o
+anulado no se puede confirmar.
+
 ## Compras
 
 Solo administración.

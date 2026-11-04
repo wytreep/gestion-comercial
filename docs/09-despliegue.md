@@ -150,6 +150,19 @@ No carga clientes, ventas ni pagos.
 Los precios de los productos base son de demostración. Cámbialos en
 **Productos** antes de operar con clientes reales.
 
+### Migraciones incrementales
+
+`docker-compose.yml` monta `database/migrations/` en el directorio de
+inicialización. En una base nueva, MySQL ejecuta los archivos en orden
+alfabético. En una base existente, las migraciones nuevas se aplican a mano:
+
+```bash
+docker compose cp database/migrations/002_cobros_qr.sql db:/tmp/002_cobros_qr.sql
+docker compose exec -T db sh -c \
+  'mysql -u root -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE < /tmp/002_cobros_qr.sql'
+docker compose exec -T db rm -f /tmp/002_cobros_qr.sql
+```
+
 ### Importar datos operativos
 
 Los dumps con datos reales viven en `database/private/` y no se versionan.

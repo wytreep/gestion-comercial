@@ -16,3 +16,4 @@ database/private/
 # Red de seguridad: solo el esquema puede entrar al repositorio.
 database/migrations/*.sql
 !database/migrations/001_schema.sql
+!database/migrations/002_cobros_qr.sql

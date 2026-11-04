@@ -36,9 +36,10 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD:?falta DB_PASSWORD en .env}
     volumes:
       - gcom_db_data:/var/lib/mysql
-      # Solo el esquema se ejecuta en instalaciones nuevas. Los dumps con
-      # datos reales viven en database/private y se importan a mano.
-      - ./database/migrations/001_schema.sql:/docker-entrypoint-initdb.d/001_schema.sql:ro
+      # Las migraciones se ejecutan en orden alfabético solo al crear el
+      # volumen. Los dumps con datos reales viven en database/private y se
+      # importan a mano.
+      - ./database/migrations:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:?falta DB_ROOT_PASSWORD}" ]
       interval: 10s

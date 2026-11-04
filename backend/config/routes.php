@@ -14,7 +14,8 @@ use App\Controllers\{
     BackupController,
     CajaController,
     CarteraController,
-    FinanzasController
+    FinanzasController,
+    CobroQrController
 };
 use App\Services\{
     AuthService,
@@ -28,9 +29,10 @@ use App\Services\{
     BackupService,
     CajaService,
     CarteraService,
-    FinanzasService
+    FinanzasService,
+    CobroQrService
 };
-use App\Repositories\{ProductoRepository, VentaRepository, CompraRepository, ClienteRepository};
+use App\Repositories\{ProductoRepository, VentaRepository, CompraRepository, ClienteRepository, CobroQrRepository};
 use App\Middleware\{AuthMiddleware, RoleMiddleware};
 use App\Core\Database;
 
@@ -46,7 +48,10 @@ $roleMiddleware = new RoleMiddleware();
 // Controllers
 $authCtrl = new AuthController($authService);
 $dashCtrl = new DashboardController(new DashboardService(), $notifService);
-$ventaCtrl = new VentaController(new VentaService(new VentaRepository(), new ProductoRepository(), new ClienteRepository(), $stockService, $db));
+$ventaRepo = new VentaRepository();
+$ventaService = new VentaService($ventaRepo, new ProductoRepository(), new ClienteRepository(), $stockService, $db);
+$ventaCtrl = new VentaController($ventaService);
+$cobroQrCtrl = new CobroQrController(new CobroQrService(new CobroQrRepository(), $ventaRepo, $ventaService, $db));
 $compraCtrl = new CompraController(new CompraService(new CompraRepository(), new ProductoRepository(), $stockService, $db));
 $prodCtrl = new ProductoController(new ProductoRepository(), $stockService);
 $clienteCtrl = new ClienteController();
@@ -97,6 +102,13 @@ $router->get('/api/v1/ventas/{id}', $protect([$ventaCtrl, 'show']));
 $router->put('/api/v1/ventas/{id}', $protect([$ventaCtrl, 'update'], $noReadonly));
 $router->delete('/api/v1/ventas/{id}', $protect([$ventaCtrl, 'destroy'], $adminOnly));
 $router->post('/api/v1/ventas/{id}/pagos', $protect([$ventaCtrl, 'storePago'], $noReadonly));
+
+// ── Cobro con QR (Fase 1.2) ───────────────────────────
+$router->get('/api/v1/ventas/{id}/cobros-qr', $protect([$cobroQrCtrl, 'index']));
+$router->post('/api/v1/ventas/{id}/cobros-qr', $protect([$cobroQrCtrl, 'store'], $noReadonly));
+$router->get('/api/v1/cobros-qr/{codigo}', $protect([$cobroQrCtrl, 'show']));
+$router->post('/api/v1/cobros-qr/{codigo}/confirmar', $protect([$cobroQrCtrl, 'confirmar'], $noReadonly));
+$router->post('/api/v1/cobros-qr/{codigo}/anular', $protect([$cobroQrCtrl, 'anular'], $noReadonly));
 
 // ── Compras (solo administración: afectan inventario y costos) ──
 $router->get('/api/v1/compras', $protect([$compraCtrl, 'index'], $adminOnly));

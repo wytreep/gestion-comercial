@@ -2,7 +2,7 @@ import client from './client';
 import type {
   AuthTokens, DashboardData, Producto, Venta, Compra,
   Cliente, Proveedor, TipoGasto, FiltrosVenta, ApiResponse,
-  Notificacion, ReporteMensual, BackupLog, UsuarioAdmin, FinanzasData,
+  Notificacion, ReporteMensual, BackupLog, UsuarioAdmin, FinanzasData, CobroQr,
 } from '../types';
 
 async function get<T>(url: string, params?: object): Promise<T> {
@@ -61,6 +61,17 @@ export const ventasApi = {
   editar:        (id: number, body: object) => put<null>(`/ventas/${id}`, body),
   eliminar:      (id: number)      => del<{ accion: string }>(`/ventas/${id}`),
   registrarPago: (id: number, body: object) => post<{ id: number }>(`/ventas/${id}/pagos`, body),
+};
+
+export const cobrosQrApi = {
+  crear:     (ventaId: number, body: object) => post<CobroQr>(`/ventas/${ventaId}/cobros-qr`, body),
+  listar:    (ventaId: number) => get<CobroQr[]>(`/ventas/${ventaId}/cobros-qr`),
+  detalle:   (codigo: string) => get<CobroQr>(`/cobros-qr/${encodeURIComponent(codigo)}`),
+  confirmar: (codigo: string, body: object) =>
+    post<{ id: number; venta_id: number; codigo: string; monto: number; estado: string; pago_id: number }>(
+      `/cobros-qr/${encodeURIComponent(codigo)}/confirmar`, body
+    ),
+  anular:    (codigo: string) => post<CobroQr>(`/cobros-qr/${encodeURIComponent(codigo)}/anular`),
 };
 
 export const comprasApi = {

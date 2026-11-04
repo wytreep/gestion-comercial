@@ -16,7 +16,7 @@ como parte del roadmap. No deben interpretarse como funcionalidad disponible.
 | Panel del vendedor | Implementado |
 | Nueva venta | Implementado, con escaneo de producto |
 | Finanzas | Implementado |
-| Escáner QR | Escaneo de producto implementado; cobro con QR en roadmap |
+| Escáner QR | Escaneo de producto y cobro con QR implementados |
 
 ## Sistema visual
 
@@ -111,9 +111,10 @@ panel lateral.
 
 ![Mockup del escáner QR](assets/mockup-qr.svg)
 
-> **Estado:** el **escaneo de producto** está implementado en la versión 3.0.0:
-> cámara, lector USB y entrada manual agregan el producto a la venta. El **cobro
-> con QR** sigue siendo una propuesta de la [Fase 1 del roadmap](10-roadmap.md).
+> **Estado:** el **escaneo de producto** y el **cobro con QR** están
+> implementados en la versión 3.0.0. La cámara, el lector USB y la entrada manual
+> agregan el producto a la venta; el cobro genera un QR con vencimiento y se
+> confirma manualmente desde **Ventas**.
 
 **Qué valida**
 
@@ -121,12 +122,12 @@ panel lateral.
 - Control para voltear la imagen cuando la cámara se muestra en espejo.
 - Entrada manual y compatibilidad con lectores USB.
 - Confirmación visual del producto agregado.
-- Cobro con QR en escritorio (propuesta).
-- Confirmación del pago por parte del vendedor (propuesta).
-- Estados del cobro y expiración (propuesta).
+- Cobro con QR en escritorio.
+- Confirmación del pago por parte del vendedor.
+- Estados del cobro y expiración.
 
-El escaneo de producto ya está disponible. El cobro con QR corresponde a la
-[Fase 1 del roadmap](10-roadmap.md).
+El escaneo de producto y el cobro con QR ya están disponibles y corresponden a
+la [Fase 1 del roadmap](10-roadmap.md).
 
 ## Cómo usar los mockups
 
@@ -144,7 +145,7 @@ El escaneo de producto ya está disponible. El cobro con QR corresponde a la
 | Estados | Selección | Todos los estados |
 | Responsive | Escritorio | Escritorio, tablet y móvil |
 | Cámara QR | Propuesta | Escaneo de producto disponible |
-| Cobro con QR | Propuesta | Pendiente (Fase 1) |
+| Cobro con QR | Propuesta | Implementado (Fase 1) |
 
 ## Accesibilidad
 

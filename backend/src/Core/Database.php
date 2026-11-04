@@ -12,6 +12,7 @@ final class Database
 {
     private static ?self $instance = null;
     private PDO $pdo;
+    private int $savepointCounter = 0;
 
     private function __construct()
     {
@@ -57,9 +58,25 @@ final class Database
     /**
      * Ejecuta un callable dentro de una transacción.
      * Hace rollback automático si se lanza cualquier excepción.
+     * Si ya hay una transacción abierta usa un savepoint para que los
+     * servicios puedan anidarse sin perder la atomicidad del proceso padre.
      */
     public function transaction(callable $fn): mixed
     {
+        if ($this->pdo->inTransaction()) {
+            $savepoint = 'gcom_sp_' . (++$this->savepointCounter);
+            $this->pdo->exec("SAVEPOINT {$savepoint}");
+            try {
+                $result = $fn($this);
+                $this->pdo->exec("RELEASE SAVEPOINT {$savepoint}");
+                return $result;
+            } catch (\Throwable $e) {
+                $this->pdo->exec("ROLLBACK TO SAVEPOINT {$savepoint}");
+                $this->pdo->exec("RELEASE SAVEPOINT {$savepoint}");
+                throw $e;
+            }
+        }
+
         $this->pdo->beginTransaction();
         try {
             $result = $fn($this);
