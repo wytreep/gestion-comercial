@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { BrowserQRCodeReader } from '@zxing/browser';
 import type { IScannerControls } from '@zxing/browser';
-import { Camera, Keyboard, QrCode, RefreshCw } from 'lucide-react';
+import { Camera, FlipHorizontal, Keyboard, QrCode, RefreshCw } from 'lucide-react';
 import { Alert, Modal } from '../ui';
 
 type CameraState = 'idle' | 'starting' | 'active' | 'error';
@@ -18,6 +18,21 @@ export default function QrScannerModal({ open, onClose, onCode }: Props) {
   const [error, setError] = useState('');
   const [manual, setManual] = useState('');
   const [buscando, setBuscando] = useState(false);
+  const [espejo, setEspejo] = useState(() => {
+    try {
+      return localStorage.getItem('gcom-qr-espejo') === '1';
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('gcom-qr-espejo', espejo ? '1' : '0');
+    } catch {
+      // El navegador puede bloquear el almacenamiento; el control sigue funcionando.
+    }
+  }, [espejo]);
   const videoRef = useRef<HTMLVideoElement>(null);
   const controlsRef = useRef<IScannerControls | null>(null);
   const handlingRef = useRef(false);
@@ -107,7 +122,7 @@ export default function QrScannerModal({ open, onClose, onCode }: Props) {
         <div className="relative overflow-hidden rounded-md border border-line bg-navy-950">
           <video
             ref={videoRef}
-            className={`h-64 w-full object-cover ${cameraState === 'active' ? '' : 'opacity-20'}`}
+            className={`h-64 w-full object-cover ${cameraState === 'active' ? '' : 'opacity-20'} ${espejo ? '-scale-x-100' : ''}`}
             muted
             playsInline
             autoPlay
@@ -132,12 +147,25 @@ export default function QrScannerModal({ open, onClose, onCode }: Props) {
           )}
 
           {cameraState === 'active' && (
-            <div className="pointer-events-none absolute inset-0">
-              <div className="absolute left-1/2 top-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded border-2 border-white/80 shadow-[0_0_0_9999px_rgba(15,27,45,0.35)]" />
-              <p className="absolute inset-x-0 bottom-3 text-center text-[11px] font-medium text-white">
-                Apunta al QR del producto
-              </p>
-            </div>
+            <>
+              <div className="pointer-events-none absolute inset-0">
+                <div className="absolute left-1/2 top-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded border-2 border-white/80 shadow-[0_0_0_9999px_rgba(15,27,45,0.35)]" />
+                <p className="absolute inset-x-0 bottom-3 text-center text-[11px] font-medium text-white">
+                  Apunta al QR del producto
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEspejo(v => !v)}
+                aria-pressed={espejo}
+                aria-label="Voltear la imagen de la cámara"
+                title={espejo ? 'Volver a la vista normal' : 'Voltear la imagen horizontalmente'}
+                className="absolute right-2 top-2 z-10 inline-flex items-center gap-1.5 rounded-sm border border-white/25 bg-navy-950/80 px-2 py-1 text-[11px] font-medium text-white transition-colors hover:bg-navy-950"
+              >
+                <FlipHorizontal size={13} aria-hidden="true" />
+                Voltear
+              </button>
+            </>
           )}
         </div>
 

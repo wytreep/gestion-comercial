@@ -118,6 +118,7 @@ panel lateral.
 **Qué valida**
 
 - Escaneo de producto desde la cámara del dispositivo.
+- Control para voltear la imagen cuando la cámara se muestra en espejo.
 - Entrada manual y compatibilidad con lectores USB.
 - Confirmación visual del producto agregado.
 - Cobro con QR en escritorio (propuesta).
