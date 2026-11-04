@@ -41,7 +41,7 @@ export default function ClientesPage() {
                   <td className="text-gray-500">{c.telefono ?? '—'}</td>
                   <td className="text-gray-500 text-xs">{c.direccion ?? '—'}</td>
                   <td className="text-gray-400 text-xs">{c.notas ?? '—'}</td>
-                  <td><button onClick={() => setEditando(c)} className="btn-secondary btn-sm"><Pencil size={12}/></button></td>
+                  <td><button onClick={() => setEditando(c)} className="btn-secondary btn-sm" aria-label={`Editar el cliente ${c.nombre}`} title="Editar cliente"><Pencil size={12} aria-hidden="true"/></button></td>
                 </tr>
               ))}
             </tbody>
@@ -71,10 +71,10 @@ function FormCliente({ cliente, onSuccess }: { cliente?: Cliente; onSuccess: () 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {error && <div className="text-xs text-red-500 bg-red-50 p-3 rounded">{error}</div>}
-      <div className="field"><label className="label">Nombre *</label><input type="text" className="input" {...register('nombre', { required: true })} /></div>
-      <div className="field"><label className="label">Teléfono</label><input type="tel" className="input" {...register('telefono')} /></div>
-      <div className="field"><label className="label">Dirección</label><input type="text" className="input" {...register('direccion')} /></div>
-      <div className="field"><label className="label">Notas</label><input type="text" className="input" {...register('notas')} /></div>
+      <div className="field"><label htmlFor="cliente-nombre" className="label">Nombre *</label><input id="cliente-nombre" type="text" className="input" {...register('nombre', { required: true })} /></div>
+      <div className="field"><label htmlFor="cliente-telefono" className="label">Teléfono</label><input id="cliente-telefono" type="tel" className="input" {...register('telefono')} /></div>
+      <div className="field"><label htmlFor="cliente-direccion" className="label">Dirección</label><input id="cliente-direccion" type="text" className="input" {...register('direccion')} /></div>
+      <div className="field"><label htmlFor="cliente-notas" className="label">Notas</label><input id="cliente-notas" type="text" className="input" {...register('notas')} /></div>
       <button type="submit" disabled={isSubmitting} className="btn-primary btn-lg">{isSubmitting ? 'Guardando…' : cliente ? 'Guardar cambios' : 'Crear cliente'}</button>
     </form>
   );

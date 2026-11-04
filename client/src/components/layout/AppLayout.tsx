@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../../context/AuthContext';
 import { notifApi } from '../../api/endpoints';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import {
   LayoutDashboard, ReceiptText, PlusCircle, Wallet, HandCoins, Package,
   PackagePlus, Users, Tag, LogOut, Bell, FileText, Database, ArrowLeftRight,
@@ -34,8 +35,20 @@ export default function AppLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const mainRef = useRef<HTMLElement>(null);
+  const drawerRef = useRef<HTMLElement>(null);
+  const firstRender = useRef(true);
+
+  useFocusTrap(mobileOpen, drawerRef, () => setMobileOpen(false));
 
   useEffect(() => { setMobileOpen(false); }, [location.pathname]);
+
+  // Al cambiar de sección, el foco pasa al contenido para que la navegación
+  // por teclado no vuelva al inicio del documento.
+  useEffect(() => {
+    if (firstRender.current) { firstRender.current = false; return; }
+    mainRef.current?.focus({ preventScroll: true });
+  }, [location.pathname]);
 
   const { data: notifCount } = useQuery({
     queryKey: ['notif-count'],
@@ -56,29 +69,44 @@ export default function AppLayout() {
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-canvas">
+      <a
+        href="#contenido-principal"
+        className="skip-link"
+        onClick={(e) => { e.preventDefault(); mainRef.current?.focus(); }}
+      >
+        Saltar al contenido
+      </a>
+
       {/* ── Barra superior: módulos principales ─────── */}
       <header className="z-30 flex h-[54px] shrink-0 items-center gap-1.5 border-b border-navy-800 bg-navy-900 px-2.5 text-white md:gap-2 md:px-3 xl:px-4">
         <button
           onClick={() => setMobileOpen(true)}
           className="rounded-sm p-1.5 text-slate-400 hover:bg-white/5 hover:text-white md:hidden"
           aria-label="Abrir menú"
+          aria-expanded={mobileOpen}
+          aria-controls="menu-movil"
         >
           <Menu size={18} />
         </button>
 
-        <button onClick={() => navigate('/')} className="flex shrink-0 items-center gap-2.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-sm bg-primary shadow-panel">
+        <button
+          onClick={() => navigate('/')}
+          className="flex shrink-0 items-center gap-2.5"
+          title="Ir al panel de control"
+        >
+          <div className="flex h-7 w-7 items-center justify-center rounded-sm bg-primary shadow-panel" aria-hidden="true">
             <BarChart3 size={16} className="text-white" strokeWidth={2.4} />
           </div>
           <div className="hidden text-left md:block">
             <p className="text-[12.5px] font-semibold leading-tight tracking-tight">Gestión Comercial</p>
-            <p className="hidden text-[8.5px] font-medium uppercase tracking-widest text-slate-500 xl:block">ERP de distribución</p>
+            <p className="hidden text-[8.5px] font-medium uppercase tracking-widest text-slate-400 xl:block">ERP de distribución</p>
           </div>
+          <span className="sr-only md:hidden">Ir al panel de control</span>
         </button>
 
         <div className="mx-1 hidden h-6 w-px bg-white/10 md:block xl:mx-2" />
 
-        <nav className="hidden min-w-0 flex-1 items-center gap-px md:flex">
+        <nav className="hidden min-w-0 flex-1 items-center gap-px md:flex" aria-label="Módulos principales">
           <TopItem to="/" label="Panel" icon={<LayoutDashboard size={14} />} end />
           <TopItem to="/ventas" label="Ventas" icon={<ReceiptText size={14} />} />
           {isAdmin && <TopItem to="/compras" label="Compras" icon={<Package size={14} />} />}
@@ -103,26 +131,31 @@ export default function AppLayout() {
                 : 'border-white/10 text-slate-400 hover:bg-white/5 hover:text-white',
             )}
             title={`${count} alerta(s) pendiente(s)`}
+            aria-label={count > 0 ? `Alertas: ${count} pendiente(s)` : 'Alertas: sin pendientes'}
           >
             <Bell size={15} />
             {count > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[9px] font-bold text-white">
+              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[9px] font-bold text-white" aria-hidden="true">
                 {count > 99 ? '99+' : count}
               </span>
             )}
           </button>
+          <span className="sr-only" role="status" aria-live="polite">
+            {count > 0 ? `${count} alerta(s) pendiente(s)` : 'Sin alertas pendientes'}
+          </span>
           <div className="hidden h-6 w-px bg-white/10 md:block" />
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10 text-[10px] font-semibold text-slate-200 ring-1 ring-white/15">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10 text-[10px] font-semibold text-slate-200 ring-1 ring-white/15" aria-hidden="true">
               {initials || '?'}
             </div>
             <div className="hidden leading-tight xl:block">
               <p className="max-w-[120px] truncate text-[11.5px] font-medium text-slate-200">{user?.nombre}</p>
-              <p className="text-[9.5px] capitalize text-slate-500">{user?.rol}</p>
+              <p className="text-[9.5px] capitalize text-slate-400">{user?.rol}</p>
             </div>
             <button
               onClick={handleLogout}
               title="Cerrar sesión"
+              aria-label="Cerrar sesión"
               className="rounded-sm p-1.5 text-slate-500 transition-colors hover:bg-white/5 hover:text-white"
             >
               <LogOut size={14} />
@@ -133,29 +166,36 @@ export default function AppLayout() {
 
       <div className="flex min-h-0 flex-1 overflow-hidden">
         {/* ── Riel lateral: acciones y datos maestros ── */}
-        <aside className="hidden w-[58px] shrink-0 flex-col items-center border-r border-line bg-white py-2 md:flex">
-          <RailGroup label="Acciones">
-            <RailItem to="/ventas/nueva" label="Nueva venta" icon={<PlusCircle size={17} />} />
-            {isAdmin && <RailItem to="/compras/nueva" label="Nueva compra" icon={<PackagePlus size={17} />} />}
-          </RailGroup>
+        <aside className="hidden w-[58px] shrink-0 border-r border-line bg-white py-2 md:flex">
+          <nav aria-label="Acciones y datos maestros" className="flex w-full flex-1 flex-col items-center">
+            <RailGroup label="Acciones">
+              <RailItem to="/ventas/nueva" label="Nueva venta" icon={<PlusCircle size={17} />} />
+              {isAdmin && <RailItem to="/compras/nueva" label="Nueva compra" icon={<PackagePlus size={17} />} />}
+            </RailGroup>
 
-          <div className="my-2 h-px w-7 bg-line" />
+            <div className="my-2 h-px w-7 bg-line" />
 
-          <RailGroup label="Datos maestros">
-            <RailItem to="/clientes" label="Clientes" icon={<Users size={17} />} />
-            <RailItem to="/productos" label="Productos y precios" icon={<Tag size={17} />} />
-            <RailItem to="/stock" label="Movimientos de stock" icon={<ArrowLeftRight size={17} />} />
-          </RailGroup>
+            <RailGroup label="Datos maestros">
+              <RailItem to="/clientes" label="Clientes" icon={<Users size={17} />} />
+              <RailItem to="/productos" label="Productos y precios" icon={<Tag size={17} />} />
+              <RailItem to="/stock" label="Movimientos de stock" icon={<ArrowLeftRight size={17} />} />
+            </RailGroup>
 
-          <div className="mt-auto flex flex-col items-center gap-0.5">
-            <RailItem to="/notificaciones" label="Alertas" icon={<Bell size={17} />} badge={count} />
-            {isAdmin && <RailItem to="/admin" label="Administración" icon={<ShieldCheck size={17} />} />}
-            {isAdmin && <RailItem to="/backup" label="Copias de seguridad" icon={<Database size={17} />} />}
-          </div>
+            <div className="mt-auto flex flex-col items-center gap-0.5">
+              <RailItem to="/notificaciones" label="Alertas" icon={<Bell size={17} />} badge={count} />
+              {isAdmin && <RailItem to="/admin" label="Administración" icon={<ShieldCheck size={17} />} />}
+              {isAdmin && <RailItem to="/backup" label="Copias de seguridad" icon={<Database size={17} />} />}
+            </div>
+          </nav>
         </aside>
 
         {/* ── Contenido ──────────────────────────────── */}
-        <main className="scroll-slim min-w-0 flex-1 overflow-y-auto bg-canvas">
+        <main
+          ref={mainRef}
+          id="contenido-principal"
+          tabIndex={-1}
+          className="scroll-slim min-w-0 flex-1 overflow-y-auto bg-canvas outline-none"
+        >
           <div className="mx-auto w-full max-w-[1720px] p-4 md:p-5 xl:p-6">
             <div className="mb-3 flex items-center gap-1.5 text-[10.5px] text-slate-400 md:hidden">
               <span>{meta.section}</span>
@@ -175,21 +215,34 @@ export default function AppLayout() {
             onClick={() => setMobileOpen(false)}
             className="fixed inset-0 z-40 bg-navy-950/50 md:hidden"
           />
-          <aside className="fixed inset-y-0 left-0 z-50 flex w-[250px] flex-col bg-navy-900 md:hidden">
+          <aside
+            ref={drawerRef}
+            id="menu-movil"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menú de navegación"
+            tabIndex={-1}
+            className="surface-dark fixed inset-y-0 left-0 z-50 flex w-[250px] flex-col bg-navy-900 outline-none md:hidden"
+          >
             <div className="flex h-[54px] items-center gap-2.5 border-b border-white/[0.07] px-4">
-              <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-primary">
+              <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-primary" aria-hidden="true">
                 <BarChart3 size={17} className="text-white" strokeWidth={2.4} />
               </div>
               <div>
                 <p className="text-[13px] font-semibold leading-tight text-white">Gestión Comercial</p>
-                <p className="text-[9px] uppercase tracking-widest text-slate-500">ERP de distribución</p>
+                <p className="text-[9px] uppercase tracking-widest text-slate-400">ERP de distribución</p>
               </div>
-              <button onClick={() => setMobileOpen(false)} className="ml-auto text-slate-500 hover:text-white">
+              <button
+                type="button"
+                onClick={() => setMobileOpen(false)}
+                aria-label="Cerrar menú"
+                className="ml-auto rounded-sm p-1 text-slate-500 hover:bg-white/5 hover:text-white"
+              >
                 <X size={17} />
               </button>
             </div>
 
-            <nav className="scroll-slim flex-1 overflow-y-auto py-3">
+            <nav className="scroll-slim flex-1 overflow-y-auto py-3" aria-label="Navegación móvil">
               <MobileSection label="Operación">
                 <MobileItem to="/" label="Panel de control" icon={<LayoutDashboard size={15} />} end />
                 <MobileItem to="/ventas" label="Ventas" icon={<ReceiptText size={15} />} />
@@ -219,14 +272,19 @@ export default function AppLayout() {
 
             <div className="border-t border-white/[0.07] p-3">
               <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-[11px] font-semibold text-sky-200 ring-1 ring-primary/40">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-[11px] font-semibold text-sky-200 ring-1 ring-primary/40" aria-hidden="true">
                   {initials || '?'}
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[12px] font-medium text-slate-200">{user?.nombre}</p>
-                  <p className="truncate text-[10px] capitalize text-slate-500">{user?.rol}</p>
+                  <p className="truncate text-[10px] capitalize text-slate-400">{user?.rol}</p>
                 </div>
-                <button onClick={handleLogout} className="rounded-sm p-1.5 text-slate-500 hover:text-white">
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  aria-label="Cerrar sesión"
+                  className="rounded-sm p-1.5 text-slate-500 hover:bg-white/5 hover:text-white"
+                >
                   <LogOut size={14} />
                 </button>
               </div>
@@ -254,7 +312,7 @@ function TopItem({ to, label, icon, end }: { to: string; label: string; icon: Re
     >
       {({ isActive }) => (
         <>
-          <span className={clsx('hidden xl:inline-flex', isActive ? 'text-sky-300' : 'text-slate-500')}>{icon}</span>
+          <span className={clsx('hidden xl:inline-flex', isActive ? 'text-sky-300' : 'text-slate-500')} aria-hidden="true">{icon}</span>
           <span>{label}</span>
         </>
       )}
@@ -277,6 +335,7 @@ function RailItem({ to, label, icon, badge }: { to: string; label: string; icon:
     <NavLink
       to={to}
       title={label}
+      aria-label={badge ? `${label} (${badge} pendientes)` : label}
       className={({ isActive }) => clsx(
         'relative flex h-9 w-9 items-center justify-center rounded-sm transition-colors',
         isActive
@@ -286,7 +345,7 @@ function RailItem({ to, label, icon, badge }: { to: string; label: string; icon:
     >
       {icon}
       {!!badge && (
-        <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[9px] font-bold text-white">
+        <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[9px] font-bold text-white" aria-hidden="true">
           {badge > 99 ? '99+' : badge}
         </span>
       )}
@@ -299,7 +358,7 @@ function RailItem({ to, label, icon, badge }: { to: string; label: string; icon:
 function MobileSection({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="mb-3">
-      <p className="px-4 pb-1 pt-2 text-[9.5px] font-semibold uppercase tracking-widest text-slate-500">{label}</p>
+      <p className="px-4 pb-1 pt-2 text-[9.5px] font-semibold uppercase tracking-widest text-slate-400">{label}</p>
       <div className="space-y-px">{children}</div>
     </div>
   );
@@ -319,10 +378,10 @@ function MobileItem({ to, label, icon, badge, end }: { to: string; label: string
     >
       {({ isActive }) => (
         <>
-          <span className={isActive ? 'text-sky-300' : 'text-slate-500'}>{icon}</span>
+          <span className={isActive ? 'text-sky-300' : 'text-slate-500'} aria-hidden="true">{icon}</span>
           <span className="flex-1 truncate">{label}</span>
           {!!badge && (
-            <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[9px] font-bold text-white">
+            <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[9px] font-bold text-white" aria-hidden="true">
               {badge > 99 ? '99+' : badge}
             </span>
           )}

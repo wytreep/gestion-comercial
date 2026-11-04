@@ -55,8 +55,9 @@ export default function AdminPage() {
                       <button
                         onClick={() => setConfirm({ id: u.id, activo: !u.activo })}
                         className={u.activo ? 'btn-danger btn-sm' : 'btn-success btn-sm'}
-                        title={u.activo ? 'Desactivar' : 'Activar'}>
-                        <Power size={12} />
+                        title={u.activo ? 'Desactivar' : 'Activar'}
+                        aria-label={`${u.activo ? 'Desactivar' : 'Activar'} al usuario ${u.nombre}`}>
+                        <Power size={12} aria-hidden="true" />
                       </button>
                     </div>
                   </td>
@@ -106,12 +107,12 @@ function FormUsuario({ onSuccess }: { onSuccess: () => void }) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {error && <div className="text-xs text-red-500 bg-red-50 p-3 rounded">{error}</div>}
-      <div className="field"><label className="label">Nombre *</label><input type="text" className="input" {...register('nombre', { required: true })} /></div>
-      <div className="field"><label className="label">Correo *</label><input type="email" className="input" {...register('email', { required: true })} /></div>
-      <div className="field"><label className="label">Contraseña *</label><input type="password" className="input" {...register('password', { required: true, minLength: 8 })} /></div>
+      <div className="field"><label htmlFor="admin-nombre" className="label">Nombre *</label><input id="admin-nombre" type="text" className="input" {...register('nombre', { required: true })} /></div>
+      <div className="field"><label htmlFor="admin-email" className="label">Correo *</label><input id="admin-email" type="email" className="input" {...register('email', { required: true })} /></div>
+      <div className="field"><label htmlFor="admin-password" className="label">Contraseña *</label><input id="admin-password" type="password" className="input" {...register('password', { required: true, minLength: 8 })} /></div>
       <div className="field">
-        <label className="label">Rol *</label>
-        <select className="input" {...register('rol')}>
+        <label htmlFor="admin-rol" className="label">Rol *</label>
+        <select id="admin-rol" className="input" {...register('rol')}>
           {OPCIONES_ROL.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
       </div>
@@ -134,8 +135,8 @@ function CambiarRol({ usuario, onSuccess }: { usuario: UsuarioAdmin; onSuccess: 
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {error && <div className="text-xs text-red-500 bg-red-50 p-3 rounded">{error}</div>}
       <div className="field">
-        <label className="label">Nuevo rol para {usuario.nombre}</label>
-        <select className="input" {...register('rol')}>
+        <label htmlFor="admin-nuevo-rol" className="label">Nuevo rol para {usuario.nombre}</label>
+        <select id="admin-nuevo-rol" className="input" {...register('rol')}>
           {OPCIONES_ROL.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
       </div>

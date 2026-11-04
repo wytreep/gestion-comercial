@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { lazy, Suspense, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
@@ -6,7 +6,9 @@ import { ventasApi, productosApi, clientesApi } from '../../api/endpoints';
 import { NumberInput } from '../../components/ui';
 import { formatCOP, today, OPCIONES_MEDIO_PAGO, OPCIONES_DESTINO, num, parseMoneyInput, parseDecimalInput } from '../../utils/format';
 import type { Producto, Cliente } from '../../types';
-import { ArrowLeft, Check, Plus, Search, X } from 'lucide-react';
+import { ArrowLeft, Check, Plus, QrCode, Search, X } from 'lucide-react';
+
+const QrScannerModal = lazy(() => import('../../components/scanner/QrScannerModal'));
 
 interface L { productoId: number; nombre: string; cantidad: number; precio: number; }
 
@@ -18,9 +20,12 @@ export default function NuevaVentaPage() {
   const [cliente, setCliente]       = useState<Cliente | null>(null);
   const [clienteLibre, setClienteLibre] = useState('');
   const [showCli, setShowCli]       = useState(false);
+  const cliBoxRef                   = useRef<HTMLDivElement>(null);
   const [lineas, setLineas]         = useState<L[]>([]);
   const [pagoInicial, setPagoInicial] = useState(0);
   const [error, setError]           = useState('');
+  const [scanOk, setScanOk]         = useState('');
+  const [scannerOpen, setScannerOpen] = useState(false);
   const [saving, setSaving]         = useState(false);
   const { register, watch }         = useForm({ defaultValues: { fecha_entrega: today(), observaciones: '', medio_pago: 'efectivo', destino_dinero: 'efectivo_caja', referencia: '', fecha_vencimiento: '' } });
   const fv = watch();
@@ -29,6 +34,25 @@ export default function NuevaVentaPage() {
   const nombreCliente = cliente?.nombre ?? (clienteLibre || busqueda.trim()) ?? '';
 
   const addLinea = (p: Producto) => setLineas(prev => prev.find(l => l.productoId===p.id) ? prev : [...prev, { productoId:p.id, nombre:p.nombre, cantidad:1, precio:num(p.precio_venta) }]);
+
+  const addLineaEscaneada = (p: Producto) => setLineas(prev => {
+    const existe = prev.find(l => l.productoId === p.id);
+    if (existe) {
+      return prev.map(l => l.productoId === p.id ? { ...l, cantidad: l.cantidad + 1 } : l);
+    }
+    return [...prev, { productoId: p.id, nombre: p.nombre, cantidad: 1, precio: num(p.precio_venta) }];
+  });
+
+  const buscarPorCodigo = async (codigo: string) => {
+    try {
+      const p = await productosApi.porCodigo(codigo);
+      addLineaEscaneada(p);
+      setScanOk(`${p.nombre} agregado al pedido`);
+      return { ok: true };
+    } catch (e: any) {
+      return { ok: false, message: e.message ?? 'Producto no encontrado.' };
+    }
+  };
 
   const guardar = async () => {
     setError('');
@@ -65,14 +89,31 @@ export default function NuevaVentaPage() {
           <h1 className="page-title">Nueva venta</h1>
           <p className="page-subtitle">Pedido, cliente, pago inicial y productos</p>
         </div>
-        <button onClick={() => navigate('/ventas')} className="btn-secondary">
-          <ArrowLeft size={14} /> Volver a ventas
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => { setScanOk(''); setScannerOpen(true); }}
+            className="btn-secondary"
+          >
+            <QrCode size={14} /> Escanear QR
+          </button>
+          <button onClick={() => navigate('/ventas')} className="btn-secondary">
+            <ArrowLeft size={14} /> Volver a ventas
+          </button>
+        </div>
       </div>
 
       {error && (
         <div className="rounded border border-danger/25 bg-red-50 px-3 py-2 text-[12.5px] font-medium text-danger">
           {error}
+        </div>
+      )}
+
+      {scanOk && (
+        <div className="flex items-center justify-between rounded border border-success/25 bg-emerald-50 px-3 py-2 text-[12.5px] font-medium text-success">
+          <span className="flex items-center gap-1.5"><Check size={14} /> {scanOk}</span>
+          <button onClick={() => setScanOk('')} className="rounded-sm p-1 text-success/70 hover:bg-white hover:text-success" title="Cerrar aviso" aria-label="Cerrar aviso de escaneo">
+            <X size={14} />
+          </button>
         </div>
       )}
 
@@ -88,7 +129,7 @@ export default function NuevaVentaPage() {
                     <p className="truncate text-[13px] font-semibold text-slate-800">{cliente.nombre}</p>
                     {cliente.telefono && <p className="text-[11px] text-slate-500">{cliente.telefono}</p>}
                   </div>
-                  <button onClick={() => setCliente(null)} className="rounded-sm p-1 text-slate-400 hover:bg-white hover:text-slate-700" title="Quitar cliente">
+                  <button onClick={() => setCliente(null)} className="rounded-sm p-1 text-slate-400 hover:bg-white hover:text-slate-700" title="Quitar cliente" aria-label="Quitar cliente">
                     <X size={15} />
                   </button>
                 </div>
@@ -98,36 +139,53 @@ export default function NuevaVentaPage() {
                     <p className="truncate text-[13px] font-semibold text-slate-800">{clienteLibre}</p>
                     <p className="text-[11px] font-medium text-warning">Cliente no registrado</p>
                   </div>
-                  <button onClick={() => setClienteLibre('')} className="rounded-sm p-1 text-slate-400 hover:bg-white hover:text-slate-700" title="Quitar cliente">
+                  <button onClick={() => setClienteLibre('')} className="rounded-sm p-1 text-slate-400 hover:bg-white hover:text-slate-700" title="Quitar cliente" aria-label="Quitar cliente">
                     <X size={15} />
                   </button>
                 </div>
               ) : (
-                <div className="relative">
-                  <Search size={14} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <div className="relative" ref={cliBoxRef}>
+                  <Search size={14} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" aria-hidden="true" />
                   <input
                     type="text"
                     placeholder="Buscar por nombre o teléfono…"
                     className="input pl-8"
+                    aria-label="Buscar cliente por nombre o teléfono"
+                    autoComplete="off"
                     value={busqueda}
                     onChange={e => { setBusqueda(e.target.value); setShowCli(true); }}
                     onFocus={() => setShowCli(true)}
-                    onBlur={() => setTimeout(() => setShowCli(false), 150)}
+                    onBlur={(e) => {
+                      if (cliBoxRef.current?.contains(e.relatedTarget as Node)) return;
+                      setTimeout(() => setShowCli(false), 150);
+                    }}
                   />
                   {showCli && (clientes.length > 0 || busqueda.trim().length >= 2) && (
-                    <ul className="absolute z-20 mt-1 max-h-56 w-full overflow-y-auto rounded border border-line bg-white shadow-dropdown">
+                    <ul className="absolute z-20 mt-1 max-h-56 w-full overflow-y-auto rounded border border-line bg-white shadow-dropdown" aria-label="Sugerencias de cliente">
                       {clientes.map(c => (
-                        <li key={c.id} className="cursor-pointer px-3 py-2 text-[12.5px] hover:bg-slate-50" onClick={() => { setCliente(c); setBusqueda(''); setShowCli(false); }}>
-                          <p className="font-medium text-slate-800">{c.nombre}</p>
-                          {c.telefono && <p className="text-[11px] text-slate-500">{c.telefono}</p>}
+                        <li key={c.id}>
+                          <button
+                            type="button"
+                            className="block w-full px-3 py-2 text-left text-[12.5px] hover:bg-slate-50 focus:bg-slate-50"
+                            onClick={() => { setCliente(c); setBusqueda(''); setShowCli(false); }}
+                          >
+                            <p className="font-medium text-slate-800">{c.nombre}</p>
+                            {c.telefono && <p className="text-[11px] text-slate-500">{c.telefono}</p>}
+                          </button>
                         </li>
                       ))}
                       {busqueda.trim().length >= 2 && (
-                        <li className="cursor-pointer border-t border-line px-3 py-2 text-[12.5px] hover:bg-amber-50" onClick={() => { setClienteLibre(busqueda.trim()); setBusqueda(''); setShowCli(false); }}>
-                          <p className="flex items-center gap-1.5 font-medium text-warning">
-                            <Plus size={13} /> Usar «{busqueda.trim()}»
-                          </p>
-                          <p className="text-[11px] text-slate-500">Se registrará como cliente nuevo</p>
+                        <li className="border-t border-line">
+                          <button
+                            type="button"
+                            className="block w-full px-3 py-2 text-left text-[12.5px] hover:bg-amber-50 focus:bg-amber-50"
+                            onClick={() => { setClienteLibre(busqueda.trim()); setBusqueda(''); setShowCli(false); }}
+                          >
+                            <p className="flex items-center gap-1.5 font-medium text-warning">
+                              <Plus size={13} aria-hidden="true" /> Usar «{busqueda.trim()}»
+                            </p>
+                            <p className="text-[11px] text-slate-500">Se registrará como cliente nuevo</p>
+                          </button>
                         </li>
                       )}
                     </ul>
@@ -141,12 +199,12 @@ export default function NuevaVentaPage() {
               )}
               <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div className="field">
-                  <label className="label">Fecha de entrega</label>
-                  <input type="date" className="input" {...register('fecha_entrega')} />
+                  <label htmlFor="venta-fecha-entrega" className="label">Fecha de entrega</label>
+                  <input id="venta-fecha-entrega" type="date" className="input" {...register('fecha_entrega')} />
                 </div>
                 <div className="field">
-                  <label className="label">Observaciones</label>
-                  <input type="text" className="input" placeholder="Opcional" {...register('observaciones')} />
+                  <label htmlFor="venta-observaciones" className="label">Observaciones</label>
+                  <input id="venta-observaciones" type="text" className="input" placeholder="Opcional" {...register('observaciones')} />
                 </div>
               </div>
             </div>
@@ -154,8 +212,9 @@ export default function NuevaVentaPage() {
             <div className="card">
               <p className="card-title">2. Pago inicial</p>
               <div className="field">
-                <label className="label">Monto abonado (0 = fiado)</label>
+                <label htmlFor="venta-pago-inicial" className="label">Monto abonado (0 = fiado)</label>
                 <NumberInput
+                  id="venta-pago-inicial"
                   className="input"
                   placeholder="Ej: 55.000"
                   value={pagoInicial}
@@ -165,24 +224,24 @@ export default function NuevaVentaPage() {
               </div>
               <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div className="field">
-                  <label className="label">Medio</label>
-                  <select className="input" {...register('medio_pago')}>
+                  <label htmlFor="venta-medio" className="label">Medio</label>
+                  <select id="venta-medio" className="input" {...register('medio_pago')}>
                     {OPCIONES_MEDIO_PAGO.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                   </select>
                 </div>
                 <div className="field">
-                  <label className="label">Destino</label>
-                  <select className="input" {...register('destino_dinero')}>
+                  <label htmlFor="venta-destino" className="label">Destino</label>
+                  <select id="venta-destino" className="input" {...register('destino_dinero')}>
                     {OPCIONES_DESTINO.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                   </select>
                 </div>
                 <div className="field">
-                  <label className="label">Referencia</label>
-                  <input type="text" className="input" placeholder="Opcional" {...register('referencia')} />
+                  <label htmlFor="venta-referencia" className="label">Referencia</label>
+                  <input id="venta-referencia" type="text" className="input" placeholder="Opcional" {...register('referencia')} />
                 </div>
                 <div className="field">
-                  <label className="label">Fecha límite si es fiado</label>
-                  <input type="date" className="input" {...register('fecha_vencimiento')} />
+                  <label htmlFor="venta-vencimiento" className="label">Fecha límite si es fiado</label>
+                  <input id="venta-vencimiento" type="date" className="input" {...register('fecha_vencimiento')} />
                 </div>
               </div>
             </div>
@@ -272,7 +331,7 @@ export default function NuevaVentaPage() {
             ) : (
               <div className="mt-4 rounded border border-dashed border-line bg-slate-50/60 py-8 text-center">
                 <p className="text-[12.5px] font-medium text-slate-500">Selecciona un producto para agregarlo al pedido</p>
-                <p className="mt-0.5 text-[11px] text-slate-400">Puedes ajustar cantidad y precio en la tabla</p>
+                <p className="mt-0.5 text-[11px] text-slate-500">Puedes ajustar cantidad y precio en la tabla</p>
               </div>
             )}
           </div>
@@ -283,7 +342,7 @@ export default function NuevaVentaPage() {
           <p className="card-title mb-0">Resumen del pedido</p>
 
           <div className="rounded border border-line bg-slate-50/70 px-3 py-2">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Cliente</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Cliente</p>
             <p className="truncate text-[12.5px] font-medium text-slate-800">{nombreCliente || 'Sin asignar'}</p>
           </div>
 
@@ -319,11 +378,21 @@ export default function NuevaVentaPage() {
           <button onClick={guardar} disabled={saving || lineas.length === 0} className="btn-primary btn-lg">
             <Check size={15} /> {saving ? 'Registrando…' : 'Registrar venta'}
           </button>
-          <p className="text-[10.5px] leading-relaxed text-slate-400">
+          <p className="text-[10.5px] leading-relaxed text-slate-500">
             Si no abonas el total, el saldo pendiente queda en Cartera y se puede cobrar después.
           </p>
         </aside>
       </div>
+
+      {scannerOpen && (
+        <Suspense fallback={null}>
+          <QrScannerModal
+            open={scannerOpen}
+            onClose={() => setScannerOpen(false)}
+            onCode={buscarPorCodigo}
+          />
+        </Suspense>
+      )}
     </div>
   );
 }

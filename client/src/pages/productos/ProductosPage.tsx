@@ -1,17 +1,19 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
+import { toDataURL } from 'qrcode';
 import { productosApi } from '../../api/endpoints';
 import { Spinner, Empty, Modal } from '../../components/ui';
 import { formatCOP, formatCantidad, num, parseMoneyInput, parseDecimalInput } from '../../utils/format';
 import type { Producto } from '../../types';
-import { Info, Pencil } from 'lucide-react';
+import { Check, Copy, Download, Info, Pencil, QrCode } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 export default function ProductosPage() {
   const { isAdmin } = useAuth();
   const qc = useQueryClient();
   const [editando, setEditando] = useState<Producto | null>(null);
+  const [qrProducto, setQrProducto] = useState<Producto | null>(null);
   const { data: productos = [], isLoading } = useQuery({ queryKey: ['productos'], queryFn: productosApi.listar });
 
   const margenColor = (m: number | null) => {
@@ -60,7 +62,23 @@ export default function ProductosPage() {
               <tbody>
                 {productos.map(p => (
                   <tr key={p.id}>
-                    <td><p className="font-medium">{p.nombre}</p><p className="text-xs text-gray-400">{p.categoria}</p></td>
+                    <td>
+                      <div className="flex items-center gap-2">
+                        <div className="min-w-0">
+                          <p className="font-medium">{p.nombre}</p>
+                          <p className="text-xs text-gray-400">{p.categoria} · <span className="font-mono">{p.codigo}</span></p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setQrProducto(p)}
+                          className="shrink-0 rounded-sm p-1 text-slate-400 hover:bg-primary-50 hover:text-primary"
+                          title={`Ver QR ${p.codigo}`}
+                          aria-label={`Ver código QR de ${p.nombre}`}
+                        >
+                          <QrCode size={14} aria-hidden="true" />
+                        </button>
+                      </div>
+                    </td>
                     <td><p>{p.unidad_medida === 'canasta' ? 'Media canasta' : p.unidad_medida}</p>{p.unidad_medida === 'canasta' && <p className={`text-xs ${p.kilos_por_canasta ? 'text-gray-400' : 'text-warning'}`}>{p.kilos_por_canasta ? `${p.kilos_por_canasta} kg/canasta` : 'sin kg/canasta'}</p>}</td>
                     {isAdmin && <td className="font-mono">{formatCOP(p.precio_compra ?? 0)}<p className="text-xs text-gray-400">{p.unidad_medida === 'canasta' ? '/canasta' : '/kg'}</p></td>}
                     {isAdmin && <td className="font-mono font-semibold">{p.costo_por_kg ? formatCOP(p.costo_por_kg) + '/kg' : '—'}</td>}
@@ -78,6 +96,70 @@ export default function ProductosPage() {
       <Modal open={!!editando} onClose={() => setEditando(null)} title={`Precios — ${editando?.nombre}`}>
         {isAdmin && editando && <EditarPrecio producto={editando} onSuccess={() => { setEditando(null); qc.invalidateQueries({ queryKey: ['productos'] }); }} />}
       </Modal>
+
+      <Modal open={!!qrProducto} onClose={() => setQrProducto(null)} title={`Código QR — ${qrProducto?.nombre ?? ''}`} size="sm">
+        {qrProducto && <QrProducto producto={qrProducto} />}
+      </Modal>
+    </div>
+  );
+}
+
+function QrProducto({ producto }: { producto: Producto }) {
+  const [dataUrl, setDataUrl] = useState('');
+  const [copiado, setCopiado] = useState(false);
+
+  useEffect(() => {
+    let activo = true;
+    toDataURL(producto.codigo, {
+      width: 280,
+      margin: 1,
+      errorCorrectionLevel: 'M',
+      color: { dark: '#0f172a', light: '#ffffff' },
+    }).then(url => { if (activo) setDataUrl(url); });
+    return () => { activo = false; };
+  }, [producto.codigo]);
+
+  const copiar = async () => {
+    try {
+      await navigator.clipboard.writeText(producto.codigo);
+      setCopiado(true);
+      window.setTimeout(() => setCopiado(false), 1500);
+    } catch {
+      /* El navegador puede bloquear el portapapeles; el código sigue visible. */
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex justify-center rounded border border-line bg-slate-50 p-3">
+        {dataUrl
+          ? <img src={dataUrl} alt={`QR ${producto.codigo}`} className="h-56 w-56" />
+          : <div className="h-56 w-56 animate-pulse rounded bg-slate-200" />}
+      </div>
+
+      <div className="text-center">
+        <p className="text-[13px] font-semibold text-slate-800">{producto.nombre}</p>
+        <p className="mt-1 font-mono text-[12px] text-slate-500">{producto.codigo}</p>
+        <p className="mt-1 text-[11.5px] text-slate-500">
+          {formatCOP(producto.precio_venta)} / {producto.unidad_medida === 'canasta' ? 'canasta' : 'kg'}
+        </p>
+      </div>
+
+      <div className="flex flex-wrap justify-center gap-2">
+        <button type="button" onClick={copiar} className="btn-secondary">
+          {copiado ? <Check size={14} /> : <Copy size={14} />}
+          {copiado ? 'Copiado' : 'Copiar código'}
+        </button>
+        {dataUrl && (
+          <a href={dataUrl} download={`${producto.codigo}.png`} className="btn-primary">
+            <Download size={14} /> Descargar QR
+          </a>
+        )}
+      </div>
+
+      <p className="text-center text-[11px] text-slate-500">
+        Imprime o guarda esta imagen y pégala en el producto. El escáner de ventas la lee desde la cámara o un lector USB.
+      </p>
     </div>
   );
 }
@@ -107,7 +189,8 @@ function EditarPrecio({ producto, onSuccess }: { producto: Producto; onSuccess: 
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {error && <div className="text-xs text-red-500 bg-red-50 p-3 rounded">{error}</div>}
       <div className="grid grid-cols-2 gap-4">
-        <div className="field"><label className="label">{esPescado ? 'Precio compra (por media canasta)' : 'Precio compra (por kg)'} *</label><input
+        <div className="field"><label htmlFor="producto-precio-compra" className="label">{esPescado ? 'Precio compra (por media canasta)' : 'Precio compra (por kg)'} *</label><input
+          id="producto-precio-compra"
           type="text"
           inputMode="numeric"
           className="input"
@@ -118,7 +201,8 @@ function EditarPrecio({ producto, onSuccess }: { producto: Producto; onSuccess: 
             validate: (v) => Number(v) > 0 || 'Debe ser mayor a cero',
           })}
         /></div>
-        <div className="field"><label className="label">Precio venta (por kg) *</label><input
+        <div className="field"><label htmlFor="producto-precio-venta" className="label">Precio venta (por kg) *</label><input
+          id="producto-precio-venta"
           type="text"
           inputMode="numeric"
           className="input"
@@ -129,7 +213,8 @@ function EditarPrecio({ producto, onSuccess }: { producto: Producto; onSuccess: 
             validate: (v) => Number(v) > 0 || 'Debe ser mayor a cero',
           })}
         /></div>
-        {esPescado && <div className="field col-span-2"><label className="label">Kilos por media canasta *</label><input
+        {esPescado && <div className="field col-span-2"><label htmlFor="producto-kilos" className="label">Kilos por media canasta *</label><input
+          id="producto-kilos"
           type="text"
           inputMode="decimal"
           className="input"
@@ -137,8 +222,8 @@ function EditarPrecio({ producto, onSuccess }: { producto: Producto; onSuccess: 
           {...register('kilos_por_canasta', {
             setValueAs: (v) => v ? parseDecimalInput(v) : '',
           })}
-        /><p className="text-xs text-gray-400 mt-1">¿Cuántos kg rinde una media canasta en promedio?</p></div>}
-        <div className="field col-span-2"><label className="label">Motivo del cambio</label><input type="text" className="input" placeholder="Ej: Alza del proveedor" {...register('motivo')} /></div>
+        /><p className="text-xs text-slate-500 mt-1">¿Cuántos kg rinde una media canasta en promedio?</p></div>}
+        <div className="field col-span-2"><label htmlFor="producto-motivo" className="label">Motivo del cambio</label><input id="producto-motivo" type="text" className="input" placeholder="Ej: Alza del proveedor" {...register('motivo')} /></div>
       </div>
       {margen !== null && (
         <div className={`rounded-lg px-4 py-3 text-sm flex gap-6 ${+margen > 0 ? 'bg-green-50' : 'bg-red-50'}`}>

@@ -99,7 +99,7 @@ export default function PanelVendedor() {
           <div className="card-header">
             <div>
               <p className="text-[12px] font-semibold text-slate-800">Últimas ventas</p>
-              <p className="text-[10.5px] text-slate-400">Movimientos recientes</p>
+              <p className="text-[10.5px] text-slate-500">Movimientos recientes</p>
             </div>
             <button onClick={() => navigate('/ventas')} className="btn-ghost">
               Ver todas <ArrowRight size={12} />
@@ -120,7 +120,7 @@ export default function PanelVendedor() {
               <tbody>
                 {data.ultimas_ventas.map((v: any) => (
                   <tr key={v.id}>
-                    <td className="font-mono text-slate-400">#{v.id}</td>
+                    <td className="font-mono text-slate-500">#{v.id}</td>
                     <td className="font-medium text-slate-700">{v.cliente}</td>
                     <td className="text-slate-500">{v.fecha}</td>
                     <td className="text-right font-mono font-semibold text-slate-900">{formatCOP(v.total)}</td>
@@ -130,7 +130,7 @@ export default function PanelVendedor() {
                 ))}
                 {data.ultimas_ventas.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="py-8 text-center text-[11.5px] text-slate-400">Sin ventas registradas</td>
+                    <td colSpan={6} className="py-8 text-center text-[11.5px] text-slate-500">Sin ventas registradas</td>
                   </tr>
                 )}
               </tbody>
@@ -149,15 +149,15 @@ export default function PanelVendedor() {
                 <div key={p.nombre} className="flex items-center justify-between gap-3 border-b border-slate-100 pb-2.5 last:border-0 last:pb-0">
                   <div className="min-w-0">
                     <p className="truncate text-[12px] font-medium text-slate-700">{p.nombre}</p>
-                    <p className="text-[10px] text-slate-400">{formatCOP(p.precio_venta)} / {p.unidad_medida === 'unidad' ? 'unidad' : 'kg'}</p>
+                    <p className="text-[10px] text-slate-500">{formatCOP(p.precio_venta)} / {p.unidad_medida === 'unidad' ? 'unidad' : 'kg'}</p>
                   </div>
                   <div className="text-right">
                     <p className="font-mono text-[12.5px] font-semibold text-slate-900">{formatCantidad(p.stock_actual)}</p>
-                    <p className="text-[9.5px] text-slate-400">{p.unidad_medida === 'canasta' ? 'kg en stock' : p.unidad_medida}</p>
+                    <p className="text-[9.5px] text-slate-500">{p.unidad_medida === 'canasta' ? 'kg en stock' : p.unidad_medida}</p>
                   </div>
                 </div>
               ))}
-              {data.stock.length === 0 && <p className="py-4 text-center text-[11.5px] text-slate-400">Sin productos activos</p>}
+              {data.stock.length === 0 && <p className="py-4 text-center text-[11.5px] text-slate-500">Sin productos activos</p>}
             </div>
             <button onClick={() => navigate('/productos')} className="btn-ghost mt-3 w-full justify-between border-t border-line pt-2.5">
               Ver productos <ArrowUpRight size={12} />

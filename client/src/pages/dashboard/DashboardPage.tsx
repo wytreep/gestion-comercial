@@ -151,7 +151,7 @@ function PanelAdmin() {
           <div className="mb-3 flex items-start justify-between">
             <div>
               <p className="card-title">Evolución de ventas y utilidad</p>
-              <p className="mt-0.5 text-[10.5px] text-slate-400">Últimos 6 meses · utilidad operativa</p>
+              <p className="mt-0.5 text-[10.5px] text-slate-500">Últimos 6 meses · utilidad operativa</p>
             </div>
             <TrendingUp size={15} className="text-slate-400" />
           </div>
@@ -178,7 +178,7 @@ function PanelAdmin() {
           <div className="card-header">
             <div>
               <p className="text-[12px] font-semibold text-slate-800">Estado de resultados</p>
-              <p className="text-[10.5px] text-slate-400">Resumen del período</p>
+              <p className="text-[10.5px] text-slate-500">Resumen del período</p>
             </div>
             <button onClick={() => navigate('/finanzas')} className="btn-ghost">
               Detalle <ArrowRight size={12} />
@@ -217,7 +217,7 @@ function PanelAdmin() {
                 style={{ width: `${Math.min(100, ind.punto_equilibrio > 0 ? (ind.ventas / ind.punto_equilibrio) * 100 : 100)}%` }}
               />
             </div>
-            <p className="mt-1.5 text-[9.5px] text-slate-400">
+            <p className="mt-1.5 text-[9.5px] text-slate-500">
               {ind.ventas >= ind.punto_equilibrio
                 ? `Superado por ${formatCOP(ind.ventas - ind.punto_equilibrio)}`
                 : `Faltan ${formatCOP(ind.punto_equilibrio - ind.ventas)}`}
@@ -232,7 +232,7 @@ function PanelAdmin() {
           <div className="mb-3 flex items-start justify-between">
             <div>
               <p className="card-title">Cobros vs. compras del mes</p>
-              <p className="mt-0.5 text-[10.5px] text-slate-400">Flujo diario de caja</p>
+              <p className="mt-0.5 text-[10.5px] text-slate-500">Flujo diario de caja</p>
             </div>
             <Banknote size={15} className="text-slate-400" />
           </div>
@@ -262,7 +262,7 @@ function PanelAdmin() {
             <Wallet size={15} className="text-slate-400" />
           </div>
           {data.saldos_destino?.length === 0 ? (
-            <p className="py-6 text-center text-[11.5px] text-slate-400">Sin cobros registrados</p>
+            <p className="py-6 text-center text-[11.5px] text-slate-500">Sin cobros registrados</p>
           ) : (
             <div className="space-y-3">
               {(data.saldos_destino ?? []).map((s) => (
@@ -299,11 +299,11 @@ function PanelAdmin() {
               <div key={p.nombre} className="flex items-center justify-between gap-3 border-b border-slate-100 pb-2.5 last:border-0 last:pb-0">
                 <div className="min-w-0">
                   <p className="truncate text-[12px] font-medium text-slate-700">{p.nombre}</p>
-                  <p className="text-[10px] text-slate-400">{formatCOP(p.precio_venta)} / {p.unidad_medida === 'unidad' ? 'unidad' : 'kg'}</p>
+                  <p className="text-[10px] text-slate-500">{formatCOP(p.precio_venta)} / {p.unidad_medida === 'unidad' ? 'unidad' : 'kg'}</p>
                 </div>
                 <div className="text-right">
                   <p className="font-mono text-[12.5px] font-semibold text-slate-900">{formatCantidad(p.stock_actual)}</p>
-                  <p className="text-[9.5px] text-slate-400">{p.unidad_medida === 'canasta' ? 'kg en stock' : p.unidad_medida}</p>
+                  <p className="text-[9.5px] text-slate-500">{p.unidad_medida === 'canasta' ? 'kg en stock' : p.unidad_medida}</p>
                 </div>
               </div>
             ))}
@@ -317,7 +317,7 @@ function PanelAdmin() {
           <div className="card-header">
             <div>
               <p className="text-[12px] font-semibold text-slate-800">Últimas ventas</p>
-              <p className="text-[10.5px] text-slate-400">Movimientos recientes</p>
+              <p className="text-[10.5px] text-slate-500">Movimientos recientes</p>
             </div>
             <button onClick={() => navigate('/ventas')} className="btn-ghost">
               Ver todas <ArrowRight size={12} />
@@ -338,7 +338,7 @@ function PanelAdmin() {
               <tbody>
                 {data.ultimas_ventas.map((v: any) => (
                   <tr key={v.id}>
-                    <td className="font-mono text-slate-400">#{v.id}</td>
+                    <td className="font-mono text-slate-500">#{v.id}</td>
                     <td className="font-medium text-slate-700">{v.cliente}</td>
                     <td className="text-slate-500">{v.fecha}</td>
                     <td className="text-right font-mono font-semibold text-slate-900">{formatCOP(v.total)}</td>
@@ -348,7 +348,7 @@ function PanelAdmin() {
                 ))}
                 {data.ultimas_ventas.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="py-8 text-center text-[11.5px] text-slate-400">Sin ventas registradas</td>
+                    <td colSpan={6} className="py-8 text-center text-[11.5px] text-slate-500">Sin ventas registradas</td>
                   </tr>
                 )}
               </tbody>

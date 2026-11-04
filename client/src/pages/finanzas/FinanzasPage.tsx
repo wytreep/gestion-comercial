@@ -75,8 +75,9 @@ export default function FinanzasPage() {
         </div>
         <div className="no-print flex flex-wrap items-end gap-2">
           <div className="field">
-            <label className="label">Período</label>
+            <label htmlFor="finanzas-periodo" className="label">Período</label>
             <input
+              id="finanzas-periodo"
               type="month"
               className="input w-auto"
               value={mes}

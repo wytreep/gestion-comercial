@@ -3,6 +3,7 @@ namespace App\Controllers;
 use App\Core\{Request, Response};
 use App\Repositories\ProductoRepository;
 use App\Services\StockService;
+use App\Exceptions\NotFoundException;
 use App\Exceptions\ValidationException;
 
 final class ProductoController extends BaseController
@@ -18,6 +19,15 @@ final class ProductoController extends BaseController
     {
         $p = $this->repo->findById($this->routeId($r));
         return Response::ok($p === null ? null : $this->sinCostos([$p], $r)[0]);
+    }
+
+    public function showByCodigo(Request $r): Response
+    {
+        $p = $this->repo->findByCodigo((string) $r->param('codigo'));
+        if ($p === null || (int) ($p['activo'] ?? 0) !== 1) {
+            throw new NotFoundException('Producto');
+        }
+        return Response::ok($this->sinCostos([$p], $r)[0]);
     }
 
     /**

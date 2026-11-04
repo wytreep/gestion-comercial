@@ -32,8 +32,8 @@ export default function ReportesPage() {
       {/* Selector de mes */}
       <div className="card flex flex-wrap gap-3 items-end">
         <div className="field">
-          <label className="label">Período</label>
-          <input type="month" className="input w-auto" value={mes}
+          <label htmlFor="reportes-periodo" className="label">Período</label>
+          <input id="reportes-periodo" type="month" className="input w-auto" value={mes}
             onChange={e => setMes(e.target.value)} />
         </div>
         <button onClick={() => setBuscar(mes)} className="btn-primary flex items-center gap-2">

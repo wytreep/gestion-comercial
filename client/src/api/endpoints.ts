@@ -43,6 +43,7 @@ export const dashboardApi = {
 export const productosApi = {
   listar:       ()           => get<Producto[]>('/productos'),
   detalle:      (id: number) => get<Producto>(`/productos/${id}`),
+  porCodigo:    (codigo: string) => get<Producto>(`/productos/codigo/${encodeURIComponent(codigo)}`),
   historial:    (id: number) => get<any[]>(`/productos/${id}/historial`),
   updatePrecio: (id: number, body: object) => put<Producto>(`/productos/${id}/precio`, body),
   ajustarStock: (id: number, cantidad: number, motivo?: string) =>

@@ -41,23 +41,26 @@ export default function LoginPage() {
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-3.5 p-5">
               {err && (
-                <div className="rounded-sm border border-red-200 bg-red-50 px-3 py-2.5 text-[11.5px] text-red-700">
+                <div role="alert" className="rounded-sm border border-red-200 bg-red-50 px-3 py-2.5 text-[11.5px] text-red-700">
                   {err}
                 </div>
               )}
               <div className="field">
-                <label className="label">Correo electrónico</label>
+                <label htmlFor="login-email" className="label">Correo electrónico</label>
                 <input
+                  id="login-email"
                   type="email"
                   autoComplete="username"
+                  autoFocus
                   className="input"
                   placeholder="nombre@empresa.com"
                   {...register('email', { required: true })}
                 />
               </div>
               <div className="field">
-                <label className="label">Contraseña</label>
+                <label htmlFor="login-password" className="label">Contraseña</label>
                 <input
+                  id="login-password"
                   type="password"
                   autoComplete="current-password"
                   className="input"

@@ -27,6 +27,8 @@ export interface UsuarioAdmin {
 // ── Producto ──────────────────────────────────────────
 export interface Producto {
   id:                number;
+  /** Código interno para etiquetas y escaneo QR: GCOM-P-0001. */
+  codigo:            string;
   categoria_id:      number;
   nombre:            string;
   unidad_medida:     'kilo' | 'canasta' | 'unidad';

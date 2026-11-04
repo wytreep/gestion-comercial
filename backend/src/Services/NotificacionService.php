@@ -9,6 +9,13 @@ use App\Repositories\BaseRepository;
 final class NotificacionService extends BaseRepository
 {
     /**
+     * Ventana de silencio después de marcar una alerta como leída.
+     * Evita que una alerta ya reconocida reaparezca cuando se genera otra
+     * notificación distinta; pasada la ventana, la condición se recuerda.
+     */
+    private const HORAS_REAVISO = 24;
+
+    /**
      * Genera y persiste las notificaciones pendientes.
      * Se puede llamar en un cron o al inicio de sesión.
      */
@@ -75,7 +82,10 @@ final class NotificacionService extends BaseRepository
                    SELECT 1 FROM notificaciones n
                    WHERE n.tipo = 'deuda_vencida'
                      AND n.referencia_id = v.id
-                     AND n.leida = 0
+                     AND (
+                       n.leida = 0
+                       OR n.created_at >= NOW() - INTERVAL " . self::HORAS_REAVISO . " HOUR
+                     )
                )
              GROUP BY v.id, v.saldo_pendiente, cl.nombre"
         );
@@ -108,7 +118,10 @@ final class NotificacionService extends BaseRepository
                    SELECT 1 FROM notificaciones n
                    WHERE n.tipo = 'stock_bajo'
                      AND n.referencia_id = productos.id
-                     AND n.leida = 0
+                     AND (
+                       n.leida = 0
+                       OR n.created_at >= NOW() - INTERVAL " . self::HORAS_REAVISO . " HOUR
+                     )
                )"
         );
 

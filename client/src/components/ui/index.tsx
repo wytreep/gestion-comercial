@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { ArrowDownRight, ArrowUpRight, X } from 'lucide-react';
 import clsx from 'clsx';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import type { EstadoPago, EstadoPedido, EstadoCompra, TipoMovimiento, TipoNotificacion } from '../../types';
 import { BADGE_PAGO, BADGE_PEDIDO, BADGE_COMPRA, BADGE_MOVIMIENTO, BADGE_NOTIF, BADGE_DESTINO } from '../../utils/format';
 
@@ -40,6 +41,8 @@ export function NumberInput({
   placeholder,
   inputMode = 'numeric',
   disabled,
+  id,
+  ariaLabel,
 }: {
   value: number;
   onChange: (value: number) => void;
@@ -48,6 +51,8 @@ export function NumberInput({
   placeholder?: string;
   inputMode?: 'numeric' | 'decimal';
   disabled?: boolean;
+  id?: string;
+  ariaLabel?: string;
 }) {
   const mostrar = (n: number) => (n ? String(n) : '');
   const [texto, setTexto] = useState(() => mostrar(value));
@@ -66,6 +71,8 @@ export function NumberInput({
       className={className}
       placeholder={placeholder}
       disabled={disabled}
+      id={id}
+      aria-label={ariaLabel}
       value={texto}
       onChange={(e) => { const raw = e.target.value; setTexto(raw); onChange(parse(raw)); }}
       onBlur={() => { const n = parse(texto); setTexto(mostrar(n)); onChange(n); }}
@@ -96,20 +103,35 @@ export function Alert({ type = 'error', message }: { type?: 'error' | 'warning' 
 
 // ── Modal ──────────────────────────────────────────────
 export function Modal({ open, onClose, title, children, size = 'md' }: { open: boolean; onClose: () => void; title: string; children: ReactNode; size?: 'sm' | 'md' | 'lg' | 'xl' }) {
-  useEffect(() => {
-    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    if (open) document.addEventListener('keydown', h);
-    return () => document.removeEventListener('keydown', h);
-  }, [open, onClose]);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
+  useFocusTrap(open, dialogRef, onClose);
 
   if (!open) return null;
   const w = { sm: 'max-w-sm', md: 'max-w-xl', lg: 'max-w-3xl', xl: 'max-w-5xl' }[size];
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy-950/55 p-4" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className={clsx('bg-white rounded-lg shadow-dropdown w-full max-h-[90vh] flex flex-col border border-line', w)}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-navy-950/55 p-4"
+      onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
+        className={clsx('bg-white rounded-lg shadow-dropdown w-full max-h-[90vh] flex flex-col border border-line outline-none', w)}
+      >
         <div className="flex items-center justify-between px-4 py-3 border-b border-line">
-          <h2 className="text-[13px] font-semibold text-slate-800">{title}</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-700"><X size={18} /></button>
+          <h2 id={titleId} className="text-[13px] font-semibold text-slate-800">{title}</h2>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Cerrar"
+            className="rounded-sm p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+          >
+            <X size={18} />
+          </button>
         </div>
         <div className="overflow-y-auto p-4 flex-1">{children}</div>
       </div>
@@ -119,15 +141,29 @@ export function Modal({ open, onClose, title, children, size = 'md' }: { open: b
 
 // ── Confirm ────────────────────────────────────────────
 export function Confirm({ open, title, message, onConfirm, onCancel, danger = false }: { open: boolean; title: string; message: string; onConfirm: () => void; onCancel: () => void; danger?: boolean }) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
+  useFocusTrap(open, dialogRef, onCancel);
+
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy-950/55 p-4">
-      <div className="bg-white rounded-lg shadow-dropdown w-full max-w-sm border border-line p-5">
-        <h3 className="text-[13px] font-semibold text-slate-900 mb-1.5">{title}</h3>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-navy-950/55 p-4"
+      onMouseDown={(e) => { if (e.target === e.currentTarget) onCancel(); }}
+    >
+      <div
+        ref={dialogRef}
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
+        className="bg-white rounded-lg shadow-dropdown w-full max-w-sm border border-line p-5 outline-none"
+      >
+        <h3 id={titleId} className="text-[13px] font-semibold text-slate-900 mb-1.5">{title}</h3>
         <p className="text-[12px] text-slate-600 mb-5">{message}</p>
         <div className="flex gap-2 justify-end">
-          <button onClick={onCancel} className="btn-secondary">Cancelar</button>
-          <button onClick={onConfirm} className={danger ? 'btn-danger' : 'btn-primary'}>Confirmar</button>
+          <button type="button" onClick={onCancel} className="btn-secondary">Cancelar</button>
+          <button type="button" onClick={onConfirm} className={danger ? 'btn-danger' : 'btn-primary'}>Confirmar</button>
         </div>
       </div>
     </div>

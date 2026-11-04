@@ -13,9 +13,27 @@
   }
   ::selection { background: #cfe2f7; color: #083a6e; }
   input[type='date'], input[type='month'] { color-scheme: light; }
+
+  /* Foco visible para navegación por teclado en todo el panel. */
+  :focus-visible {
+    outline: 2px solid #0b5cab;
+    outline-offset: 2px;
+  }
+  header :focus-visible,
+  .surface-dark :focus-visible {
+    outline-color: #7dd3fc;
+  }
 }
 
 @layer components {
+  /* ── Accesibilidad ───────────────────────────────── */
+  .skip-link {
+    @apply fixed left-3 top-3 z-[70] -translate-y-20 rounded bg-white px-3 py-2 text-[12.5px]
+           font-semibold text-primary shadow-dropdown transition-transform;
+  }
+  .skip-link:focus,
+  .skip-link:focus-visible { @apply translate-y-0; }
+
   /* ── Botones ─────────────────────────────────────── */
   .btn-primary {
     @apply inline-flex items-center justify-center gap-1.5 bg-primary text-white font-medium px-3.5 py-2 rounded
@@ -70,8 +88,8 @@
   /* ── Tipografía de datos ─────────────────────────── */
   .page-header { @apply flex flex-wrap items-center justify-between gap-3 mb-5; }
   .page-title  { @apply text-[20px] font-semibold text-slate-900 tracking-tight; }
-  .page-subtitle { @apply text-[12px] text-slate-500 mt-0.5; }
-  .section-label { @apply text-2xs font-semibold uppercase tracking-widest text-slate-400; }
+  .page-subtitle { @apply text-[12px] text-slate-600 mt-0.5; }
+  .section-label { @apply text-2xs font-semibold uppercase tracking-widest text-slate-500; }
   .stat-value { @apply text-[22px] font-semibold font-mono text-slate-900 tabular-nums leading-none; }
   .stat-value-sm { @apply text-[17px] font-semibold font-mono text-slate-900 tabular-nums leading-none; }
   .money { @apply font-mono tabular-nums; }
@@ -127,8 +145,17 @@
 }
 
 @media print {
-  aside, header, .no-print { display: none !important; }
+  aside, header, .no-print, .skip-link { display: none !important; }
   main { padding: 0 !important; overflow: visible !important; }
   body { background: #fff; }
   .card { box-shadow: none; break-inside: avoid; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

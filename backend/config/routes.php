@@ -81,6 +81,7 @@ $router->get('/api/v1/dashboard', $protect([$dashCtrl, 'index']));
 
 // ── Productos (estáticas primero, luego {id}) ─────────
 $router->get('/api/v1/productos', $protect([$prodCtrl, 'index']));
+$router->get('/api/v1/productos/codigo/{codigo}', $protect([$prodCtrl, 'showByCodigo']));
 $router->get('/api/v1/productos/{id}', $protect([$prodCtrl, 'show']));
 $router->put('/api/v1/productos/{id}/precio', $protect([$prodCtrl, 'updatePrecio'], $adminOnly));
 $router->get('/api/v1/productos/{id}/historial', $protect([$prodCtrl, 'historial'], $adminOnly));

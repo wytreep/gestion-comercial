@@ -39,14 +39,14 @@ export function ComprasPage() {
                     <td className="font-mono">{formatCOP(c.total_gastos)}</td>
                     <td className="font-mono font-bold">{formatCOP(c.total_inversion)}</td>
                     <td>
-                      <select className="text-xs border border-gray-200 rounded-full px-2 py-1 bg-white" value={c.estado} onChange={e => estadoMut.mutate({ id: c.id, estado: e.target.value })}>
+                      <select className="text-xs border border-gray-200 rounded-full px-2 py-1 bg-white" aria-label={`Estado de la compra ${c.id}`} value={c.estado} onChange={e => estadoMut.mutate({ id: c.id, estado: e.target.value })}>
                         {OPCIONES_ESTADO_COMPRA.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                       </select>
                     </td>
                     <td>
                       <div className="flex gap-1.5">
-                        <button onClick={() => comprasApi.detalle(c.id).then(setDetalle)} className="btn-secondary btn-sm"><Eye size={13} /></button>
-                        <button onClick={() => comprasApi.detalle(c.id).then(setEditando)} className="btn-secondary btn-sm"><Pencil size={13} /></button>
+                        <button onClick={() => comprasApi.detalle(c.id).then(setDetalle)} className="btn-secondary btn-sm" aria-label={`Ver detalle de la compra ${c.id}`} title="Ver detalle"><Eye size={13} aria-hidden="true" /></button>
+                        <button onClick={() => comprasApi.detalle(c.id).then(setEditando)} className="btn-secondary btn-sm" aria-label={`Editar la compra ${c.id}`} title="Editar"><Pencil size={13} aria-hidden="true" /></button>
                       </div>
                     </td>
                   </tr>
@@ -167,29 +167,29 @@ export function FormCompra({ compraExistente, onSuccess, conResumen = false }: {
         <p className="card-title">1. Datos de la compra</p>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           <div className="field">
-            <label className="label">Proveedor</label>
-            <select className="input" {...register('proveedor_id')}>
+            <label htmlFor="compra-proveedor" className="label">Proveedor</label>
+            <select id="compra-proveedor" className="input" {...register('proveedor_id')}>
               <option value="">— Sin proveedor —</option>
               {proveedores.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
             </select>
           </div>
           <div className="field">
-            <label className="label">Estado</label>
-            <select className="input" {...register('estado')}>
+            <label htmlFor="compra-estado" className="label">Estado</label>
+            <select id="compra-estado" className="input" {...register('estado')}>
               {OPCIONES_ESTADO_COMPRA.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
           </div>
           <div className="field">
-            <label className="label">Fecha compra *</label>
-            <input type="date" className="input" {...register('fecha_compra')} />
+            <label htmlFor="compra-fecha" className="label">Fecha compra *</label>
+            <input id="compra-fecha" type="date" className="input" {...register('fecha_compra')} />
           </div>
           <div className="field">
-            <label className="label">Fecha llegada estimada</label>
-            <input type="date" className="input" {...register('fecha_llegada')} />
+            <label htmlFor="compra-llegada" className="label">Fecha llegada estimada</label>
+            <input id="compra-llegada" type="date" className="input" {...register('fecha_llegada')} />
           </div>
           <div className="field sm:col-span-2">
-            <label className="label">Observaciones</label>
-            <input type="text" className="input" placeholder="Opcional" {...register('observaciones')} />
+            <label htmlFor="compra-observaciones" className="label">Observaciones</label>
+            <input id="compra-observaciones" type="text" className="input" placeholder="Opcional" {...register('observaciones')} />
           </div>
         </div>
       </div>
@@ -238,6 +238,7 @@ export function FormCompra({ compraExistente, onSuccess, conResumen = false }: {
                       <td>
                         <select
                           className="input"
+                          aria-label={`Producto de la línea ${idx + 1}`}
                           value={l.productoId}
                           onChange={e => {
                             const p = productos.find((p: Producto) => p.id === +e.target.value);
@@ -287,6 +288,7 @@ export function FormCompra({ compraExistente, onSuccess, conResumen = false }: {
                           onClick={() => setLineas(prev => prev.filter((_, i) => i !== idx))}
                           className="rounded-sm p-1 text-slate-400 hover:bg-red-50 hover:text-danger"
                           title="Quitar producto"
+                          aria-label={`Quitar producto de la línea ${idx + 1}`}
                         >
                           <X size={15} />
                         </button>
@@ -301,7 +303,7 @@ export function FormCompra({ compraExistente, onSuccess, conResumen = false }: {
         {lineas.length === 0 && (
           <div className="mt-4 rounded border border-dashed border-line bg-slate-50/60 py-8 text-center">
             <p className="text-[12.5px] font-medium text-slate-500">Selecciona un producto para agregarlo a la compra</p>
-            <p className="mt-0.5 text-[11px] text-slate-400">Puedes ajustar cantidad, precio y kilos en la tabla</p>
+            <p className="mt-0.5 text-[11px] text-slate-500">Puedes ajustar cantidad, precio y kilos en la tabla</p>
           </div>
         )}
       </div>
@@ -319,12 +321,12 @@ export function FormCompra({ compraExistente, onSuccess, conResumen = false }: {
         </div>
 
         {gastos.length === 0 ? (
-          <p className="py-4 text-center text-[12px] text-slate-400">Sin gastos asociados a esta compra</p>
+          <p className="py-4 text-center text-[12px] text-slate-500">Sin gastos asociados a esta compra</p>
         ) : (
           <div className="space-y-2">
             {gastos.map((g, idx) => (
               <div key={idx} className="grid grid-cols-1 items-center gap-2 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1.2fr)_32px]">
-                <select className="input" value={g.tipoId} onChange={e => setGastos(prev => prev.map((x, i) => i === idx ? { ...x, tipoId: +e.target.value } : x))}>
+                <select className="input" aria-label={`Tipo de gasto de la línea ${idx + 1}`} value={g.tipoId} onChange={e => setGastos(prev => prev.map((x, i) => i === idx ? { ...x, tipoId: +e.target.value } : x))}>
                   {tiposGasto.map(t => <option key={t.id} value={t.id}>{t.nombre}</option>)}
                 </select>
                 <NumberInput
@@ -340,6 +342,7 @@ export function FormCompra({ compraExistente, onSuccess, conResumen = false }: {
                   onClick={() => setGastos(prev => prev.filter((_, i) => i !== idx))}
                   className="justify-self-end rounded-sm p-1 text-slate-400 hover:bg-red-50 hover:text-danger"
                   title="Quitar gasto"
+                  aria-label={`Quitar gasto de la línea ${idx + 1}`}
                 >
                   <X size={15} />
                 </button>

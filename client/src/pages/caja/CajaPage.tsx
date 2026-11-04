@@ -24,8 +24,8 @@ export default function CajaPage() {
     <div className="space-y-6">
       <div className="page-header"><h1 className="page-title">Caja y flujo de dinero</h1></div>
       <div className="card flex flex-wrap gap-3 items-end">
-        <div className="field"><label className="label">Desde</label><input type="date" className="input w-auto" value={desde} onChange={e => setDesde(e.target.value)} /></div>
-        <div className="field"><label className="label">Hasta</label><input type="date" className="input w-auto" value={hasta} onChange={e => setHasta(e.target.value)} /></div>
+        <div className="field"><label htmlFor="caja-desde" className="label">Desde</label><input id="caja-desde" type="date" className="input w-auto" value={desde} onChange={e => setDesde(e.target.value)} /></div>
+        <div className="field"><label htmlFor="caja-hasta" className="label">Hasta</label><input id="caja-hasta" type="date" className="input w-auto" value={hasta} onChange={e => setHasta(e.target.value)} /></div>
         <button className="btn-primary" onClick={() => setBuscar({ desde, hasta })}>Consultar</button>
       </div>
       {isLoading ? <Spinner /> : (

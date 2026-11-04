@@ -12,6 +12,7 @@ final class ProductoRepository extends BaseRepository
     {
         return $this->query(
             "SELECT p.*, c.nombre AS categoria,
+                    CONCAT('GCOM-P-', LPAD(p.id, 4, '0')) AS codigo,
                     CASE
                       WHEN p.unidad_medida='canasta' AND p.kilos_por_canasta>0
                         THEN ROUND(p.precio_compra/p.kilos_por_canasta,2)
@@ -40,6 +41,7 @@ final class ProductoRepository extends BaseRepository
     {
         $p = $this->queryOne(
             "SELECT p.*, c.nombre AS categoria,
+                    CONCAT('GCOM-P-', LPAD(p.id, 4, '0')) AS codigo,
                     CASE
                       WHEN p.unidad_medida='canasta' AND p.kilos_por_canasta>0
                         THEN ROUND((p.precio_venta - p.precio_compra/p.kilos_por_canasta)/p.precio_venta*100,1)
@@ -52,6 +54,21 @@ final class ProductoRepository extends BaseRepository
             [':id' => $id]
         );
         return $p ?: null;
+    }
+
+    /**
+     * Código interno visible en la etiqueta QR: GCOM-P-0001.
+     * Se deriva del ID para no duplicar el dato ni exigir una columna extra.
+     */
+    public function findByCodigo(string $codigo): ?array
+    {
+        $codigo = strtoupper(trim($codigo));
+        if (!preg_match('/^(?:GCOM-P-)?0*(\d+)$/', $codigo, $m)) {
+            return null;
+        }
+
+        $id = (int) $m[1];
+        return $id > 0 ? $this->findById($id) : null;
     }
 
     public function updatePrecio(int $id, float $pc, float $pv, ?float $kpc): void
