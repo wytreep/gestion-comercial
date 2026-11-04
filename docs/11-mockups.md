@@ -14,9 +14,9 @@ como parte del roadmap. No deben interpretarse como funcionalidad disponible.
 | Inicio de sesión | Implementado |
 | Panel del administrador | Implementado |
 | Panel del vendedor | Implementado |
-| Nueva venta | Implementado, sin escaneo QR |
+| Nueva venta | Implementado, con escaneo de producto |
 | Finanzas | Implementado |
-| Escáner QR | Propuesta, no implementado |
+| Escáner QR | Escaneo de producto implementado; cobro con QR en roadmap |
 
 ## Sistema visual
 
@@ -91,8 +91,8 @@ panel lateral.
 - Flujo de venta en una sola pantalla.
 - Cliente, productos, cantidades y abono.
 - Resumen fijo con total y saldo pendiente.
-- El botón de escaneo QR aparece marcado como futuro; todavía no está
-  implementado.
+- El botón de escaneo QR agrega productos por cámara, lector USB o código
+  manual.
 - Jerarquía clara entre editar y confirmar.
 
 ## 5. Finanzas
@@ -107,22 +107,25 @@ panel lateral.
 - Rentabilidad por producto.
 - Aviso explícito de que no se maneja IVA.
 
-## 6. Escáner QR (futuro)
+## 6. Escáner QR
 
 ![Mockup del escáner QR](assets/mockup-qr.svg)
 
-> **Estado:** propuesta de diseño. Esta función **no está implementada** en la
-> versión 3.0.0. Corresponde a la Fase 1 del roadmap.
+> **Estado:** el **escaneo de producto** está implementado en la versión 3.0.0:
+> cámara, lector USB y entrada manual agregan el producto a la venta. El **cobro
+> con QR** sigue siendo una propuesta de la [Fase 1 del roadmap](10-roadmap.md).
 
 **Qué valida**
 
-- Cobro con QR en escritorio.
-- Escaneo de producto en móvil.
-- Confirmación del pago por parte del vendedor.
-- Estados del cobro y expiración.
-- Flujo de tres pasos: escanear, identificar, confirmar.
+- Escaneo de producto desde la cámara del dispositivo.
+- Entrada manual y compatibilidad con lectores USB.
+- Confirmación visual del producto agregado.
+- Cobro con QR en escritorio (propuesta).
+- Confirmación del pago por parte del vendedor (propuesta).
+- Estados del cobro y expiración (propuesta).
 
-Este mockup corresponde a la [Fase 1 del roadmap](10-roadmap.md).
+El escaneo de producto ya está disponible. El cobro con QR corresponde a la
+[Fase 1 del roadmap](10-roadmap.md).
 
 ## Cómo usar los mockups
 
@@ -139,16 +142,20 @@ Este mockup corresponde a la [Fase 1 del roadmap](10-roadmap.md).
 | Interacción | Estática | Reactiva |
 | Estados | Selección | Todos los estados |
 | Responsive | Escritorio | Escritorio, tablet y móvil |
-| Cámara QR | Propuesta | Pendiente de implementar |
+| Cámara QR | Propuesta | Escaneo de producto disponible |
+| Cobro con QR | Propuesta | Pendiente (Fase 1) |
 
 ## Accesibilidad
 
 - Contraste mínimo AA en texto y fondos.
 - No se depende solo del color: los estados llevan texto.
 - Áreas táctiles de al menos 32 px.
-- Navegación por teclado en formularios.
-- Etiquetas visibles y mensajes de error claros.
-- Iconos acompañados de texto o `title`.
+- Navegación completa por teclado, con foco visible en cada control.
+- Enlace «Saltar al contenido» y foco al contenido al cambiar de sección.
+- Modales y drawer atrapan el foco, se cierran con `Escape` y devuelven el foco
+  al control que los abrió.
+- Etiquetas asociadas a sus campos y mensajes de error claros.
+- Iconos acompañados de texto o `aria-label`.
 
 ## Impresión
 

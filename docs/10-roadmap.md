@@ -15,13 +15,13 @@ códigos QR**, solicitado como siguiente evolución del producto.
 
 ## Resumen
 
-| Fase | Foco | Periodo estimado | Prioridad |
-|---|---|---|---|
-| 1 | Escáner QR y códigos de barras | Q1 2027 | P0 |
-| 2 | Facturación electrónica e IVA | Q2 2027 | P0 |
-| 3 | Inventario avanzado | Q3 2027 | P1 |
-| 4 | Operación móvil y cliente | Q3–Q4 2027 | P1 |
-| 5 | Analítica y control | Q4 2027 | P2 |
+| Fase | Foco | Periodo estimado | Prioridad | Estado |
+|---|---|---|---|---|
+| 1 | Escáner QR y códigos de barras | Q1 2027 | P0 | Parcial: escaneo de producto listo |
+| 2 | Facturación electrónica e IVA | Q2 2027 | P0 | Planificada |
+| 3 | Inventario avanzado | Q3 2027 | P1 | Planificada |
+| 4 | Operación móvil y cliente | Q3–Q4 2027 | P1 | Planificada |
+| 5 | Analítica y control | Q4 2027 | P2 | Planificada |
 
 ```mermaid
 gantt
@@ -44,6 +44,10 @@ gantt
 ---
 
 ## Fase 1 · Escáner QR y códigos de barras
+
+> **Estado:** el escaneo de producto en ventas (1.1) ya está implementado en la
+> versión 3.0.0. El cobro con QR, las etiquetas y la consulta de recibos siguen
+> en roadmap.
 
 ### Objetivo
 
@@ -81,19 +85,26 @@ sequenceDiagram
 
 Requisitos:
 
-- Campo `codigo` único por producto en `productos`.
-- Soporte de QR y código de barras (EAN-13, Code 128).
-- Búsqueda por código en la API.
+- Código único por producto derivado del identificador (`GCOM-P-0001`), sin
+  columna adicional.
+- Búsqueda por código en la API (`GET /productos/codigo/{codigo}`).
 - Validación de producto activo y stock.
-- Confirmación visual y sonora al escanear.
-- Entrada manual como respaldo.
+- Confirmación visual del producto agregado.
+- Entrada manual como respaldo y compatibilidad con lectores USB.
 
-Implementación sugerida:
+Implementado en la versión 3.0.0:
 
-- `BarcodeDetector` nativo cuando esté disponible.
-- `@zxing/browser` o `jsqr` como respaldo.
-- Lectores USB se comportan como teclado: capturar entrada rápida.
+- `@zxing/browser` para la lectura con cámara, cargado en un chunk aparte.
+- Lectores USB se comportan como teclado: se captura la entrada rápida.
+- Entrada manual para códigos ilegibles o permisos denegados.
+- Generación y descarga del QR del producto con `qrcode`.
 - La cámara requiere HTTPS o `localhost`.
+
+Pendiente para cerrar 1.1:
+
+- Soporte de códigos de barras EAN-13 y Code 128 además del QR.
+- Confirmación sonora configurable.
+- Validación de stock disponible al agregar la línea.
 
 ### 1.2 Cobro con QR
 
@@ -179,11 +190,11 @@ clientes. El token expira.
 
 ### 1.6 Cambios de modelo
 
-```sql
-ALTER TABLE productos
-  ADD COLUMN codigo VARCHAR(64) NULL UNIQUE,
-  ADD COLUMN codigo_barras VARCHAR(64) NULL UNIQUE;
+El código de producto no requiere una columna nueva: se calcula en SQL a partir
+del identificador con el formato `GCOM-P-0001`. Para las siguientes etapas se
+prevé:
 
+```sql
 CREATE TABLE codigos_escaneados (
   id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   codigo      VARCHAR(64) NOT NULL,
@@ -192,12 +203,25 @@ CREATE TABLE codigos_escaneados (
   referencia_id INT UNSIGNED NULL,
   created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE cobros_qr (
+  id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  venta_id    INT UNSIGNED NOT NULL,
+  codigo      VARCHAR(64) NOT NULL UNIQUE,
+  monto       DECIMAL(12,2) NOT NULL,
+  estado      ENUM('pendiente','pagado','expirado','anulado') NOT NULL DEFAULT 'pendiente',
+  expira_at   DATETIME NOT NULL,
+  pagado_at   DATETIME NULL,
+  FOREIGN KEY (venta_id) REFERENCES ventas(id)
+);
 ```
 
 ### 1.7 Criterios de aceptación
 
 - Escanear un producto lo agrega a la venta en menos de dos segundos.
+  **Verificado en 3.0.0.**
 - Un código desconocido muestra un mensaje claro y permite buscarlo manualmente.
+  **Verificado en 3.0.0.**
 - El cobro con QR genera un código único y expira.
 - La confirmación manual del pago actualiza la cartera.
 - Funciona en móvil y escritorio.
@@ -302,7 +326,7 @@ Mayor control en productos perecederos y mejor costo real.
 
 | Función | Prioridad | Impacto | Esfuerzo | Fase |
 |---|---|---|---|---|
-| Escáner QR en ventas | P0 | Alto | Medio | 1 |
+| Escáner QR de producto en ventas | P0 | Alto | Medio | 1 · implementado |
 | Cobro con QR | P0 | Alto | Medio | 1 |
 | Etiquetas QR | P1 | Medio | Bajo | 1 |
 | Facturación electrónica | P0 | Alto | Alto | 2 |

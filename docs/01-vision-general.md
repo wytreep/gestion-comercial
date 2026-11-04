@@ -39,7 +39,7 @@ costos, márgenes, utilidades ni compras.
 | Módulo | Funcionalidad |
 |---|---|
 | Panel | Indicadores operativos y financieros según el rol |
-| Ventas | Registro, edición, detalle, pagos y abonos |
+| Ventas | Registro, edición, detalle, pagos, abonos y escaneo de productos por QR |
 | Compras | Proveedores, detalle, gastos y recepción |
 | Inventario | Stock por producto, movimientos y ajustes |
 | Clientes | Datos de contacto y consulta de saldo |
@@ -58,7 +58,7 @@ costos, márgenes, utilidades ni compras.
 - Nómina y contabilidad formal.
 - Multiempresa y multi-bodega.
 - Aplicación móvil nativa.
-- Escáner de códigos QR (previsto en el roadmap).
+- Cobro con QR y conciliación automática de pagos (previsto en el roadmap).
 
 ## Tecnologías utilizadas
 

@@ -21,7 +21,7 @@ distribución de pescado, queso y carne.
 
 - **Producto:** Gestión Comercial
 - **Versión:** 3.0.0
-- **Fecha de documento:** 2 de noviembre de 2026
+- **Fecha de documento:** 3 de noviembre de 2026
 - **Periodo de construcción:** septiembre – noviembre de 2026
 - **Estado:** operativo en entorno local, preparado para despliegue controlado
 

@@ -123,10 +123,21 @@ Para roles distintos de `admin`, el servidor omite:
 |---|---|---|---|
 | GET | `/productos` | Todos | Listado con stock y margen |
 | GET | `/productos/{id}` | Todos | Detalle |
+| GET | `/productos/codigo/{codigo}` | Todos | Busca un producto activo por su código QR o de barras |
 | PUT | `/productos/{id}/precio` | Admin | Actualiza precios y kilos por canasta |
 | GET | `/productos/{id}/historial` | Admin | Historial de precios |
 | PATCH | `/productos/{id}/stock` | Admin | Ajuste manual de stock |
 | GET | `/stock/movimientos` | Todos | Movimientos de inventario |
+
+El código de cada producto se deriva de su identificador con el formato
+`GCOM-P-0001`. La búsqueda por código devuelve `404` si el producto no existe o
+está inactivo. Para roles distintos de `admin`, la respuesta omite
+`precio_compra`, `margen` y cualquier dato de costo.
+
+```http
+GET /api/v1/productos/codigo/GCOM-P-0001
+Authorization: Bearer <token>
+```
 
 Ejemplo de actualización de precio:
 

@@ -52,8 +52,8 @@
   <text x="82" y="110" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="11.5" fill="#64748b">Registra el pedido y el abono inicial</text>
   <rect x="1246" y="76" width="70" height="30" rx="3" fill="#ffffff" stroke="#dfe4ea"/>
   <text x="1281" y="95" text-anchor="middle" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="10.5" fill="#334155">Volver</text>
-  <rect x="1326" y="76" width="90" height="30" rx="3" fill="#fdf6ec" stroke="#f0d9b5"/>
-  <text x="1371" y="95" text-anchor="middle" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="10.5" font-weight="600" fill="#92400e">QR · futuro</text>
+  <rect x="1326" y="76" width="90" height="30" rx="3" fill="#eff6fd" stroke="#bcd6ef"/>
+  <text x="1371" y="95" text-anchor="middle" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="9.5" font-weight="600" fill="#0b5cab">Escanear QR</text>
 
   <!-- Cliente -->
   <rect x="82" y="126" width="860" height="128" rx="5" fill="#ffffff" stroke="#dfe4ea"/>

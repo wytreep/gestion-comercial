@@ -12,7 +12,7 @@ permisos separados para administración y vendedores.
 |---|---|
 | Versión | 3.0.0 |
 | Periodo de construcción | Septiembre – noviembre de 2026 |
-| Última actualización | 2 de noviembre de 2026 |
+| Última actualización | 3 de noviembre de 2026 |
 | Estado | Operativo en entorno local, preparado para despliegue controlado |
 | Moneda | COP |
 | Idioma | Español (Colombia) |
@@ -22,6 +22,7 @@ permisos separados para administración y vendedores.
 ### Operación
 
 - Ventas con pago total, abono o crédito.
+- Escaneo de productos por QR con cámara, lector USB o código manual.
 - Compras con proveedores, gastos y recepción.
 - Inventario por kilos, canastas y unidades.
 - Movimientos de stock y ajustes con motivo.
@@ -47,6 +48,13 @@ permisos separados para administración y vendedores.
 - Secretos fuera del repositorio.
 - Datos reales de clientes fuera de Git.
 
+### Accesibilidad
+
+- Navegación completa por teclado y foco visible.
+- Enlace para saltar al contenido y foco al cambiar de sección.
+- Modales y menú móvil con foco atrapado, cierre con `Escape` y retorno del foco.
+- Etiquetas asociadas, nombres accesibles y contraste AA.
+
 ## Roles
 
 | Rol | Alcance |
@@ -65,6 +73,7 @@ La restricción se valida en la API, no solo en la interfaz.
 | Frontend | React 18.3 · TypeScript 5.5 · Vite 5.4 · Tailwind CSS 3.4 |
 | Estado y datos | TanStack Query 5 · Axios · React Hook Form |
 | Gráficas | Recharts · Lucide React |
+| Escaneo y QR | @zxing/browser · qrcode |
 | Backend | PHP 8.4.27 · API REST propia |
 | Base de datos | MySQL 8.0 |
 | Servidor | nginx 1.27 |
@@ -179,12 +188,13 @@ prueba la restauración. Ver [despliegue](docs/09-despliegue.md#seguridad).
 
 ## Roadmap
 
-La siguiente fase prioriza el **escáner de códigos QR**:
+El **escaneo de productos por QR** ya está disponible en ventas. La siguiente
+fase completa el resto de la Fase 1:
 
-1. Escaneo de productos en ventas.
-2. Cobro con QR y conciliación del pago.
-3. Etiquetas QR por producto y lote.
-4. Consulta de venta desde el recibo.
+1. Cobro con QR y conciliación del pago.
+2. Etiquetas QR por producto y lote.
+3. Consulta de venta desde el recibo.
+4. Recepción de compras por escaneo.
 
 Después: facturación electrónica, IVA, lotes y vencimientos, multi-bodega, PWA
 offline, WhatsApp y auditoría. Detalle en el [roadmap](docs/10-roadmap.md).

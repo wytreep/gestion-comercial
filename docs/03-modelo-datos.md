@@ -194,5 +194,6 @@ etapas se prevé:
 - `bodegas` y `stock_por_bodega` para inventario multipunto.
 - `impuestos` y `ventas_impuestos` para IVA.
 - `facturas_electronicas` para integración con la DIAN.
-- `codigos_qr` para etiquetas y cobros.
+- `codigos_qr` para etiquetas por lote y cobros. El código de producto
+  (`GCOM-P-0001`) se deriva del identificador y no requiere una columna extra.
 - `auditoria` para registrar cambios sensibles.
