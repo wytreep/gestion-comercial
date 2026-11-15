@@ -5,6 +5,19 @@ import type { ApiResponse } from '../types';
 // Ruta relativa por defecto: nginx y el proxy de Vite resuelven /api/*.
 const BASE = import.meta.env.VITE_API_URL ?? '/api/v1';
 
+/** Error de la API con el código HTTP y los datos extra del backend. */
+export class ApiError extends Error {
+  readonly status?: number;
+  readonly data?: any;
+
+  constructor(message: string, status?: number, data?: any) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.data = data;
+  }
+}
+
 const client: AxiosInstance = axios.create({
   baseURL: BASE,
   headers: { 'Content-Type': 'application/json' },
@@ -19,7 +32,7 @@ client.interceptors.request.use((cfg) => {
 
 let refreshing = false;
 let queue: Array<{ resolve: Function; reject: Function }> = [];
-const flush = (err: AxiosError | null, token: string | null = null) => {
+const flush = (err: unknown, token: string | null = null) => {
   queue.forEach(({ resolve, reject }) => err ? reject(err) : resolve(token));
   queue = [];
 };
@@ -28,33 +41,74 @@ client.interceptors.response.use(
   (r) => r,
   async (error: AxiosError<ApiResponse>) => {
     const orig = error.config as any;
-    if (error.response?.status === 401 && !orig._retry && !orig.url?.includes('/auth/')) {
+
+    if (error.response?.status === 401 && !orig?._retry && !orig?.url?.includes('/auth/')) {
       if (refreshing) {
         return new Promise((resolve, reject) => queue.push({ resolve, reject }))
           .then((token) => { orig.headers.Authorization = `Bearer ${token}`; return client(orig); });
       }
+
       orig._retry = true;
       refreshing  = true;
-      const rt    = localStorage.getItem('refresh_token');
-      if (!rt) { refreshing = false; clearSession(); return Promise.reject(error); }
       try {
-        const { data } = await axios.post<ApiResponse<{ access_token: string }>>(
-          `${BASE}/auth/refresh`, { refresh_token: rt }
-        );
-        const newToken = data.data.access_token;
-        localStorage.setItem('access_token', newToken);
-        flush(null, newToken);
-        orig.headers.Authorization = `Bearer ${newToken}`;
+        const nuevo = await refrescarToken();
+        flush(null, nuevo);
+        orig.headers.Authorization = `Bearer ${nuevo}`;
         return client(orig);
       } catch (e) {
-        flush(e as AxiosError, null);
+        flush(e, null);
         clearSession();
         return Promise.reject(e);
-      } finally { refreshing = false; }
+      } finally {
+        refreshing = false;
+      }
     }
-    return Promise.reject(new Error(mensajeError(error)));
+
+    return Promise.reject(aApiError(error));
   }
 );
+
+/**
+ * Canjea el refresh y guarda el par nuevo.
+ *
+ * El refresh es de un solo uso: si dos pestañas refrescan a la vez con el mismo
+ * token, el backend interpreta el segundo como robo y revoca la sesión. Por eso
+ * el canje se serializa con `navigator.locks` (entre pestañas del mismo origen)
+ * y se relee el token de `localStorage` dentro del bloqueo.
+ */
+async function refrescarToken(): Promise<string> {
+  const canjear = async (): Promise<string> => {
+    const rt = localStorage.getItem('refresh_token');
+    if (!rt) throw new ApiError('Tu sesión expiró. Inicia sesión de nuevo.', 401);
+
+    try {
+      const { data } = await axios.post<ApiResponse<{ access_token: string; refresh_token?: string }>>(
+        `${BASE}/auth/refresh`,
+        { refresh_token: rt }
+      );
+
+      localStorage.setItem('access_token', data.data.access_token);
+      if (data.data.refresh_token) localStorage.setItem('refresh_token', data.data.refresh_token);
+
+      return data.data.access_token;
+    } catch (e) {
+      throw aApiError(e as AxiosError<ApiResponse>);
+    }
+  };
+
+  const locks = (navigator as Navigator & { locks?: LockManager }).locks;
+  if (locks?.request) return locks.request('gcom-refresh', canjear);
+
+  return canjear();
+}
+
+function aApiError(error: AxiosError<ApiResponse>): ApiError {
+  const payload = error.response?.data as
+    | { message?: string; data?: any }
+    | undefined;
+
+  return new ApiError(mensajeError(error), error.response?.status, payload?.data);
+}
 
 /**
  * Mensaje legible para el usuario.
@@ -76,7 +130,10 @@ function mensajeError(error: AxiosError<ApiResponse>): string {
     if (primero) return primero;
   }
 
-  return payload?.message ?? error.message ?? 'Error de conexión';
+  if (payload?.message) return payload.message;
+  if (error.code === 'ECONNABORTED') return 'La operación tardó demasiado. Intenta de nuevo.';
+  if (!error.response) return 'No hay conexión con el servidor.';
+  return error.message || 'Error de conexión';
 }
 
 function clearSession() {

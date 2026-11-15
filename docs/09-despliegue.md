@@ -43,13 +43,16 @@ Edita `.env` y asigna:
 | `DB_PASSWORD` | Sí | Contraseña del usuario |
 | `DB_ROOT_PASSWORD` | Sí | Contraseña de root |
 | `JWT_SECRET` | Sí | Clave de firma |
-| `JWT_EXPIRY` | No | Segundos del token |
-| `JWT_REFRESH_EXPIRY` | No | Segundos del refresh |
+| `APP_KEY` | Sí | Clave AES-256-GCM de 64 hex para cifrar datos sensibles |
+| `JWT_EXPIRY` | No | Segundos del access token (900) |
+| `JWT_REFRESH_EXPIRY` | No | Segundos del refresh (604800) |
+| `SECURITY_TOKEN_EXPIRY` | No | Segundos del token del panel de seguridad (600) |
 | `CORS_ALLOWED_ORIGINS` | No | Orígenes permitidos |
-| `LOGIN_MAX_ATTEMPTS` | No | Intentos por email e IP |
-| `LOGIN_WINDOW_MINUTES` | No | Ventana de conteo |
-| `LOGIN_LOCKOUT_MINUTES` | No | Duración del bloqueo |
-| `LOGIN_MAX_IP_ATTEMPTS` | No | Intentos por IP |
+| `LOGIN_MAX_ATTEMPTS` | No | Fallos antes de bloquear (5) |
+| `LOGIN_WINDOW_MINUTES` | No | Ventana de conteo (15) |
+| `LOGIN_BLOCK_MINUTES` | No | Esperas por nivel (`5,30,1440,10080`) |
+| `LOGIN_MAX_BLOCKS` | No | Bloqueos antes de la lista negra (5) |
+| `LOGIN_RESET_DAYS` | No | Días sin bloqueos para reiniciar la escalada (30) |
 
 `DB_PASSWORD` y `DB_ROOT_PASSWORD` no tienen valor por defecto. Si faltan,
 Docker Compose no arranca.
@@ -204,12 +207,15 @@ producción.
 
 ## Seguridad
 
-- nginx es el único servicio publicado.
-- MySQL no expone puertos al host.
-- Los secretos viven en `.env`.
-- `.env` y `database/private/` están fuera de Git.
-- Rate limiting en login.
-- JWT con expiración.
+El detalle de cada capa está en [14 · Seguridad](14-seguridad.md). Resumen:
+
+- nginx es el único servicio publicado; MySQL no expone puertos al host.
+- Contraseñas con Argon2id y cifrado AES-256-GCM de direcciones y notas.
+- Access de 15 min y refresh de un solo uso atado a la IP y a la sesión.
+- Sesiones revocables desde el panel de administración.
+- Bloqueo de IP escalonado y lista negra tras 5 bloqueos.
+- Cabeceras de seguridad y CSP estricta en nginx.
+- Los secretos viven en .env; .env y database/private/ están fuera de Git.
 - Errores internos ocultos en producción.
 - Respaldos fuera del servidor.
 

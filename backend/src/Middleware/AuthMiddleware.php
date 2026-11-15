@@ -10,8 +10,11 @@ use App\Services\AuthService;
 use App\Exceptions\HttpException;
 
 /**
- * AuthMiddleware — verifica el JWT en el header Authorization.
- * Inyecta el payload del token en $request como 'auth_user'.
+ * AuthMiddleware — verifica el JWT y que la sesión siga activa.
+ *
+ * Además de la firma y la expiración, comprueba que la sesión no haya sido
+ * revocada y que la petición venga de la misma IP con la que se inició.
+ * Inyecta el payload en $request como 'auth_user'.
  */
 final class AuthMiddleware
 {
@@ -26,7 +29,7 @@ final class AuthMiddleware
         }
 
         try {
-            $payload = $this->authService->verificarToken($token);
+            $payload = $this->authService->verificarAcceso($token, $request->ip());
             $request->setParams(['auth_user' => $payload]);
         } catch (HttpException $e) {
             return Response::unauthorized($e->getMessage());

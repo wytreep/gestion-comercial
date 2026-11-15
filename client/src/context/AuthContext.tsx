@@ -45,7 +45,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(tokens.user);
   };
 
-  const logout = () => { clearStorage(); queryClient.clear(); setUser(null); };
+  /**
+   * Cierra la sesión también en el servidor: el access y su refresh quedan
+   * revocados en la tabla de sesiones. Si la red falla, la salida local no se
+   * bloquea.
+   */
+  const logout = () => {
+    const token = localStorage.getItem('access_token');
+    if (token) authApi.logout(token).catch(() => undefined);
+    clearStorage();
+    queryClient.clear();
+    setUser(null);
+  };
 
   const can = (minRol: Rol): boolean => {
     if (!user) return false;

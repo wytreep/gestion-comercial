@@ -65,11 +65,13 @@ Respuesta:
   "data": {
     "access_token": "...",
     "refresh_token": "...",
+    "expires_in": 900,
     "user": {
       "id": 1,
       "nombre": "Administrador",
       "email": "admin@dominio.com",
-      "rol": "admin"
+      "rol": "admin",
+      "tema": "sistema"
     }
   }
 }
@@ -79,7 +81,40 @@ Respuesta:
 
 ```http
 POST /api/v1/auth/refresh
+
+{ "refresh_token": "..." }
 ```
+
+El refresh es **de un solo uso**: cada canje devuelve un par nuevo y el anterior
+queda marcado como usado. Reutilizarlo se interpreta como robo y revoca la
+sesión completa (todos sus access y refresh). El canje tambien falla si la
+peticion llega desde otra IP distinta a la del inicio de sesion.
+
+### Estado del bloqueo de la IP
+
+```http
+GET /api/v1/auth/estado-ip
+```
+
+```json
+{ "success": true, "data": {
+  "bloqueo": true, "permanente": false, "nivel": 2,
+  "restante": 1800, "hasta": "2026-11-15 03:48:23",
+  "mensaje": "Demasiados intentos fallidos. Intenta de nuevo en 30 minutos."
+} }
+```
+
+La pantalla de login lo consulta al cargar para deshabilitar el formulario
+aunque se recargue la pagina.
+
+### Cerrar sesión
+
+```http
+POST /api/v1/auth/logout
+Authorization: Bearer <token>
+```
+
+Revoca la sesión en el servidor: el access y su refresh dejan de servir.
 
 ### Cambiar contraseña
 
@@ -93,13 +128,40 @@ Authorization: Bearer <token>
 }
 ```
 
-### Rate limiting
+Al cambiarla se revocan las demás sesiones abiertas de ese usuario.
 
-- 5 intentos fallidos por email e IP.
-- 20 intentos fallidos por IP.
-- Ventana de 15 minutos.
-- Bloqueo de 15 minutos.
-- Respuesta `429` con cabecera `Retry-After`.
+### Re-autenticación para el panel de seguridad
+
+```http
+POST /api/v1/auth/seguridad
+Authorization: Bearer <token>
+
+{ "password": "..." }
+```
+
+Devuelve `security_token` (10 minutos, atado a la sesión y a la IP). Ese token
+viaja en la cabecera `X-Security-Token` en las rutas de `/admin/seguridad/*`.
+
+### Panel de seguridad (solo admin + `X-Security-Token`)
+
+| Método | Ruta | Acción |
+|---|---|---|
+| GET | `/admin/seguridad/sesiones` | Sesiones activas |
+| DELETE | `/admin/seguridad/sesiones/{id}` | Revoca una sesión |
+| GET | `/admin/seguridad/bloqueos` | IPs con fallos o bloqueos |
+| GET | `/admin/seguridad/eventos` | Bitácora de seguridad |
+| POST | `/admin/seguridad/desbloquear` | `{ ip, motivo }` |
+| POST | `/admin/seguridad/bloquear` | `{ ip, motivo }` envía a lista negra |
+
+### Bloqueo por fuerza bruta
+
+- 5 intentos fallidos seguidos por IP cierran el formulario de login.
+- Cada bloqueo sube de nivel: 5 min, 30 min, 24 h, 7 días y lista negra
+  permanente en el quinto.
+- Un inicio de sesión correcto limpia los intentos, pero no el nivel; la
+  escalada vuelve a cero tras 30 días sin bloqueos.
+- La respuesta es `429` con `Retry-After` y `data.bloqueo`, `data.nivel`,
+  `data.restante`, `data.permanente`.
 
 ## Dashboard
 

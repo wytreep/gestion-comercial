@@ -11,7 +11,12 @@ final class AuthController extends BaseController
     {
         $this->requireFields($r, 'email', 'password');
         return Response::ok(
-            $this->svc->login((string)$r->input('email'), (string)$r->input('password'), $r->ip()),
+            $this->svc->login(
+                (string) $r->input('email'),
+                (string) $r->input('password'),
+                $r->ip(),
+                (string) ($r->header('User-Agent') ?? '')
+            ),
             'Autenticado correctamente'
         );
     }
@@ -19,7 +24,41 @@ final class AuthController extends BaseController
     public function refresh(Request $r): Response
     {
         $this->requireFields($r, 'refresh_token');
-        return Response::ok($this->svc->refresh((string)$r->input('refresh_token')));
+        return Response::ok($this->svc->refresh(
+            (string) $r->input('refresh_token'),
+            $r->ip(),
+            (string) ($r->header('User-Agent') ?? '')
+        ));
+    }
+
+    /** Estado del bloqueo de la IP actual (pantalla de login). */
+    public function estadoIp(Request $r): Response
+    {
+        return Response::ok($this->svc->estadoIp($r->ip()));
+    }
+
+    public function logout(Request $r): Response
+    {
+        $this->svc->logout($r->authUser() ?? []);
+        return Response::ok(null, 'Sesión cerrada');
+    }
+
+    /**
+     * Re-autenticación del panel de seguridad: exige contraseña y devuelve un
+     * token de 10 minutos atado a la sesión y a la IP.
+     */
+    public function verificarSeguridad(Request $r): Response
+    {
+        $this->requireFields($r, 'password');
+        $payload = $r->authUser() ?? [];
+        $userId  = (int) ($payload['sub'] ?? 0);
+
+        if (!$this->svc->verificarPassword($userId, (string) $r->input('password'))) {
+            $this->svc->registrarReautenticacionFallida($userId, $r->ip());
+            return Response::error('Contraseña incorrecta.', 401);
+        }
+
+        return Response::ok($this->svc->crearTokenSeguridad($userId, $payload, $r->ip()));
     }
 
     public function register(Request $r): Response

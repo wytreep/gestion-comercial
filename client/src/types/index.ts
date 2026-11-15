@@ -26,6 +26,56 @@ export interface UsuarioAdmin {
   created_at: string;
 }
 
+// -- Seguridad ---------------------------------------------------------------
+/** Estado del bloqueo de la IP actual (pantalla de login). */
+export interface EstadoIp {
+  bloqueo:    boolean;
+  permanente: boolean;
+  nivel:      number;
+  /** Segundos restantes; -1 si el bloqueo es permanente. */
+  restante:   number;
+  hasta:      string | null;
+  mensaje:    string;
+}
+
+export interface SesionActiva {
+  id:               number;
+  usuario_id:       number;
+  nombre:           string;
+  email:            string;
+  ip:               string;
+  user_agent:       string;
+  creada:           string;
+  ultima_actividad: string;
+  expira:           string;
+}
+
+export interface IpBloqueo {
+  ip:              string;
+  intentos:        number;
+  nivel:           number;
+  bloqueado_hasta: string | null;
+  permanente:      number;
+  motivo:          string | null;
+  ultimo_fallo:    string | null;
+  ultimo_bloqueo:  string | null;
+  creado:          string;
+  actualizado:     string;
+  bloqueado:       boolean;
+  restante:        number;
+}
+
+export interface EventoSeguridad {
+  id:         number;
+  tipo:       string;
+  ip:         string;
+  email:      string | null;
+  usuario_id: number | null;
+  usuario:    string | null;
+  detalle:    string | null;
+  creado:     string;
+}
+
 // ── Producto ──────────────────────────────────────────
 export interface Producto {
   id:                number;

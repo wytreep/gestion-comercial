@@ -18,6 +18,7 @@ distribución de pescado, queso y carne.
 | [11 · Mockups](11-mockups.md) | Wireframes de las pantallas principales |
 | [12 · Integración Chulito](12-integracion-chulito.md) | Borrador de integración con Chulito |
 | [13 · Guía visual](13-guia-visual.md) | Tokens, escala tipográfica, componentes y checklist de revisión |
+| [14 · Seguridad](14-seguridad.md) | Cifrado, sesiones revocables, bloqueo por IP y panel de seguridad |
 
 ## Versión documentada
 

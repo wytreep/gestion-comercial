@@ -37,7 +37,7 @@ if (in_array('*', $allowed, true)) {
     header('Vary: Origin');
 }
 header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
+header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Security-Token');
 header('Access-Control-Max-Age: 86400');
 
 // ── Preflight ─────────────────────────────────────────
@@ -58,6 +58,11 @@ set_exception_handler(function (\Throwable $e) use ($config): void {
     $data = null;
     if ($e instanceof ValidationException) {
         $data = ['errors' => $e->getErrors()];
+    }
+
+    // El bloqueo de IP viaja con datos para que el login muestre la espera.
+    if ($e instanceof TooManyRequestsException) {
+        $data = $e->getDatos();
     }
 
     if ($code >= 500) {

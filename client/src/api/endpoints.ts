@@ -3,39 +3,77 @@ import type {
   AuthTokens, DashboardData, Producto, Categoria, Venta, Compra,
   Cliente, Proveedor, TipoGasto, FiltrosVenta, ApiResponse,
   Notificacion, ReporteMensual, BackupLog, UsuarioAdmin, FinanzasData, CobroQr,
-  Etiqueta,
+  Etiqueta, EstadoIp, SesionActiva, IpBloqueo, EventoSeguridad,
 } from '../types';
 
-async function get<T>(url: string, params?: object): Promise<T> {
-  const { data } = await client.get<ApiResponse<T>>(url, { params });
+async function get<T>(url: string, params?: object, opts: ReqOpts = {}): Promise<T> {
+  const { data } = await client.get<ApiResponse<T>>(url, { params, headers: cabeceras(opts) });
   return data.data;
 }
-async function post<T>(url: string, body?: object): Promise<T> {
-  const { data } = await client.post<ApiResponse<T>>(url, body);
+async function post<T>(url: string, body?: object, opts: ReqOpts = {}): Promise<T> {
+  const { data } = await client.post<ApiResponse<T>>(url, body, { headers: cabeceras(opts) });
   return data.data;
 }
-async function put<T>(url: string, body?: object): Promise<T> {
-  const { data } = await client.put<ApiResponse<T>>(url, body);
+async function put<T>(url: string, body?: object, opts: ReqOpts = {}): Promise<T> {
+  const { data } = await client.put<ApiResponse<T>>(url, body, { headers: cabeceras(opts) });
   return data.data;
 }
-async function patch<T>(url: string, body?: object): Promise<T> {
-  const { data } = await client.patch<ApiResponse<T>>(url, body);
+async function patch<T>(url: string, body?: object, opts: ReqOpts = {}): Promise<T> {
+  const { data } = await client.patch<ApiResponse<T>>(url, body, { headers: cabeceras(opts) });
   return data.data;
 }
-async function del<T>(url: string): Promise<T> {
-  const { data } = await client.delete<ApiResponse<T>>(url);
+async function del<T>(url: string, opts: ReqOpts = {}): Promise<T> {
+  const { data } = await client.delete<ApiResponse<T>>(url, { headers: cabeceras(opts) });
   return data.data;
+}
+
+/**
+ * Cabeceras extra por petición.
+ *
+ * `securityToken` es el token de 10 minutos del panel de seguridad; `bearer`
+ * permite cerrar sesión con un token explícito antes de borrar el almacenado.
+ */
+interface ReqOpts {
+  securityToken?: string;
+  bearer?: string;
+}
+
+function cabeceras({ securityToken, bearer }: ReqOpts): Record<string, string> | undefined {
+  const h: Record<string, string> = {};
+  if (securityToken) h['X-Security-Token'] = securityToken;
+  if (bearer) h.Authorization = `Bearer ${bearer}`;
+  return Object.keys(h).length > 0 ? h : undefined;
 }
 
 export const authApi = {
   login:           (email: string, password: string) => post<AuthTokens>('/auth/login', { email, password }),
-  refresh:         (rt: string) => post<{ access_token: string }>('/auth/refresh', { refresh_token: rt }),
+  refresh:         (rt: string) => post<{ access_token: string; refresh_token: string }>('/auth/refresh', { refresh_token: rt }),
+  estadoIp:        () => get<EstadoIp>('/auth/estado-ip'),
+  logout:          (token: string) => post<null>('/auth/logout', undefined, { bearer: token }),
+  verificarSeguridad: (password: string) =>
+    post<{ security_token: string; expires_in: number }>('/auth/seguridad', { password }),
   register:        (body: object) => post<{ id: number }>('/auth/register', body),
   cambiarPassword: (body: object) => post<null>('/auth/cambiar-password', body),
   guardarTema:     (tema: string) => patch<null>('/auth/preferencias', { tema }),
   listarUsuarios:  () => get<UsuarioAdmin[]>('/usuarios'),
   cambiarRol:      (id: number, rol: string) => patch<null>(`/usuarios/${id}/rol`, { rol }),
   toggleActivo:    (id: number, activo: boolean) => patch<null>(`/usuarios/${id}/activo`, { activo }),
+};
+
+/**
+ * Panel de seguridad. Todas las llamadas exigen el token de 10 minutos que se
+ * obtiene al confirmar la contraseña (`authApi.verificarSeguridad`).
+ */
+export const seguridadApi = {
+  sesiones:      (st: string) => get<SesionActiva[]>('/admin/seguridad/sesiones', undefined, { securityToken: st }),
+  revocarSesion: (id: number, st: string) =>
+    del<null>(`/admin/seguridad/sesiones/${id}`, { securityToken: st }),
+  bloqueos:      (st: string) => get<IpBloqueo[]>('/admin/seguridad/bloqueos', undefined, { securityToken: st }),
+  eventos:       (st: string) => get<EventoSeguridad[]>('/admin/seguridad/eventos', undefined, { securityToken: st }),
+  desbloquear:   (ip: string, st: string, motivo?: string) =>
+    post<null>('/admin/seguridad/desbloquear', { ip, motivo }, { securityToken: st }),
+  bloquear:      (ip: string, st: string, motivo?: string) =>
+    post<null>('/admin/seguridad/bloquear', { ip, motivo }, { securityToken: st }),
 };
 
 export const dashboardApi = {

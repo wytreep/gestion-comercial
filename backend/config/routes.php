@@ -17,7 +17,8 @@ use App\Controllers\{
     CarteraController,
     FinanzasController,
     CobroQrController,
-    EtiquetaController
+    EtiquetaController,
+    SecurityController
 };
 use App\Services\{
     AuthService,
@@ -52,7 +53,8 @@ use App\Core\Database;
 
 // ── Instancias ────────────────────────────────────────
 $db = Database::getInstance();
-$authService = new AuthService(new LoginThrottleService());
+$throttle = new LoginThrottleService();
+$authService = new AuthService($throttle);
 $stockService = new StockService();
 $notifService = new NotificacionService();
 $productoRepo = new ProductoRepository();
@@ -65,6 +67,7 @@ $roleMiddleware = new RoleMiddleware();
 
 // Controllers
 $authCtrl = new AuthController($authService);
+$securityCtrl = new SecurityController($authService, $throttle);
 $dashCtrl = new DashboardController(new DashboardService(), $notifService);
 $ventaRepo = new VentaRepository();
 $ventaService = new VentaService($ventaRepo, $productoRepo, new ClienteRepository(), $stockService, $db);
@@ -100,6 +103,17 @@ $noReadonly = $roleMiddleware->require('admin', 'vendedor');
 // ── Rutas públicas ────────────────────────────────────
 $router->post('/api/v1/auth/login', [$authCtrl, 'login']);
 $router->post('/api/v1/auth/refresh', [$authCtrl, 'refresh']);
+$router->get('/api/v1/auth/estado-ip', [$authCtrl, 'estadoIp']);
+$router->post('/api/v1/auth/logout', $protect([$authCtrl, 'logout']));
+$router->post('/api/v1/auth/seguridad', $protect([$authCtrl, 'verificarSeguridad']));
+
+// ── Panel de seguridad (admin + re-autenticación) ─────────
+$router->get('/api/v1/admin/seguridad/sesiones', $protect([$securityCtrl, 'sesiones'], $adminOnly));
+$router->delete('/api/v1/admin/seguridad/sesiones/{id}', $protect([$securityCtrl, 'revocarSesion'], $adminOnly));
+$router->get('/api/v1/admin/seguridad/bloqueos', $protect([$securityCtrl, 'bloqueos'], $adminOnly));
+$router->get('/api/v1/admin/seguridad/eventos', $protect([$securityCtrl, 'eventos'], $adminOnly));
+$router->post('/api/v1/admin/seguridad/desbloquear', $protect([$securityCtrl, 'desbloquear'], $adminOnly));
+$router->post('/api/v1/admin/seguridad/bloquear', $protect([$securityCtrl, 'bloquear'], $adminOnly));
 
 // ── Dashboard ─────────────────────────────────────────
 $router->get('/api/v1/dashboard', $protect([$dashCtrl, 'index']));

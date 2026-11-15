@@ -37,6 +37,12 @@ final class Database
                     PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci",
                 ]
             );
+
+            // MySQL corre en UTC por defecto y PHP en la zona de la app: si no
+            // se alinean, NOW() y date() escriben horas distintas y los
+            // vencimientos (bloqueos, sesiones) salen corridos. Se fija la
+            // misma zona que PHP en cada conexión.
+            $this->pdo->exec("SET time_zone = '" . date('P') . "'");
         } catch (PDOException $e) {
             throw new DatabaseException('No se pudo conectar a la base de datos: ' . $e->getMessage());
         }
