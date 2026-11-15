@@ -18,6 +18,7 @@ import FinanzasPage        from './pages/finanzas/FinanzasPage';
 import NotificacionesPage  from './pages/notificaciones/NotificacionesPage';
 import ReportesPage        from './pages/reportes/ReportesPage';
 import StockPage           from './pages/stock/StockPage';
+import EtiquetasPage       from './pages/etiquetas/EtiquetasPage';
 import AdminPage           from './pages/admin/AdminPage';
 import BackupPage          from './pages/admin/BackupPage';
 
@@ -66,6 +67,7 @@ export default function App() {
               <Route path="notificaciones"element={<NotificacionesPage />} />
               <Route path="reportes"      element={<AdminOnly><ReportesPage /></AdminOnly>} />
               <Route path="stock"         element={<StockPage />} />
+              <Route path="etiquetas"     element={<EtiquetasPage />} />
               <Route path="admin"         element={<AdminOnly><AdminPage /></AdminOnly>} />
               <Route path="backup"        element={<AdminOnly><BackupPage /></AdminOnly>} />
             </Route>

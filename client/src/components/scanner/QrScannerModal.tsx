@@ -130,8 +130,8 @@ export default function QrScannerModal({ open, onClose, onCode }: Props) {
 
           {cameraState !== 'active' && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-4 text-center">
-              {cameraState === 'error' ? <RefreshCw size={30} className="text-slate-400" /> : <QrCode size={34} className="text-slate-400" />}
-              <p className="text-[12px] font-medium text-white">
+              {cameraState === 'error' ? <RefreshCw size={30} className="text-slate-400" aria-hidden="true" /> : <QrCode size={34} className="text-slate-400" aria-hidden="true" />}
+              <p className="text-xs font-medium text-white">
                 {cameraState === 'error' ? 'Cámara no disponible' : 'Cámara desactivada'}
               </p>
               <button
@@ -150,7 +150,7 @@ export default function QrScannerModal({ open, onClose, onCode }: Props) {
             <>
               <div className="pointer-events-none absolute inset-0">
                 <div className="absolute left-1/2 top-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded border-2 border-white/80 shadow-[0_0_0_9999px_rgba(15,27,45,0.35)]" />
-                <p className="absolute inset-x-0 bottom-3 text-center text-[11px] font-medium text-white">
+                <p className="absolute inset-x-0 bottom-3 text-center text-tiny font-medium text-white">
                   Apunta al QR del producto
                 </p>
               </div>
@@ -160,7 +160,7 @@ export default function QrScannerModal({ open, onClose, onCode }: Props) {
                 aria-pressed={espejo}
                 aria-label="Voltear la imagen de la cámara"
                 title={espejo ? 'Volver a la vista normal' : 'Voltear la imagen horizontalmente'}
-                className="absolute right-2 top-2 z-10 inline-flex items-center gap-1.5 rounded-sm border border-white/25 bg-navy-950/80 px-2 py-1 text-[11px] font-medium text-white transition-colors hover:bg-navy-950"
+                className="absolute right-2 top-2 z-10 inline-flex items-center gap-1.5 rounded-sm border border-white/25 bg-navy-950/80 px-2 py-1 text-tiny font-medium text-white transition-colors hover:bg-navy-950"
               >
                 <FlipHorizontal size={13} aria-hidden="true" />
                 Voltear
@@ -170,11 +170,11 @@ export default function QrScannerModal({ open, onClose, onCode }: Props) {
         </div>
 
         {error && <Alert type="error" message={error} />}
-        {buscando && <p className="text-[12px] text-slate-500">Buscando producto…</p>}
+        {buscando && <p className="text-xs text-muted">Buscando producto…</p>}
 
         <div className="rounded border border-line bg-slate-50/60 p-3">
-          <div className="mb-2 flex items-center gap-2 text-[12px] font-medium text-slate-700">
-            <Keyboard size={14} /> Código manual o lector USB
+          <div className="mb-2 flex items-center gap-2 text-xs font-medium text-slate-700">
+            <Keyboard size={14} aria-hidden="true" /> Código manual o lector USB
           </div>
           <form onSubmit={submitManual} className="flex gap-2">
             <input
@@ -188,12 +188,12 @@ export default function QrScannerModal({ open, onClose, onCode }: Props) {
               Buscar
             </button>
           </form>
-          <p className="mt-2 text-[11px] text-slate-500">
+          <p className="mt-2 text-tiny text-muted">
             El lector USB escribe el código y presiona Enter.
           </p>
         </div>
 
-        <p className="text-[11px] text-slate-500">
+        <p className="text-tiny text-muted">
           Si la cámara no está disponible, puedes escribir el código que aparece en la etiqueta.
         </p>
       </div>

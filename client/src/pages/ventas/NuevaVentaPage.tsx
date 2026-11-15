@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { ventasApi, productosApi, clientesApi } from '../../api/endpoints';
-import { NumberInput } from '../../components/ui';
-import { formatCOP, today, OPCIONES_MEDIO_PAGO, OPCIONES_DESTINO, num, parseMoneyInput, parseDecimalInput } from '../../utils/format';
+import { Alert, NumberInput } from '../../components/ui';
+import { formatCOP, formatCantidad, today, OPCIONES_MEDIO_PAGO, OPCIONES_DESTINO, num, parseMoneyInput, parseDecimalInput } from '../../utils/format';
 import type { Producto, Cliente } from '../../types';
 import { ArrowLeft, Check, Plus, QrCode, Search, X } from 'lucide-react';
 
@@ -35,19 +35,35 @@ export default function NuevaVentaPage() {
 
   const addLinea = (p: Producto) => setLineas(prev => prev.find(l => l.productoId===p.id) ? prev : [...prev, { productoId:p.id, nombre:p.nombre, cantidad:1, precio:num(p.precio_venta) }]);
 
-  const addLineaEscaneada = (p: Producto) => setLineas(prev => {
-    const existe = prev.find(l => l.productoId === p.id);
-    if (existe) {
-      return prev.map(l => l.productoId === p.id ? { ...l, cantidad: l.cantidad + 1 } : l);
-    }
-    return [...prev, { productoId: p.id, nombre: p.nombre, cantidad: 1, precio: num(p.precio_venta) }];
-  });
+  const addLineaEscaneada = (p: Producto) => {
+    // Una etiqueta de canasta o de lote aporta su peso real en kg.
+    const peso = p.etiqueta?.peso_kg && p.etiqueta.peso_kg > 0 ? p.etiqueta.peso_kg : null;
+    const cantidad = peso ?? 1;
+
+    setLineas(prev => {
+      const existe = prev.find(l => l.productoId === p.id);
+      if (existe) {
+        return prev.map(l => l.productoId === p.id ? { ...l, cantidad: l.cantidad + cantidad } : l);
+      }
+      return [...prev, { productoId: p.id, nombre: p.nombre, cantidad, precio: num(p.precio_venta) }];
+    });
+  };
 
   const buscarPorCodigo = async (codigo: string) => {
     try {
       const p = await productosApi.porCodigo(codigo);
       addLineaEscaneada(p);
-      setScanOk(`${p.nombre} agregado al pedido`);
+
+      const e = p.etiqueta;
+      const detalle = !e
+        ? ''
+        : e.tipo === 'canasta' && e.peso_kg
+          ? ` · ${formatCantidad(e.peso_kg)} kg`
+          : e.tipo === 'lote' && e.lote
+            ? ` · lote ${e.lote}`
+            : ' · etiqueta';
+
+      setScanOk(`${p.nombre}${detalle} agregado al pedido`);
       return { ok: true };
     } catch (e: any) {
       return { ok: false, message: e.message ?? 'Producto no encontrado.' };
@@ -94,25 +110,21 @@ export default function NuevaVentaPage() {
             onClick={() => { setScanOk(''); setScannerOpen(true); }}
             className="btn-secondary"
           >
-            <QrCode size={14} /> Escanear QR
+            <QrCode size={14} aria-hidden="true" /> Escanear QR
           </button>
           <button onClick={() => navigate('/ventas')} className="btn-secondary">
-            <ArrowLeft size={14} /> Volver a ventas
+            <ArrowLeft size={14} aria-hidden="true" /> Volver a ventas
           </button>
         </div>
       </div>
 
-      {error && (
-        <div className="rounded border border-danger/25 bg-red-50 px-3 py-2 text-[12.5px] font-medium text-danger">
-          {error}
-        </div>
-      )}
+      {error && <Alert type="error" message={error} />}
 
       {scanOk && (
-        <div className="flex items-center justify-between rounded border border-success/25 bg-emerald-50 px-3 py-2 text-[12.5px] font-medium text-success">
-          <span className="flex items-center gap-1.5"><Check size={14} /> {scanOk}</span>
+        <div className="flex items-center justify-between rounded border border-success/25 bg-success-soft px-3 py-2 text-xs font-medium text-success">
+          <span className="flex items-center gap-1.5"><Check size={14} aria-hidden="true" /> {scanOk}</span>
           <button onClick={() => setScanOk('')} className="rounded-sm p-1 text-success/70 hover:bg-white hover:text-success" title="Cerrar aviso" aria-label="Cerrar aviso de escaneo">
-            <X size={14} />
+            <X size={14} aria-hidden="true" />
           </button>
         </div>
       )}
@@ -127,25 +139,25 @@ export default function NuevaVentaPage() {
                 <div className="flex items-center justify-between rounded border border-primary/20 bg-primary-50 px-3 py-2.5">
                   <div className="min-w-0">
                     <p className="truncate text-[13px] font-semibold text-slate-800">{cliente.nombre}</p>
-                    {cliente.telefono && <p className="text-[11px] text-slate-500">{cliente.telefono}</p>}
+                    {cliente.telefono && <p className="text-tiny text-muted">{cliente.telefono}</p>}
                   </div>
-                  <button onClick={() => setCliente(null)} className="rounded-sm p-1 text-slate-400 hover:bg-white hover:text-slate-700" title="Quitar cliente" aria-label="Quitar cliente">
-                    <X size={15} />
+                  <button onClick={() => setCliente(null)} className="btn-icon hover:bg-white" title="Quitar cliente" aria-label="Quitar cliente">
+                    <X size={15} aria-hidden="true" />
                   </button>
                 </div>
               ) : clienteLibre ? (
-                <div className="flex items-center justify-between rounded border border-warning/25 bg-amber-50 px-3 py-2.5">
+                <div className="flex items-center justify-between rounded border border-warning/25 bg-warning-soft px-3 py-2.5">
                   <div className="min-w-0">
                     <p className="truncate text-[13px] font-semibold text-slate-800">{clienteLibre}</p>
-                    <p className="text-[11px] font-medium text-warning">Cliente no registrado</p>
+                    <p className="text-tiny font-medium text-warning">Cliente no registrado</p>
                   </div>
-                  <button onClick={() => setClienteLibre('')} className="rounded-sm p-1 text-slate-400 hover:bg-white hover:text-slate-700" title="Quitar cliente" aria-label="Quitar cliente">
-                    <X size={15} />
+                  <button onClick={() => setClienteLibre('')} className="btn-icon hover:bg-white" title="Quitar cliente" aria-label="Quitar cliente">
+                    <X size={15} aria-hidden="true" />
                   </button>
                 </div>
               ) : (
                 <div className="relative" ref={cliBoxRef}>
-                  <Search size={14} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+                  <Search size={14} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted" aria-hidden="true" />
                   <input
                     type="text"
                     placeholder="Buscar por nombre o teléfono…"
@@ -166,11 +178,11 @@ export default function NuevaVentaPage() {
                         <li key={c.id}>
                           <button
                             type="button"
-                            className="block w-full px-3 py-2 text-left text-[12.5px] hover:bg-slate-50 focus:bg-slate-50"
+                            className="block w-full px-3 py-2 text-left text-xs hover:bg-slate-50 focus:bg-slate-50"
                             onClick={() => { setCliente(c); setBusqueda(''); setShowCli(false); }}
                           >
                             <p className="font-medium text-slate-800">{c.nombre}</p>
-                            {c.telefono && <p className="text-[11px] text-slate-500">{c.telefono}</p>}
+                            {c.telefono && <p className="text-tiny text-muted">{c.telefono}</p>}
                           </button>
                         </li>
                       ))}
@@ -178,20 +190,20 @@ export default function NuevaVentaPage() {
                         <li className="border-t border-line">
                           <button
                             type="button"
-                            className="block w-full px-3 py-2 text-left text-[12.5px] hover:bg-amber-50 focus:bg-amber-50"
+                            className="block w-full px-3 py-2 text-left text-xs hover:bg-warning-soft focus:bg-warning-soft"
                             onClick={() => { setClienteLibre(busqueda.trim()); setBusqueda(''); setShowCli(false); }}
                           >
                             <p className="flex items-center gap-1.5 font-medium text-warning">
                               <Plus size={13} aria-hidden="true" /> Usar «{busqueda.trim()}»
                             </p>
-                            <p className="text-[11px] text-slate-500">Se registrará como cliente nuevo</p>
+                            <p className="text-tiny text-muted">Se registrará como cliente nuevo</p>
                           </button>
                         </li>
                       )}
                     </ul>
                   )}
                   {busqueda.trim().length >= 2 && (
-                    <p className="mt-1 text-[11px] text-slate-500">
+                    <p className="field-help mt-1">
                       Si no seleccionas un cliente, se usará «{busqueda.trim()}» como cliente no registrado.
                     </p>
                   )}
@@ -250,7 +262,7 @@ export default function NuevaVentaPage() {
           <div className="card">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <p className="card-title mb-0">3. Productos</p>
-              <span className="text-[11px] text-slate-500">{lineas.length} producto(s) en el pedido</span>
+              <span className="chip">{lineas.length} producto(s) en el pedido</span>
             </div>
 
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 2xl:grid-cols-3">
@@ -262,10 +274,12 @@ export default function NuevaVentaPage() {
                   className="group flex items-center justify-between gap-2 rounded border border-line bg-white px-3 py-2 text-left transition-colors hover:border-primary hover:bg-primary-50"
                 >
                   <span className="min-w-0">
-                    <span className="block truncate text-[12.5px] font-medium text-slate-800">{p.nombre}</span>
-                    <span className="block text-[11px] text-slate-500">{formatCOP(p.precio_venta)} / kg</span>
+                    <span className="block truncate text-xs font-medium text-slate-800">{p.nombre}</span>
+                    <span className="block text-2xs text-muted">
+                      {formatCOP(p.precio_venta)} / {p.unidad_medida === 'unidad' ? 'unidad' : p.unidad_medida === 'canasta' ? 'canasta' : 'kg'}
+                    </span>
                   </span>
-                  <Plus size={14} className="shrink-0 text-slate-400 transition-colors group-hover:text-primary" />
+                  <Plus size={14} className="shrink-0 text-muted transition-colors group-hover:text-primary" aria-hidden="true" />
                 </button>
               ))}
             </div>
@@ -276,10 +290,10 @@ export default function NuevaVentaPage() {
                   <thead>
                     <tr>
                       <th>Producto</th>
-                      <th className="w-[130px]">Cantidad</th>
-                      <th className="w-[170px]">Precio unitario</th>
+                      <th className="w-[130px] text-right">Cantidad</th>
+                      <th className="w-[170px] text-right">Precio unitario</th>
                       <th className="w-[150px] text-right">Subtotal</th>
-                      <th className="w-[46px]"></th>
+                      <th className="w-[46px]"><span className="sr-only">Acciones</span></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -289,31 +303,34 @@ export default function NuevaVentaPage() {
                         <td>
                           <NumberInput
                             inputMode="decimal"
-                            className="input w-24"
+                            className="input w-24 text-right"
                             placeholder="Ej: 1.5"
+                            ariaLabel={`Cantidad de la línea ${idx + 1}`}
                             value={l.cantidad}
                             parse={parseDecimalInput}
-                            onChange={v => setLineas(prev => prev.map((x,i) => i===idx ? { ...x, cantidad: v } : x))}
+                            onChange={(v) => setLineas((prev) => prev.map((x, i) => i === idx ? { ...x, cantidad: v } : x))}
                           />
                         </td>
                         <td>
                           <NumberInput
                             inputMode="numeric"
-                            className="input w-32"
+                            className="input w-32 text-right"
                             placeholder="Ej: 30000"
+                            ariaLabel={`Precio unitario de la línea ${idx + 1}`}
                             value={l.precio}
                             parse={parseMoneyInput}
-                            onChange={v => setLineas(prev => prev.map((x,i) => i===idx ? { ...x, precio: v } : x))}
+                            onChange={(v) => setLineas((prev) => prev.map((x, i) => i === idx ? { ...x, precio: v } : x))}
                           />
                         </td>
-                        <td className="text-right font-mono font-semibold tabular-nums text-slate-900">{formatCOP(l.cantidad*l.precio)}</td>
+                        <td className="num font-semibold text-slate-900">{formatCOP(l.cantidad * l.precio)}</td>
                         <td>
                           <button
-                            onClick={() => setLineas(prev => prev.filter((_,i) => i!==idx))}
-                            className="rounded-sm p-1 text-slate-400 hover:bg-red-50 hover:text-danger"
+                            onClick={() => setLineas((prev) => prev.filter((_, i) => i !== idx))}
+                            className="btn-icon text-muted hover:bg-danger-soft hover:text-danger"
                             title="Quitar producto"
+                            aria-label={`Quitar producto de la línea ${idx + 1}`}
                           >
-                            <X size={15} />
+                            <X size={15} aria-hidden="true" />
                           </button>
                         </td>
                       </tr>
@@ -321,17 +338,17 @@ export default function NuevaVentaPage() {
                   </tbody>
                   <tfoot>
                     <tr>
-                      <td colSpan={3} className="text-right text-[11px] font-semibold uppercase tracking-wider text-slate-500">Total del pedido</td>
-                      <td className="text-right font-mono text-[15px] font-bold tabular-nums text-slate-900">{formatCOP(total)}</td>
+                      <td colSpan={3} className="text-right text-2xs font-semibold uppercase tracking-wide text-muted">Total del pedido</td>
+                      <td className="num text-[15px] font-bold text-slate-900">{formatCOP(total)}</td>
                       <td></td>
                     </tr>
                   </tfoot>
                 </table>
               </div>
             ) : (
-              <div className="mt-4 rounded border border-dashed border-line bg-slate-50/60 py-8 text-center">
-                <p className="text-[12.5px] font-medium text-slate-500">Selecciona un producto para agregarlo al pedido</p>
-                <p className="mt-0.5 text-[11px] text-slate-500">Puedes ajustar cantidad y precio en la tabla</p>
+              <div className="mt-4 rounded border border-dashed border-line bg-slate-50/60 px-4 py-8 text-center">
+                <p className="text-xs font-medium text-slate-600">Selecciona un producto para agregarlo al pedido</p>
+                <p className="mt-0.5 text-2xs text-muted">Puedes ajustar cantidad y precio en la tabla</p>
               </div>
             )}
           </div>
@@ -342,43 +359,43 @@ export default function NuevaVentaPage() {
           <p className="card-title mb-0">Resumen del pedido</p>
 
           <div className="rounded border border-line bg-slate-50/70 px-3 py-2">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Cliente</p>
-            <p className="truncate text-[12.5px] font-medium text-slate-800">{nombreCliente || 'Sin asignar'}</p>
+            <p className="section-label">Cliente</p>
+            <p className="truncate text-xs font-medium text-slate-800">{nombreCliente || 'Sin asignar'}</p>
           </div>
 
-          <dl className="space-y-2 text-[12.5px]">
-            <div className="flex items-center justify-between">
-              <dt className="text-slate-500">Líneas</dt>
-              <dd className="font-mono tabular-nums text-slate-800">{lineas.length}</dd>
+          <dl className="space-y-2 text-xs">
+            <div className="flex items-center justify-between gap-2">
+              <dt className="text-muted">Líneas</dt>
+              <dd className="money text-slate-800">{lineas.length}</dd>
             </div>
-            <div className="flex items-center justify-between">
-              <dt className="text-slate-500">Unidades</dt>
-              <dd className="font-mono tabular-nums text-slate-800">
-                {lineas.reduce((s,l) => s + (l.cantidad || 0), 0).toLocaleString('es-CO', { maximumFractionDigits: 2 })}
+            <div className="flex items-center justify-between gap-2">
+              <dt className="text-muted">Unidades</dt>
+              <dd className="money text-slate-800">
+                {lineas.reduce((s, l) => s + (l.cantidad || 0), 0).toLocaleString('es-CO', { maximumFractionDigits: 2 })}
               </dd>
             </div>
-            <div className="flex items-center justify-between border-t border-line pt-2">
+            <div className="flex items-center justify-between gap-2 border-t border-line pt-2">
               <dt className="font-medium text-slate-600">Total</dt>
-              <dd className="font-mono text-[15px] font-bold tabular-nums text-slate-900">{formatCOP(total)}</dd>
+              <dd className="money text-[15px] font-bold text-slate-900">{formatCOP(total)}</dd>
             </div>
-            <div className="flex items-center justify-between">
-              <dt className="text-slate-500">Abono inicial</dt>
-              <dd className="font-mono tabular-nums text-slate-800">{formatCOP(pagoInicial)}</dd>
+            <div className="flex items-center justify-between gap-2">
+              <dt className="text-muted">Abono inicial</dt>
+              <dd className="money text-slate-800">{formatCOP(pagoInicial)}</dd>
             </div>
           </dl>
 
-          <div className={saldo > 0 ? 'rounded border border-warning/25 bg-amber-50 px-3 py-2' : 'rounded border border-success/25 bg-emerald-50 px-3 py-2'}>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Saldo pendiente</p>
-            <p className={saldo > 0 ? 'font-mono text-[18px] font-bold tabular-nums text-warning' : 'font-mono text-[18px] font-bold tabular-nums text-success'}>
+          <div className={saldo > 0 ? 'rounded border border-warning/25 bg-warning-soft px-3 py-2' : 'rounded border border-success/25 bg-success-soft px-3 py-2'}>
+            <p className="section-label">Saldo pendiente</p>
+            <p className={saldo > 0 ? 'mt-0.5 font-mono text-[18px] font-bold tabular-nums text-warning' : 'mt-0.5 font-mono text-[18px] font-bold tabular-nums text-success'}>
               {formatCOP(saldo)}
             </p>
-            <p className="text-[11px] text-slate-500">{saldo > 0 ? 'Queda registrado en cartera' : 'Pedido pagado en su totalidad'}</p>
+            <p className="text-tiny text-slate-600">{saldo > 0 ? 'Queda registrado en cartera' : 'Pedido pagado en su totalidad'}</p>
           </div>
 
           <button onClick={guardar} disabled={saving || lineas.length === 0} className="btn-primary btn-lg">
-            <Check size={15} /> {saving ? 'Registrando…' : 'Registrar venta'}
+            <Check size={15} aria-hidden="true" /> {saving ? 'Registrando…' : 'Registrar venta'}
           </button>
-          <p className="text-[10.5px] leading-relaxed text-slate-500">
+          <p className="text-2xs leading-relaxed text-muted">
             Si no abonas el total, el saldo pendiente queda en Cartera y se puede cobrar después.
           </p>
         </aside>

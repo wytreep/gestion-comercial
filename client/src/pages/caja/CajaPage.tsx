@@ -1,92 +1,187 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
+import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { CalendarRange, Landmark, TrendingUp } from 'lucide-react';
 import { cajaApi } from '../../api/endpoints';
-import { KpiCard, Spinner, BadgeMedioPago, BadgeDestino } from '../../components/ui';
-import { formatCOP, formatDate, firstDayOfMonth, today } from '../../utils/format';
+import { KpiCard, Spinner, BadgeMedioPago, BadgeDestino, Empty } from '../../components/ui';
+import { CHART } from '../../components/charts/theme';
+import { formatCOP, formatCOPCompact, formatDate, firstDayOfMonth, today } from '../../utils/format';
+
+type Movimiento = {
+  fecha: string;
+  medio_pago: 'efectivo' | 'transferencia';
+  destino_dinero: string;
+  num_pagos: number;
+  total: number;
+};
 
 export default function CajaPage() {
   const [desde, setDesde] = useState(firstDayOfMonth());
   const [hasta, setHasta] = useState(today());
   const [buscar, setBuscar] = useState({ desde: firstDayOfMonth(), hasta: today() });
-  const { data, isLoading } = useQuery({ queryKey: ['caja', buscar.desde, buscar.hasta], queryFn: () => cajaApi.get(buscar.desde, buscar.hasta) });
 
-  const flujo  = data?.flujo       ?? { ingresos: 0, inversiones: 0 };
-  const saldos = data?.saldos      ?? [];
-  const movs   = data?.movimientos ?? [];
-  const balance = flujo.ingresos - flujo.inversiones;
-  const pos     = balance >= 0;
+  const { data, isLoading } = useQuery({
+    queryKey: ['caja', buscar.desde, buscar.hasta],
+    queryFn:  () => cajaApi.get(buscar.desde, buscar.hasta),
+  });
 
-  const movPorFecha = movs.reduce((acc: any, m: any) => { const k = m.fecha; if (!acc[k]) acc[k] = { fecha: formatDate(k), ingresos: 0 }; acc[k].ingresos += Number(m.total) || 0; return acc; }, {});
-  const chartLine = Object.values(movPorFecha).slice(-14) as any[];
+  const flujo    = data?.flujo ?? { ingresos: 0, inversiones: 0 };
+  const saldos   = data?.saldos ?? [];
+  const movs: Movimiento[] = data?.movimientos ?? [];
+  const balance  = flujo.ingresos - flujo.inversiones;
+  const positivo = balance >= 0;
+
+  const maxSaldo = Math.max(...saldos.map((s: any) => Number(s.total) || 0), 1);
+
+  const porFecha = movs.reduce<Record<string, { fecha: string; ingresos: number }>>((acc, m) => {
+    if (!acc[m.fecha]) acc[m.fecha] = { fecha: formatDate(m.fecha), ingresos: 0 };
+    acc[m.fecha].ingresos += Number(m.total) || 0;
+    return acc;
+  }, {});
+  const serie = Object.values(porFecha).slice(-14);
 
   return (
-    <div className="space-y-6">
-      <div className="page-header"><h1 className="page-title">Caja y flujo de dinero</h1></div>
-      <div className="card flex flex-wrap gap-3 items-end">
-        <div className="field"><label htmlFor="caja-desde" className="label">Desde</label><input id="caja-desde" type="date" className="input w-auto" value={desde} onChange={e => setDesde(e.target.value)} /></div>
-        <div className="field"><label htmlFor="caja-hasta" className="label">Hasta</label><input id="caja-hasta" type="date" className="input w-auto" value={hasta} onChange={e => setHasta(e.target.value)} /></div>
-        <button className="btn-primary" onClick={() => setBuscar({ desde, hasta })}>Consultar</button>
+    <div className="space-y-5">
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Caja y flujo de dinero</h1>
+          <p className="page-subtitle">Cobros recibidos, inversiones y saldo del período</p>
+        </div>
+        {!isLoading && movs.length > 0 && <span className="chip">{movs.length} movimiento(s)</span>}
       </div>
+
+      <div className="toolbar no-print">
+        <div className="field">
+          <label htmlFor="caja-desde" className="label">Desde</label>
+          <input id="caja-desde" type="date" className="input w-auto" value={desde} onChange={(e) => setDesde(e.target.value)} />
+        </div>
+        <div className="field">
+          <label htmlFor="caja-hasta" className="label">Hasta</label>
+          <input id="caja-hasta" type="date" className="input w-auto" value={hasta} onChange={(e) => setHasta(e.target.value)} />
+        </div>
+        <button className="btn-primary" onClick={() => setBuscar({ desde, hasta })}>
+          <CalendarRange size={14} aria-hidden="true" /> Consultar
+        </button>
+      </div>
+
       {isLoading ? <Spinner /> : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <KpiCard label="Ingresos cobrados" value={formatCOP(flujo.ingresos)} color="green" />
-            <KpiCard label="Inversiones (compras)" value={formatCOP(flujo.inversiones)} color="orange" />
-            <KpiCard label="Balance del período" value={formatCOP(balance)} sub={pos ? 'Positivo' : 'Negativo'} color={pos ? 'emerald' : 'red'} />
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <KpiCard label="Ingresos cobrados" value={formatCOP(flujo.ingresos)} sub="Pagos recibidos" color="green" icon={<TrendingUp size={14} />} />
+            <KpiCard label="Inversiones (compras)" value={formatCOP(flujo.inversiones)} sub="Egresos del período" color="orange" />
+            <KpiCard
+              label="Balance del período"
+              value={formatCOP(balance)}
+              sub={positivo ? 'Flujo positivo' : 'Flujo negativo'}
+              color={positivo ? 'emerald' : 'red'}
+            />
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <div className="card">
-              <p className="card-title">Saldos por destino</p>
-              <div className="space-y-2.5 mb-4">
-                {saldos.map((s: any) => (
-                  <div key={s.destino_dinero} className="flex items-center justify-between">
-                    <BadgeDestino destino={s.destino_dinero} />
-                    <div className="text-right"><p className="font-mono font-semibold text-sm">{formatCOP(s.total)}</p><p className="text-xs text-gray-400">{s.transacciones} transac.</p></div>
-                  </div>
-                ))}
-                {saldos.length === 0 && <p className="text-xs text-gray-400">Sin movimientos</p>}
+              <div className="mb-3 flex items-center justify-between">
+                <div>
+                  <p className="card-title mb-0.5">Saldos por destino</p>
+                  <p className="text-2xs text-muted">Distribución del dinero cobrado</p>
+                </div>
+                <Landmark size={15} className="text-muted" aria-hidden="true" />
               </div>
-              {saldos.length > 0 && (
-                <ResponsiveContainer width="100%" height={100}>
-                  <BarChart data={saldos.map((s: any) => ({ name: s.destino_dinero.replace('billetera_','').replace('_',' '), total: s.total }))} margin={{ top:0, right:0, left:0, bottom:0 }}>
-                    <XAxis dataKey="name" tick={{ fontSize: 9 }} /><YAxis hide />
-                    <Tooltip formatter={(v: any) => [formatCOP(v), 'Total']} contentStyle={{ fontSize: 11 }} />
-                    <Bar dataKey="total" radius={[3,3,0,0]}>
-                      {saldos.map((_: any, i: number) => <Cell key={i} fill={['#1b6ca8','#22a05e','#c25b00','#047857','#94a3b8'][i%5]} />)}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
+              {saldos.length === 0 ? (
+                <Empty message="Sin movimientos en el período" />
+              ) : (
+                <div className="space-y-3">
+                  {saldos.map((s: any) => {
+                    const pct = Math.min(100, ((Number(s.total) || 0) / maxSaldo) * 100);
+                    return (
+                      <div key={s.destino_dinero}>
+                        <div className="mb-1 flex items-center justify-between gap-2">
+                          <BadgeDestino destino={s.destino_dinero} />
+                          <div className="text-right">
+                            <p className="money text-tiny font-semibold text-slate-900">{formatCOP(s.total)}</p>
+                            <p className="text-2xs text-muted">{s.transacciones} transacción(es)</p>
+                          </div>
+                        </div>
+                        <div
+                          className="progress-track"
+                          role="progressbar"
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                          aria-valuenow={Math.round(pct)}
+                          aria-label={`Participación de ${s.destino_dinero} en los saldos`}
+                        >
+                          <div className="progress-bar bg-teal" style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               )}
             </div>
+
             <div className="card">
-              <p className="card-title">Ingresos por día</p>
-              {chartLine.length > 0 ? (
-                <ResponsiveContainer width="100%" height={200}>
-                  <LineChart data={chartLine} margin={{ top:5, right:10, left:0, bottom:5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis dataKey="fecha" tick={{ fontSize: 9 }} /><YAxis tick={{ fontSize: 9 }} tickFormatter={(v) => `$${(v/1000).toFixed(0)}K`} />
-                    <Tooltip formatter={(v: any) => [formatCOP(v), 'Cobrado']} contentStyle={{ fontSize: 11 }} />
-                    <Line type="monotone" dataKey="ingresos" stroke="#1b6ca8" strokeWidth={2} dot={{ r: 3 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              ) : <p className="text-xs text-gray-400 text-center py-8">Sin movimientos en el período</p>}
+              <div className="mb-3 flex items-center justify-between">
+                <div>
+                  <p className="card-title mb-0.5">Ingresos por día</p>
+                  <p className="text-2xs text-muted">Últimos 14 días con cobros</p>
+                </div>
+                <TrendingUp size={15} className="text-muted" aria-hidden="true" />
+              </div>
+              {serie.length > 0 ? (
+                <div role="img" aria-label="Gráfico de ingresos cobrados por día en el período consultado">
+                  <ResponsiveContainer width="100%" height={200}>
+                    <LineChart data={serie} margin={{ top: 5, right: 8, left: 0, bottom: 0 }}>
+                      <CartesianGrid {...CHART.grid} />
+                      <XAxis dataKey="fecha" tick={CHART.axisTick} axisLine={false} tickLine={false} />
+                      <YAxis tick={CHART.axisTick} tickFormatter={formatCOPCompact} axisLine={false} tickLine={false} width={46} />
+                      <Tooltip formatter={(v: any) => [formatCOP(Number(v)), 'Cobrado']} {...CHART.tooltip} />
+                      <Line
+                        type="monotone"
+                        dataKey="ingresos"
+                        name="Cobrado"
+                        stroke={CHART.color.blue}
+                        strokeWidth={2}
+                        dot={{ ...CHART.dot, stroke: CHART.color.blue }}
+                        activeDot={{ ...CHART.activeDot, stroke: CHART.color.blue }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <Empty message="Sin movimientos en el período" />
+              )}
             </div>
           </div>
-          <div className="card p-0 overflow-hidden">
-            <div className="px-5 py-4 border-b border-gray-100"><p className="text-sm font-semibold text-gray-700">Movimientos del período ({movs.length})</p></div>
-            {movs.length === 0 ? <p className="text-sm text-gray-400 text-center py-8">Sin movimientos</p> : (
+
+          <div className="card overflow-hidden p-0">
+            <div className="card-header">
+              <div>
+                <p className="text-xs font-semibold text-slate-800">Movimientos del período</p>
+                <p className="text-2xs text-muted">Cobros agrupados por fecha, medio y destino</p>
+              </div>
+              <span className="chip">{movs.length} registro(s)</span>
+            </div>
+            {movs.length === 0 ? (
+              <Empty message="Sin movimientos en el período" />
+            ) : (
               <div className="overflow-x-auto">
                 <table className="table-base">
-                  <thead><tr><th>Fecha</th><th>Medio</th><th>Destino</th><th>Transacciones</th><th>Total cobrado</th></tr></thead>
+                  <thead>
+                    <tr>
+                      <th>Fecha</th>
+                      <th>Medio</th>
+                      <th>Destino</th>
+                      <th className="text-right">Transacciones</th>
+                      <th className="text-right">Total cobrado</th>
+                    </tr>
+                  </thead>
                   <tbody>
-                    {movs.map((m: any, i: number) => (
-                      <tr key={i}>
-                        <td className="text-xs text-gray-500">{formatDate(m.fecha)}</td>
+                    {movs.map((m, i) => (
+                      <tr key={`${m.fecha}-${m.medio_pago}-${m.destino_dinero}-${i}`}>
+                        <td className="whitespace-nowrap text-muted">{formatDate(m.fecha)}</td>
                         <td><BadgeMedioPago medio={m.medio_pago} /></td>
                         <td><BadgeDestino destino={m.destino_dinero} /></td>
-                        <td className="text-center">{m.num_pagos}</td>
-                        <td className="font-mono font-semibold text-success">{formatCOP(m.total)}</td>
+                        <td className="num">{m.num_pagos}</td>
+                        <td className="num font-semibold text-success">{formatCOP(m.total)}</td>
                       </tr>
                     ))}
                   </tbody>

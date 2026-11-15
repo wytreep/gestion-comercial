@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { BarChart3, LockKeyhole } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { Alert } from '../../components/ui';
 
 interface F { email: string; password: string; }
 
@@ -25,26 +26,22 @@ export default function LoginPage() {
         <div className="w-full max-w-[370px]">
           <div className="mb-6 flex items-center justify-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-sm bg-primary shadow-panel">
-              <BarChart3 size={21} className="text-white" strokeWidth={2.4} />
+              <BarChart3 size={21} className="text-white" strokeWidth={2.4} aria-hidden="true" />
             </div>
             <div>
               <p className="text-[15px] font-semibold leading-tight tracking-tight text-slate-900">Gestión Comercial</p>
-              <p className="text-[9.5px] font-medium uppercase tracking-widest text-slate-500">ERP de distribución</p>
+              <p className="text-2xs font-medium uppercase tracking-widest text-muted">ERP de distribución</p>
             </div>
           </div>
 
           <div className="rounded-md border border-line bg-white shadow-panel">
             <div className="border-b border-line px-5 py-4">
               <h1 className="text-[15px] font-semibold text-slate-900">Iniciar sesión</h1>
-              <p className="mt-0.5 text-[11.5px] text-slate-500">Accede con tu cuenta corporativa.</p>
+              <p className="mt-0.5 text-tiny text-muted">Accede con tu cuenta corporativa.</p>
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-3.5 p-5">
-              {err && (
-                <div role="alert" className="rounded-sm border border-red-200 bg-red-50 px-3 py-2.5 text-[11.5px] text-red-700">
-                  {err}
-                </div>
-              )}
+              {err && <Alert type="error" message={err} />}
               <div className="field">
                 <label htmlFor="login-email" className="label">Correo electrónico</label>
                 <input
@@ -69,14 +66,14 @@ export default function LoginPage() {
                 />
               </div>
               <button type="submit" disabled={isSubmitting} className="btn-primary btn-lg mt-1">
-                <LockKeyhole size={14} />
+                <LockKeyhole size={14} aria-hidden="true" />
                 {isSubmitting ? 'Verificando…' : 'Ingresar'}
               </button>
             </form>
           </div>
 
-          <div className="mt-5 flex items-center justify-center gap-1.5 text-[10.5px] text-slate-400">
-            <LockKeyhole size={11} />
+          <div className="mt-5 flex items-center justify-center gap-1.5 text-2xs text-muted">
+            <LockKeyhole size={11} aria-hidden="true" />
             <span>Acceso restringido · Gestión Comercial</span>
           </div>
         </div>

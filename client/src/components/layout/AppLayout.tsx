@@ -8,7 +8,7 @@ import { useFocusTrap } from '../../hooks/useFocusTrap';
 import {
   LayoutDashboard, ReceiptText, PlusCircle, Wallet, HandCoins, Package,
   PackagePlus, Users, Tag, LogOut, Bell, FileText, Database, ArrowLeftRight,
-  ShieldCheck, BarChart3, Menu, X, Landmark,
+  ShieldCheck, BarChart3, Menu, X, Landmark, QrCode,
 } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -25,6 +25,7 @@ const ROUTE_META: Record<string, { section: string; label: string }> = {
   '/reportes':          { section: 'Finanzas',   label: 'Reportes' },
   '/productos':         { section: 'Inventario', label: 'Productos y precios' },
   '/stock':             { section: 'Inventario', label: 'Movimientos de stock' },
+  '/etiquetas':         { section: 'Inventario', label: 'Etiquetas QR' },
   '/notificaciones':    { section: 'Sistema',    label: 'Alertas' },
   '/admin':             { section: 'Sistema',    label: 'Administración' },
   '/backup':            { section: 'Sistema',    label: 'Copias de seguridad' },
@@ -86,7 +87,7 @@ export default function AppLayout() {
           aria-expanded={mobileOpen}
           aria-controls="menu-movil"
         >
-          <Menu size={18} />
+          <Menu size={18} aria-hidden="true" />
         </button>
 
         <button
@@ -98,8 +99,8 @@ export default function AppLayout() {
             <BarChart3 size={16} className="text-white" strokeWidth={2.4} />
           </div>
           <div className="hidden text-left md:block">
-            <p className="text-[12.5px] font-semibold leading-tight tracking-tight">Gestión Comercial</p>
-            <p className="hidden text-[8.5px] font-medium uppercase tracking-widest text-slate-400 xl:block">ERP de distribución</p>
+            <p className="text-xs font-semibold leading-tight tracking-tight">Gestión Comercial</p>
+            <p className="hidden text-2xs font-medium uppercase tracking-widest text-slate-400 xl:block">ERP de distribución</p>
           </div>
           <span className="sr-only md:hidden">Ir al panel de control</span>
         </button>
@@ -119,7 +120,7 @@ export default function AppLayout() {
         <div className="ml-auto flex shrink-0 items-center gap-2">
           {isVendedor && (
             <button onClick={() => navigate('/ventas/nueva')} className="btn-primary btn-sm hidden xl:inline-flex">
-              <PlusCircle size={13} /> Nueva venta
+              <PlusCircle size={13} aria-hidden="true" /> Nueva venta
             </button>
           )}
           <button
@@ -127,15 +128,15 @@ export default function AppLayout() {
             className={clsx(
               'relative rounded-sm border p-1.5 transition-colors',
               count > 0
-                ? 'border-amber-400/30 bg-amber-400/10 text-amber-300 hover:bg-amber-400/20'
+                ? 'border-warning/40 bg-warning/15 text-warning-invert hover:bg-warning/25'
                 : 'border-white/10 text-slate-400 hover:bg-white/5 hover:text-white',
             )}
             title={`${count} alerta(s) pendiente(s)`}
             aria-label={count > 0 ? `Alertas: ${count} pendiente(s)` : 'Alertas: sin pendientes'}
           >
-            <Bell size={15} />
+            <Bell size={15} aria-hidden="true" />
             {count > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[9px] font-bold text-white" aria-hidden="true">
+              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-2xs font-bold text-white" aria-hidden="true">
                 {count > 99 ? '99+' : count}
               </span>
             )}
@@ -145,20 +146,20 @@ export default function AppLayout() {
           </span>
           <div className="hidden h-6 w-px bg-white/10 md:block" />
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10 text-[10px] font-semibold text-slate-200 ring-1 ring-white/15" aria-hidden="true">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10 text-2xs font-semibold text-slate-200 ring-1 ring-white/15" aria-hidden="true">
               {initials || '?'}
             </div>
             <div className="hidden leading-tight xl:block">
-              <p className="max-w-[120px] truncate text-[11.5px] font-medium text-slate-200">{user?.nombre}</p>
-              <p className="text-[9.5px] capitalize text-slate-400">{user?.rol}</p>
+              <p className="max-w-[120px] truncate text-tiny font-medium text-slate-200">{user?.nombre}</p>
+              <p className="text-2xs capitalize text-slate-400">{user?.rol}</p>
             </div>
             <button
               onClick={handleLogout}
               title="Cerrar sesión"
               aria-label="Cerrar sesión"
-              className="rounded-sm p-1.5 text-slate-500 transition-colors hover:bg-white/5 hover:text-white"
+              className="rounded-sm p-1.5 text-slate-400 transition-colors hover:bg-white/5 hover:text-white"
             >
-              <LogOut size={14} />
+              <LogOut size={14} aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -179,6 +180,7 @@ export default function AppLayout() {
               <RailItem to="/clientes" label="Clientes" icon={<Users size={17} />} />
               <RailItem to="/productos" label="Productos y precios" icon={<Tag size={17} />} />
               <RailItem to="/stock" label="Movimientos de stock" icon={<ArrowLeftRight size={17} />} />
+              <RailItem to="/etiquetas" label="Etiquetas QR" icon={<QrCode size={17} />} />
             </RailGroup>
 
             <div className="mt-auto flex flex-col items-center gap-0.5">
@@ -197,7 +199,7 @@ export default function AppLayout() {
           className="scroll-slim min-w-0 flex-1 overflow-y-auto bg-canvas outline-none"
         >
           <div className="mx-auto w-full max-w-[1720px] p-4 md:p-5 xl:p-6">
-            <div className="mb-3 flex items-center gap-1.5 text-[10.5px] text-slate-400 md:hidden">
+            <div className="mb-3 flex items-center gap-1.5 text-2xs text-muted md:hidden">
               <span>{meta.section}</span>
               <span className="text-slate-300">/</span>
               <span className="font-medium text-slate-600">{meta.label}</span>
@@ -230,15 +232,15 @@ export default function AppLayout() {
               </div>
               <div>
                 <p className="text-[13px] font-semibold leading-tight text-white">Gestión Comercial</p>
-                <p className="text-[9px] uppercase tracking-widest text-slate-400">ERP de distribución</p>
+                <p className="text-2xs uppercase tracking-widest text-slate-400">ERP de distribución</p>
               </div>
               <button
                 type="button"
                 onClick={() => setMobileOpen(false)}
                 aria-label="Cerrar menú"
-                className="ml-auto rounded-sm p-1 text-slate-500 hover:bg-white/5 hover:text-white"
+                className="ml-auto rounded-sm p-1 text-slate-400 hover:bg-white/5 hover:text-white"
               >
-                <X size={17} />
+                <X size={17} aria-hidden="true" />
               </button>
             </div>
 
@@ -262,9 +264,10 @@ export default function AppLayout() {
               <MobileSection label="Inventario">
                 <MobileItem to="/productos" label="Productos y precios" icon={<Tag size={15} />} />
                 <MobileItem to="/stock" label="Movimientos de stock" icon={<ArrowLeftRight size={15} />} />
+                <MobileItem to="/etiquetas" label="Etiquetas QR" icon={<QrCode size={15} />} />
               </MobileSection>
               <MobileSection label="Sistema">
-                <MobileItem to="/notificaciones" label="Alertas" icon={<Bell size={15} />} badge={count} />
+                <MobileItem to="/notificaciones" label="Alertas" icon={<Bell size={15} aria-hidden="true" />} badge={count} />
                 {isAdmin && <MobileItem to="/admin" label="Administración" icon={<ShieldCheck size={15} />} />}
                 {isAdmin && <MobileItem to="/backup" label="Copias de seguridad" icon={<Database size={15} />} />}
               </MobileSection>
@@ -272,20 +275,20 @@ export default function AppLayout() {
 
             <div className="border-t border-white/[0.07] p-3">
               <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-[11px] font-semibold text-sky-200 ring-1 ring-primary/40" aria-hidden="true">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-tiny font-semibold text-primary-invert ring-1 ring-primary/40" aria-hidden="true">
                   {initials || '?'}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[12px] font-medium text-slate-200">{user?.nombre}</p>
-                  <p className="truncate text-[10px] capitalize text-slate-400">{user?.rol}</p>
+                  <p className="truncate text-xs font-medium text-slate-200">{user?.nombre}</p>
+                  <p className="truncate text-2xs capitalize text-slate-400">{user?.rol}</p>
                 </div>
                 <button
                   type="button"
                   onClick={handleLogout}
                   aria-label="Cerrar sesión"
-                  className="rounded-sm p-1.5 text-slate-500 hover:bg-white/5 hover:text-white"
+                  className="rounded-sm p-1.5 text-slate-400 hover:bg-white/5 hover:text-white"
                 >
-                  <LogOut size={14} />
+                  <LogOut size={14} aria-hidden="true" />
                 </button>
               </div>
             </div>
@@ -304,7 +307,7 @@ function TopItem({ to, label, icon, end }: { to: string; label: string; icon: Re
       to={to}
       end={end}
       className={({ isActive }) => clsx(
-        'relative flex h-[54px] items-center gap-1.5 whitespace-nowrap px-2.5 text-[11.5px] font-medium transition-colors xl:px-3.5 xl:text-[12px]',
+        'relative flex h-[54px] items-center gap-1.5 whitespace-nowrap px-2.5 text-tiny font-medium transition-colors xl:px-3.5 xl:text-xs',
         isActive
           ? 'bg-white/[0.07] text-white after:absolute after:inset-x-0 after:bottom-0 after:h-[2px] after:bg-primary-light'
           : 'text-slate-400 hover:bg-white/[0.04] hover:text-slate-100',
@@ -312,7 +315,7 @@ function TopItem({ to, label, icon, end }: { to: string; label: string; icon: Re
     >
       {({ isActive }) => (
         <>
-          <span className={clsx('hidden xl:inline-flex', isActive ? 'text-sky-300' : 'text-slate-500')} aria-hidden="true">{icon}</span>
+          <span className={clsx('hidden xl:inline-flex', isActive ? 'text-primary-invert' : 'text-slate-400')} aria-hidden="true">{icon}</span>
           <span>{label}</span>
         </>
       )}
@@ -340,12 +343,12 @@ function RailItem({ to, label, icon, badge }: { to: string; label: string; icon:
         'relative flex h-9 w-9 items-center justify-center rounded-sm transition-colors',
         isActive
           ? 'bg-primary-50 text-primary ring-1 ring-primary/15'
-          : 'text-slate-400 hover:bg-slate-100 hover:text-slate-700',
+          : 'text-muted hover:bg-slate-100 hover:text-slate-700',
       )}
     >
-      {icon}
+      <span aria-hidden="true">{icon}</span>
       {!!badge && (
-        <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[9px] font-bold text-white" aria-hidden="true">
+        <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-2xs font-bold text-white" aria-hidden="true">
           {badge > 99 ? '99+' : badge}
         </span>
       )}
@@ -358,7 +361,7 @@ function RailItem({ to, label, icon, badge }: { to: string; label: string; icon:
 function MobileSection({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="mb-3">
-      <p className="px-4 pb-1 pt-2 text-[9.5px] font-semibold uppercase tracking-widest text-slate-400">{label}</p>
+      <p className="px-4 pb-1 pt-2 text-2xs font-semibold uppercase tracking-widest text-slate-400">{label}</p>
       <div className="space-y-px">{children}</div>
     </div>
   );
@@ -370,7 +373,7 @@ function MobileItem({ to, label, icon, badge, end }: { to: string; label: string
       to={to}
       end={end}
       className={({ isActive }) => clsx(
-        'flex items-center gap-2.5 border-l-2 px-4 py-[7px] text-[12.5px] font-medium transition-colors',
+        'flex items-center gap-2.5 border-l-2 px-4 py-[7px] text-xs font-medium transition-colors',
         isActive
           ? 'border-primary-light bg-white/[0.07] text-white'
           : 'border-transparent text-slate-400 hover:bg-white/[0.04] hover:text-slate-100',
@@ -378,10 +381,10 @@ function MobileItem({ to, label, icon, badge, end }: { to: string; label: string
     >
       {({ isActive }) => (
         <>
-          <span className={isActive ? 'text-sky-300' : 'text-slate-500'} aria-hidden="true">{icon}</span>
+          <span className={isActive ? 'text-primary-invert' : 'text-slate-400'} aria-hidden="true">{icon}</span>
           <span className="flex-1 truncate">{label}</span>
           {!!badge && (
-            <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[9px] font-bold text-white" aria-hidden="true">
+            <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-2xs font-bold text-white" aria-hidden="true">
               {badge > 99 ? '99+' : badge}
             </span>
           )}

@@ -10,19 +10,11 @@ import {
 } from 'lucide-react';
 import clsx from 'clsx';
 import { dashboardApi, finanzasApi } from '../../api/endpoints';
-import { KpiCard, Spinner, BadgeEstadoPago, BadgeEstadoPedido, BadgeDestino } from '../../components/ui';
-import { currentMonthKey, formatCOP, formatCantidad, formatPct } from '../../utils/format';
+import { Alert, KpiCard, Spinner, BadgeEstadoPago, BadgeEstadoPedido, BadgeDestino } from '../../components/ui';
+import { CHART } from '../../components/charts/theme';
+import { currentMonthKey, formatCOP, formatCOPCompact, formatCantidad, formatPct } from '../../utils/format';
 import { useAuth } from '../../context/AuthContext';
 import PanelVendedor from './PanelVendedor';
-
-const C = { blue: '#0b5cab', green: '#157347', teal: '#0f766e', amber: '#b45309', red: '#b42318', slate: '#94a3b8' };
-
-const tooltipStyle = {
-  fontSize: 11,
-  borderRadius: 4,
-  border: '1px solid #dfe4ea',
-  boxShadow: '0 8px 24px rgba(16,24,40,.12)',
-};
 
 export default function DashboardPage() {
   const { isAdmin } = useAuth();
@@ -46,11 +38,7 @@ function PanelAdmin() {
 
   if (dash.isLoading || fin.isLoading) return <Spinner size="lg" />;
   if (dash.error || fin.error || !dash.data || !fin.data) {
-    return (
-      <div className="rounded-sm border border-red-200 bg-red-50 px-3 py-2.5 text-[12px] text-red-700">
-        No fue posible cargar el panel de control.
-      </div>
-    );
+    return <Alert type="error" message="No fue posible cargar el panel de control. Intenta recargar la página." />;
   }
 
   const data = dash.data;
@@ -65,23 +53,22 @@ function PanelAdmin() {
 
   const maxSaldo = Math.max(...(data.saldos_destino ?? []).map((s) => s.total), 1);
   const serieFlujo = flujo.serie_diaria;
+  const pctEquilibrio = ind.punto_equilibrio > 0 ? (ind.ventas / ind.punto_equilibrio) * 100 : 100;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {/* ── Encabezado ─────────────────────────────── */}
       <div className="page-header">
         <div>
           <h1 className="page-title">Panel de control</h1>
-          <p className="page-subtitle">
-            Resumen operativo y financiero · {f.periodo_label}
-          </p>
+          <p className="page-subtitle">Resumen operativo y financiero · {f.periodo_label}</p>
         </div>
         <div className="no-print flex flex-wrap items-center gap-2">
           <button onClick={() => navigate('/finanzas')} className="btn-secondary">
-            <Wallet size={14} /> Ver finanzas
+            <Wallet size={14} aria-hidden="true" /> Ver finanzas
           </button>
           <button onClick={() => navigate('/ventas/nueva')} className="btn-primary">
-            <PlusCircle size={14} /> Nueva venta
+            <PlusCircle size={14} aria-hidden="true" /> Nueva venta
           </button>
         </div>
       </div>
@@ -90,14 +77,14 @@ function PanelAdmin() {
       {data.notificaciones_pendientes > 0 && (
         <button
           onClick={() => navigate('/notificaciones')}
-          className="flex w-full items-center gap-2.5 rounded-sm border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-left text-[12px] text-amber-800 transition-colors hover:bg-amber-100"
+          className="flex w-full items-center gap-2.5 rounded border border-warning/25 bg-warning-soft px-3.5 py-2.5 text-left text-xs text-warning transition-colors hover:bg-warning/10"
         >
-          <AlertTriangle size={15} className="shrink-0" />
+          <AlertTriangle size={15} className="shrink-0" aria-hidden="true" />
           <span className="font-medium">
             {data.notificaciones_pendientes} alerta{data.notificaciones_pendientes === 1 ? '' : 's'} pendiente{data.notificaciones_pendientes === 1 ? '' : 's'}
           </span>
-          <span className="ml-auto inline-flex items-center gap-1 text-[11px] underline">
-            Revisar <ArrowRight size={11} />
+          <span className="ml-auto inline-flex items-center gap-1 text-tiny underline">
+            Revisar <ArrowRight size={11} aria-hidden="true" />
           </span>
         </button>
       )}
@@ -148,40 +135,54 @@ function PanelAdmin() {
       {/* ── Tendencia + estado de resultados ────────── */}
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <div className="card xl:col-span-2">
-          <div className="mb-3 flex items-start justify-between">
+          <div className="mb-3 flex items-start justify-between gap-3">
             <div>
-              <p className="card-title">Evolución de ventas y utilidad</p>
-              <p className="mt-0.5 text-[10.5px] text-slate-500">Últimos 6 meses · utilidad operativa</p>
+              <p className="card-title mb-0.5">Evolución de ventas y utilidad</p>
+              <p className="text-2xs text-muted">Últimos 6 meses · utilidad operativa</p>
             </div>
-            <TrendingUp size={15} className="text-slate-400" />
+            <TrendingUp size={15} className="text-muted" aria-hidden="true" />
           </div>
-          <ResponsiveContainer width="100%" height={255}>
-            <ComposedChart data={f.tendencia} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-              <CartesianGrid stroke="#eef2f6" strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="label" tick={{ fontSize: 9.5, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-              <YAxis
-                tick={{ fontSize: 9.5, fill: '#94a3b8' }}
-                tickFormatter={(v) => `$${Math.round(Number(v) / 1000)}K`}
-                axisLine={false}
-                tickLine={false}
-                width={46}
-              />
-              <Tooltip formatter={(v: any, name: any) => [formatCOP(Number(v)), String(name)]} contentStyle={tooltipStyle} />
-              <Legend wrapperStyle={{ fontSize: 10.5 }} />
-              <Bar dataKey="ventas" name="Ventas" fill={C.blue} barSize={20} radius={[2, 2, 0, 0]} />
-              <Line type="monotone" dataKey="utilidad_operativa" name="Utilidad operativa" stroke={C.teal} strokeWidth={2} dot={{ r: 2.5 }} />
-            </ComposedChart>
-          </ResponsiveContainer>
+          <div role="img" aria-label="Gráfico de evolución de ventas y utilidad operativa de los últimos seis meses">
+            <ResponsiveContainer width="100%" height={255}>
+              <ComposedChart data={f.tendencia} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+                <CartesianGrid {...CHART.grid} />
+                <XAxis dataKey="label" tick={CHART.axisTick} axisLine={false} tickLine={false} />
+                <YAxis
+                  tick={CHART.axisTick}
+                  tickFormatter={formatCOPCompact}
+                  axisLine={false}
+                  tickLine={false}
+                  width={48}
+                />
+                <Tooltip
+                  formatter={(v: any, name: any) => [formatCOP(Number(v)), String(name)]}
+                  {...CHART.tooltip}
+
+                />
+                <Legend wrapperStyle={CHART.legend.wrapperStyle} />
+                <Bar dataKey="ventas" name="Ventas" fill={CHART.color.blue} barSize={20} radius={CHART.barRadius} />
+                <Line
+                  type="monotone"
+                  dataKey="utilidad_operativa"
+                  name="Utilidad operativa"
+                  stroke={CHART.color.teal}
+                  strokeWidth={2}
+                  dot={{ ...CHART.dot, stroke: CHART.color.teal }}
+                  activeDot={{ ...CHART.activeDot, stroke: CHART.color.teal }}
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
         <div className="overflow-hidden rounded-md border border-line bg-white shadow-panel">
           <div className="card-header">
             <div>
-              <p className="text-[12px] font-semibold text-slate-800">Estado de resultados</p>
-              <p className="text-[10.5px] text-slate-500">Resumen del período</p>
+              <p className="text-xs font-semibold text-slate-800">Estado de resultados</p>
+              <p className="text-2xs text-muted">Resumen del período</p>
             </div>
             <button onClick={() => navigate('/finanzas')} className="btn-ghost">
-              Detalle <ArrowRight size={12} />
+              Detalle <ArrowRight size={12} aria-hidden="true" />
             </button>
           </div>
           <table className="table-base table-dense">
@@ -199,25 +200,32 @@ function PanelAdmin() {
             </tbody>
             <tfoot>
               <tr>
-                <td>Márgenes</td>
-                <td className="text-right font-mono text-[11px]">
+                <td>Márgenes (bruto / operativo)</td>
+                <td className="text-right font-mono text-tiny tabular-nums">
                   {formatPct(er.margen_bruto)} / {formatPct(er.margen_operativo)}
                 </td>
               </tr>
             </tfoot>
           </table>
           <div className="border-t border-line px-4 py-3">
-            <div className="flex items-center justify-between text-[11px]">
-              <span className="text-slate-500">Punto de equilibrio</span>
-              <span className="font-mono font-semibold text-slate-800">{formatCOP(ind.punto_equilibrio)}</span>
+            <div className="flex items-center justify-between text-tiny">
+              <span className="text-muted">Punto de equilibrio</span>
+              <span className="money font-semibold text-slate-800">{formatCOP(ind.punto_equilibrio)}</span>
             </div>
-            <div className="mt-2 progress-track">
+            <div
+              className="progress-track mt-2"
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={Math.round(Math.min(100, pctEquilibrio))}
+              aria-label="Avance sobre el punto de equilibrio"
+            >
               <div
                 className={clsx('progress-bar', ind.ventas >= ind.punto_equilibrio ? 'bg-success' : 'bg-danger')}
-                style={{ width: `${Math.min(100, ind.punto_equilibrio > 0 ? (ind.ventas / ind.punto_equilibrio) * 100 : 100)}%` }}
+                style={{ width: `${Math.min(100, pctEquilibrio)}%` }}
               />
             </div>
-            <p className="mt-1.5 text-[9.5px] text-slate-500">
+            <p className="mt-1.5 text-2xs text-muted">
               {ind.ventas >= ind.punto_equilibrio
                 ? `Superado por ${formatCOP(ind.ventas - ind.punto_equilibrio)}`
                 : `Faltan ${formatCOP(ind.punto_equilibrio - ind.ventas)}`}
@@ -229,58 +237,80 @@ function PanelAdmin() {
       {/* ── Caja + destinos ─────────────────────────── */}
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <div className="card xl:col-span-2">
-          <div className="mb-3 flex items-start justify-between">
+          <div className="mb-3 flex items-start justify-between gap-3">
             <div>
-              <p className="card-title">Cobros vs. compras del mes</p>
-              <p className="mt-0.5 text-[10.5px] text-slate-500">Flujo diario de caja</p>
+              <p className="card-title mb-0.5">Cobros vs. compras del mes</p>
+              <p className="text-2xs text-muted">Flujo diario de caja</p>
             </div>
-            <Banknote size={15} className="text-slate-400" />
+            <Banknote size={15} className="text-muted" aria-hidden="true" />
           </div>
-          <ResponsiveContainer width="100%" height={190}>
-            <ComposedChart data={serieFlujo} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-              <CartesianGrid stroke="#eef2f6" strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="label" tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
-              <YAxis
-                tick={{ fontSize: 9, fill: '#94a3b8' }}
-                tickFormatter={(v) => `$${Math.round(Number(v) / 1000)}K`}
-                axisLine={false}
-                tickLine={false}
-                width={44}
-              />
-              <Tooltip formatter={(v: any, name: any) => [formatCOP(Number(v)), String(name)]} contentStyle={tooltipStyle} />
-              <Legend wrapperStyle={{ fontSize: 10.5 }} />
-              <Bar dataKey="ingresos" name="Cobros" fill={C.green} barSize={9} radius={[2, 2, 0, 0]} />
-              <Bar dataKey="egresos" name="Compras" fill={C.red} barSize={9} radius={[2, 2, 0, 0]} />
-              <Line type="monotone" dataKey="acumulado" name="Acumulado" stroke={C.blue} strokeWidth={1.8} dot={false} />
-            </ComposedChart>
-          </ResponsiveContainer>
+          <div role="img" aria-label="Gráfico de cobros, compras y acumulado diario del mes">
+            <ResponsiveContainer width="100%" height={190}>
+              <ComposedChart data={serieFlujo} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+                <CartesianGrid {...CHART.grid} />
+                <XAxis
+                  dataKey="label"
+                  tick={CHART.axisTick}
+                  axisLine={false}
+                  tickLine={false}
+                  interval="preserveStartEnd"
+                />
+                <YAxis
+                  tick={CHART.axisTick}
+                  tickFormatter={formatCOPCompact}
+                  axisLine={false}
+                  tickLine={false}
+                  width={46}
+                />
+                <Tooltip
+                  formatter={(v: any, name: any) => [formatCOP(Number(v)), String(name)]}
+                  {...CHART.tooltip}
+
+                />
+                <Legend wrapperStyle={CHART.legend.wrapperStyle} />
+                <Bar dataKey="ingresos" name="Cobros" fill={CHART.color.green} barSize={CHART.barSizeNarrow} radius={CHART.barRadius} />
+                <Bar dataKey="egresos" name="Compras" fill={CHART.color.red} barSize={CHART.barSizeNarrow} radius={CHART.barRadius} />
+                <Line type="monotone" dataKey="acumulado" name="Acumulado" stroke={CHART.color.blue} strokeWidth={1.8} dot={false} />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
         <div className="card">
           <div className="mb-3 flex items-center justify-between">
-            <p className="card-title">Saldos por destino</p>
-            <Wallet size={15} className="text-slate-400" />
+            <p className="card-title mb-0">Saldos por destino</p>
+            <Wallet size={15} className="text-muted" aria-hidden="true" />
           </div>
           {data.saldos_destino?.length === 0 ? (
-            <p className="py-6 text-center text-[11.5px] text-slate-500">Sin cobros registrados</p>
+            <p className="py-6 text-center text-tiny text-muted">Sin cobros registrados</p>
           ) : (
             <div className="space-y-3">
-              {(data.saldos_destino ?? []).map((s) => (
-                <div key={s.destino_dinero}>
-                  <div className="mb-1 flex items-center justify-between">
-                    <BadgeDestino destino={s.destino_dinero} />
-                    <span className="font-mono text-[11.5px] font-semibold text-slate-800">{formatCOP(s.total)}</span>
+              {(data.saldos_destino ?? []).map((s) => {
+                const pct = Math.min(100, (s.total / maxSaldo) * 100);
+                return (
+                  <div key={s.destino_dinero}>
+                    <div className="mb-1 flex items-center justify-between gap-2">
+                      <BadgeDestino destino={s.destino_dinero} />
+                      <span className="money text-tiny font-semibold text-slate-800">{formatCOP(s.total)}</span>
+                    </div>
+                    <div
+                      className="progress-track"
+                      role="progressbar"
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={Math.round(pct)}
+                      aria-label={`Participación de ${s.destino_dinero} en los saldos`}
+                    >
+                      <div className="progress-bar bg-teal" style={{ width: `${pct}%` }} />
+                    </div>
                   </div>
-                  <div className="progress-track">
-                    <div className="progress-bar bg-teal" style={{ width: `${Math.min(100, (s.total / maxSaldo) * 100)}%` }} />
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
-          <div className="mt-4 flex items-center justify-between border-t border-line pt-3 text-[11px]">
-            <span className="text-slate-500">Posición de caja</span>
-            <span className={clsx('font-mono font-semibold', flujo.posicion_caja >= 0 ? 'text-success' : 'text-danger')}>
+          <div className="mt-4 flex items-center justify-between border-t border-line pt-3 text-tiny">
+            <span className="text-muted">Posición de caja</span>
+            <span className={clsx('money font-semibold', flujo.posicion_caja >= 0 ? 'text-success' : 'text-danger')}>
               {formatCOP(flujo.posicion_caja)}
             </span>
           </div>
@@ -291,36 +321,36 @@ function PanelAdmin() {
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <div className="card">
           <div className="mb-3 flex items-center justify-between">
-            <p className="card-title">Stock actual</p>
-            <Boxes size={15} className="text-slate-400" />
+            <p className="card-title mb-0">Stock actual</p>
+            <Boxes size={15} className="text-muted" aria-hidden="true" />
           </div>
           <div className="space-y-3">
             {data.stock.map((p) => (
               <div key={p.nombre} className="flex items-center justify-between gap-3 border-b border-slate-100 pb-2.5 last:border-0 last:pb-0">
                 <div className="min-w-0">
-                  <p className="truncate text-[12px] font-medium text-slate-700">{p.nombre}</p>
-                  <p className="text-[10px] text-slate-500">{formatCOP(p.precio_venta)} / {p.unidad_medida === 'unidad' ? 'unidad' : 'kg'}</p>
+                  <p className="truncate text-xs font-medium text-slate-700">{p.nombre}</p>
+                  <p className="text-2xs text-muted">{formatCOP(p.precio_venta)} / {p.unidad_medida === 'unidad' ? 'unidad' : 'kg'}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-mono text-[12.5px] font-semibold text-slate-900">{formatCantidad(p.stock_actual)}</p>
-                  <p className="text-[9.5px] text-slate-500">{p.unidad_medida === 'canasta' ? 'kg en stock' : p.unidad_medida}</p>
+                  <p className="money text-xs font-semibold text-slate-900">{formatCantidad(p.stock_actual)}</p>
+                  <p className="text-2xs text-muted">{p.unidad_medida === 'canasta' ? 'kg en stock' : p.unidad_medida}</p>
                 </div>
               </div>
             ))}
           </div>
           <button onClick={() => navigate('/productos')} className="btn-ghost mt-3 w-full justify-between border-t border-line pt-2.5">
-            Gestionar inventario <ArrowUpRight size={12} />
+            Gestionar inventario <ArrowUpRight size={12} aria-hidden="true" />
           </button>
         </div>
 
         <div className="overflow-hidden rounded-md border border-line bg-white shadow-panel xl:col-span-2">
           <div className="card-header">
             <div>
-              <p className="text-[12px] font-semibold text-slate-800">Últimas ventas</p>
-              <p className="text-[10.5px] text-slate-500">Movimientos recientes</p>
+              <p className="text-xs font-semibold text-slate-800">Últimas ventas</p>
+              <p className="text-2xs text-muted">Movimientos recientes</p>
             </div>
             <button onClick={() => navigate('/ventas')} className="btn-ghost">
-              Ver todas <ArrowRight size={12} />
+              Ver todas <ArrowRight size={12} aria-hidden="true" />
             </button>
           </div>
           <div className="overflow-x-auto">
@@ -338,17 +368,17 @@ function PanelAdmin() {
               <tbody>
                 {data.ultimas_ventas.map((v: any) => (
                   <tr key={v.id}>
-                    <td className="font-mono text-slate-500">#{v.id}</td>
+                    <td className="font-mono text-muted">#{v.id}</td>
                     <td className="font-medium text-slate-700">{v.cliente}</td>
-                    <td className="text-slate-500">{v.fecha}</td>
-                    <td className="text-right font-mono font-semibold text-slate-900">{formatCOP(v.total)}</td>
+                    <td className="whitespace-nowrap text-muted">{v.fecha}</td>
+                    <td className="num font-semibold text-slate-900">{formatCOP(v.total)}</td>
                     <td><BadgeEstadoPago estado={v.estado_pago} /></td>
                     <td><BadgeEstadoPedido estado={v.estado_pedido} /></td>
                   </tr>
                 ))}
                 {data.ultimas_ventas.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="py-8 text-center text-[11.5px] text-slate-500">Sin ventas registradas</td>
+                    <td colSpan={6} className="py-8 text-center text-tiny text-muted">Sin ventas registradas</td>
                   </tr>
                 )}
               </tbody>
@@ -370,12 +400,12 @@ function MiniRow({
   positive?: boolean;
 }) {
   return (
-    <tr className={strong ? 'bg-slate-50/50' : undefined}>
-      <td className={clsx('py-2 px-3', strong ? 'font-semibold text-slate-900' : 'text-slate-600', muted && 'text-slate-500')}>
+    <tr className={strong ? 'bg-slate-50/60' : undefined}>
+      <td className={clsx('py-2', strong ? 'font-semibold text-slate-900' : 'text-slate-600', muted && 'text-muted')}>
         {label}
       </td>
       <td className={clsx(
-        'py-2 px-3 text-right font-mono',
+        'num py-2',
         strong ? 'font-semibold' : 'font-medium',
         positive === true ? 'text-success' : positive === false ? 'text-danger' : 'text-slate-800',
       )}>

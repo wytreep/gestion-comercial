@@ -12,20 +12,12 @@ import {
 } from 'lucide-react';
 import clsx from 'clsx';
 import { finanzasApi } from '../../api/endpoints';
-import { KpiCard, Spinner, BadgeDestino, BadgeMedioPago, Empty } from '../../components/ui';
+import { Alert, KpiCard, Spinner, BadgeDestino, BadgeMedioPago, Empty } from '../../components/ui';
+import { CHART } from '../../components/charts/theme';
 import {
-  currentMonthKey, formatCantidad, formatCOP, formatPct,
+  currentMonthKey, formatCantidad, formatCOP, formatCOPCompact, formatPct,
 } from '../../utils/format';
 import type { FinanzasData, ProductoFinanciero } from '../../types';
-
-const C = {
-  blue:  '#0b5cab',
-  green: '#157347',
-  teal:  '#0f766e',
-  red:   '#b42318',
-  amber: '#b45309',
-  slate: '#94a3b8',
-};
 
 const CATEGORIA_GASTO: Record<string, string> = {
   transporte:     'Transporte',
@@ -47,11 +39,7 @@ export default function FinanzasPage() {
 
   if (isLoading) return <Spinner size="lg" />;
   if (error || !data) {
-    return (
-      <div className="rounded-sm border border-red-200 bg-red-50 px-3 py-2.5 text-[12px] text-red-700">
-        No fue posible cargar la información financiera del período.
-      </div>
-    );
+    return <Alert type="error" message="No fue posible cargar la información financiera del período." />;
   }
 
   const { estado_resultados: er, flujo, indicadores, comparativo } = data;
@@ -85,10 +73,10 @@ export default function FinanzasPage() {
             />
           </div>
           <button className="btn-secondary" onClick={() => window.print()}>
-            <Printer size={14} /> Imprimir
+            <Printer size={14} aria-hidden="true" /> Imprimir
           </button>
           <button className="btn-secondary" onClick={() => navigate('/reportes')}>
-            <FileText size={14} /> Reporte PDF
+            <FileText size={14} aria-hidden="true" /> Reporte PDF
           </button>
         </div>
       </div>
@@ -139,15 +127,30 @@ export default function FinanzasPage() {
       </div>
 
       {/* ── Pestañas ────────────────────────────────── */}
-      <div className="tabs no-print">
-        <button className={clsx('tab', tab === 'pyl' && 'tab-active')} onClick={() => setTab('pyl')}>
-          <FileBarChart2 size={14} /> Estado de resultados
+      <div className="tabs no-print" role="tablist" aria-label="Vistas de finanzas">
+        <button
+          role="tab"
+          aria-selected={tab === 'pyl'}
+          className={clsx('tab', tab === 'pyl' && 'tab-active')}
+          onClick={() => setTab('pyl')}
+        >
+          <FileBarChart2 size={14} aria-hidden="true" /> Estado de resultados
         </button>
-        <button className={clsx('tab', tab === 'flujo' && 'tab-active')} onClick={() => setTab('flujo')}>
-          <Landmark size={14} /> Flujo de caja
+        <button
+          role="tab"
+          aria-selected={tab === 'flujo'}
+          className={clsx('tab', tab === 'flujo' && 'tab-active')}
+          onClick={() => setTab('flujo')}
+        >
+          <Landmark size={14} aria-hidden="true" /> Flujo de caja
         </button>
-        <button className={clsx('tab', tab === 'indicadores' && 'tab-active')} onClick={() => setTab('indicadores')}>
-          <Gauge size={14} /> Indicadores
+        <button
+          role="tab"
+          aria-selected={tab === 'indicadores'}
+          className={clsx('tab', tab === 'indicadores' && 'tab-active')}
+          onClick={() => setTab('indicadores')}
+        >
+          <Gauge size={14} aria-hidden="true" /> Indicadores
         </button>
       </div>
 
@@ -155,7 +158,7 @@ export default function FinanzasPage() {
       {tab === 'flujo' && <VistaFlujo data={data} />}
       {tab === 'indicadores' && <VistaIndicadores data={data} />}
 
-      <p className="pb-2 text-[10.5px] leading-relaxed text-slate-400">
+      <p className="pb-2 text-2xs leading-relaxed text-muted">
         Criterio de cálculo: estado de resultados devengado sobre ventas no canceladas; costo de ventas con el costo
         unitario configurado (costo/kg para productos por canasta); gastos operativos = gastos de compra + reparto;
         flujo de caja = pagos cobrados − compras del período. No incluye IVA ni impuestos.
@@ -171,11 +174,11 @@ function VistaPyL({ data }: { data: FinanzasData }) {
   const base = er.ingresos_operacionales;
 
   const composicion = [
-    { name: 'Ventas',          value: er.ingresos_operacionales, fill: C.blue  },
-    { name: 'Costo de ventas', value: er.costo_ventas,           fill: C.red   },
-    { name: 'Gastos oper.',    value: er.gastos_operativos,      fill: C.amber },
-    { name: 'Utilidad bruta',  value: er.utilidad_bruta,         fill: C.green },
-    { name: 'Utilidad oper.',  value: er.utilidad_operativa,     fill: C.teal  },
+    { name: 'Ventas',          value: er.ingresos_operacionales, fill: CHART.color.blue  },
+    { name: 'Costo de ventas', value: er.costo_ventas,           fill: CHART.color.red   },
+    { name: 'Gastos oper.',    value: er.gastos_operativos,      fill: CHART.color.amber },
+    { name: 'Utilidad bruta',  value: er.utilidad_bruta,         fill: CHART.color.green },
+    { name: 'Utilidad oper.',  value: er.utilidad_operativa,     fill: CHART.color.teal  },
   ];
 
   return (
@@ -185,8 +188,8 @@ function VistaPyL({ data }: { data: FinanzasData }) {
         <div className="overflow-hidden rounded-md border border-line bg-white shadow-panel xl:col-span-2">
           <div className="card-header">
             <div>
-              <p className="text-[12px] font-semibold text-slate-800">Estado de resultados</p>
-              <p className="text-[10.5px] text-slate-400">Del 1 al último día de {data.periodo_label}</p>
+              <p className="text-xs font-semibold text-slate-800">Estado de resultados</p>
+              <p className="text-2xs text-muted">Del 1 al último día de {data.periodo_label}</p>
             </div>
             <span className="chip">Devengado · sin IVA</span>
           </div>
@@ -208,7 +211,7 @@ function VistaPyL({ data }: { data: FinanzasData }) {
                 <PylSection label="Gastos operativos" />
                 {er.detalle_gastos.length === 0 && (
                   <tr>
-                    <td colSpan={3} className="px-3 py-2.5 text-[11.5px] text-slate-400">
+                    <td colSpan={3} className="px-3 py-2.5 text-tiny text-muted">
                       Sin gastos operativos registrados en el período.
                     </td>
                   </tr>
@@ -229,7 +232,7 @@ function VistaPyL({ data }: { data: FinanzasData }) {
               <tfoot>
                 <tr>
                   <td>Margen bruto / operativo</td>
-                  <td className="text-right font-mono">
+                  <td className="num">
                     {formatPct(er.margen_bruto)} / {formatPct(er.margen_operativo)}
                   </td>
                   <td />
@@ -242,34 +245,36 @@ function VistaPyL({ data }: { data: FinanzasData }) {
         {/* Composición + resumen */}
         <div className="space-y-4">
           <div className="card">
-            <div className="mb-3 flex items-start justify-between">
+            <div className="mb-3 flex items-start justify-between gap-3">
               <div>
-                <p className="card-title">Composición del resultado</p>
-                <p className="mt-0.5 text-[10.5px] text-slate-400">Valores del período</p>
+                <p className="card-title mb-0.5">Composición del resultado</p>
+                <p className="text-2xs text-muted">Valores del período</p>
               </div>
-              <Scale size={15} className="text-slate-400" />
+              <Scale size={15} className="text-muted" aria-hidden="true" />
             </div>
-            <ResponsiveContainer width="100%" height={190}>
-              <BarChart data={composicion} layout="vertical" margin={{ top: 0, right: 8, left: 0, bottom: 0 }}>
-                <CartesianGrid stroke="#eef2f6" horizontal={false} />
-                <XAxis type="number" hide />
-                <YAxis
-                  type="category"
-                  dataKey="name"
-                  width={88}
-                  tick={{ fontSize: 10, fill: '#64748b' }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <Tooltip
-                  formatter={(v: any) => [formatCOP(Number(v)), 'Valor']}
-                  contentStyle={tooltipStyle}
-                />
-                <Bar dataKey="value" radius={[0, 2, 2, 0]} barSize={16}>
-                  {composicion.map((c) => <Cell key={c.name} fill={c.fill} />)}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+            <div role="img" aria-label="Composición del resultado: ventas, costo de ventas, gastos, utilidad bruta y utilidad operativa">
+              <ResponsiveContainer width="100%" height={190}>
+                <BarChart data={composicion} layout="vertical" margin={{ top: 0, right: 8, left: 0, bottom: 0 }}>
+                  <CartesianGrid stroke={CHART.color.grid} horizontal={false} />
+                  <XAxis type="number" hide />
+                  <YAxis
+                    type="category"
+                    dataKey="name"
+                    width={96}
+                    tick={CHART.axisTick}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    formatter={(v: any) => [formatCOP(Number(v)), 'Valor']}
+                    {...CHART.tooltip}
+                  />
+                  <Bar dataKey="value" radius={[0, 3, 3, 0]} barSize={16}>
+                    {composicion.map((c) => <Cell key={c.name} fill={c.fill} />)}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
 
           <div className="card">
@@ -296,8 +301,8 @@ function VistaPyL({ data }: { data: FinanzasData }) {
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <div className="card">
           <div className="mb-3 flex items-center justify-between">
-            <p className="card-title">Gastos por categoría</p>
-            <Calculator size={15} className="text-slate-400" />
+            <p className="card-title mb-0">Gastos por categoría</p>
+            <Calculator size={15} className="text-muted" aria-hidden="true" />
           </div>
           {er.gastos_por_categoria.length === 0 ? (
             <Empty message="Sin gastos en el período" />
@@ -307,19 +312,26 @@ function VistaPyL({ data }: { data: FinanzasData }) {
                 const pct = er.gastos_operativos > 0 ? (g.monto / er.gastos_operativos) * 100 : 0;
                 return (
                   <div key={g.categoria}>
-                    <div className="mb-1 flex items-center justify-between text-[11.5px]">
+                    <div className="mb-1 flex items-center justify-between gap-2 text-tiny">
                       <span className="text-slate-600">{CATEGORIA_GASTO[g.categoria] ?? g.categoria}</span>
-                      <span className="font-mono font-semibold text-slate-800">{formatCOP(g.monto)}</span>
+                      <span className="money font-semibold text-slate-800">{formatCOP(g.monto)}</span>
                     </div>
-                    <div className="progress-track">
-                      <div className="progress-bar bg-amber-500" style={{ width: `${Math.min(100, pct)}%` }} />
+                    <div
+                      className="progress-track"
+                      role="progressbar"
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={Math.round(Math.min(100, pct))}
+                      aria-label={`Participación de ${CATEGORIA_GASTO[g.categoria] ?? g.categoria} en los gastos`}
+                    >
+                      <div className="progress-bar bg-warning" style={{ width: `${Math.min(100, pct)}%` }} />
                     </div>
                   </div>
                 );
               })}
-              <div className="flex items-center justify-between border-t border-line pt-2 text-[11.5px]">
-                <span className="font-medium text-slate-500">Total gastos</span>
-                <span className="font-mono font-semibold text-slate-900">{formatCOP(er.gastos_operativos)}</span>
+              <div className="flex items-center justify-between border-t border-line pt-2 text-tiny">
+                <span className="font-medium text-muted">Total gastos</span>
+                <span className="money font-semibold text-slate-900">{formatCOP(er.gastos_operativos)}</span>
               </div>
             </div>
           )}
@@ -328,8 +340,8 @@ function VistaPyL({ data }: { data: FinanzasData }) {
         <div className="overflow-hidden rounded-md border border-line bg-white shadow-panel xl:col-span-2">
           <div className="card-header">
             <div>
-              <p className="text-[12px] font-semibold text-slate-800">Rentabilidad por producto</p>
-              <p className="text-[10.5px] text-slate-400">Ventas, costo y margen del período</p>
+              <p className="text-xs font-semibold text-slate-800">Rentabilidad por producto</p>
+              <p className="text-2xs text-muted">Ventas, costo y margen del período</p>
             </div>
             <span className="chip">{data.productos.length} producto(s)</span>
           </div>
@@ -354,23 +366,30 @@ function VistaPyL({ data }: { data: FinanzasData }) {
                     <tr key={p.id}>
                       <td>
                         <p className="font-medium text-slate-800">{p.nombre}</p>
-                        <p className="text-[10px] capitalize text-slate-400">{p.unidad_medida}</p>
+                        <p className="text-2xs capitalize text-muted">{p.unidad_medida}</p>
                       </td>
-                      <td className="text-right font-mono">{formatCantidad(p.unidades)}</td>
-                      <td className="text-right font-mono">{formatCOP(p.ventas)}</td>
-                      <td className="text-right font-mono text-slate-500">{formatCOP(p.costo)}</td>
-                      <td className={clsx('text-right font-mono font-semibold', p.utilidad >= 0 ? 'text-success' : 'text-danger')}>
+                      <td className="num">{formatCantidad(p.unidades)}</td>
+                      <td className="num">{formatCOP(p.ventas)}</td>
+                      <td className="num text-muted">{formatCOP(p.costo)}</td>
+                      <td className={clsx('num font-semibold', p.utilidad >= 0 ? 'text-success' : 'text-danger')}>
                         {formatCOP(p.utilidad)}
                       </td>
-                      <td className={clsx('text-right font-mono font-semibold', p.margen >= 0 ? 'text-slate-700' : 'text-danger')}>
+                      <td className={clsx('num font-semibold', p.margen >= 0 ? 'text-slate-700' : 'text-danger')}>
                         {formatPct(p.margen)}
                       </td>
                       <td>
                         <div className="flex items-center gap-1.5">
-                          <div className="progress-track w-12">
+                          <div
+                            className="progress-track w-12"
+                            role="progressbar"
+                            aria-valuemin={0}
+                            aria-valuemax={100}
+                            aria-valuenow={Math.round(Math.min(100, p.participacion))}
+                            aria-label={`Participación de ${p.nombre}`}
+                          >
                             <div className="progress-bar" style={{ width: `${Math.min(100, p.participacion)}%` }} />
                           </div>
-                          <span className="text-[10px] text-slate-500">{formatPct(p.participacion)}</span>
+                          <span className="text-2xs text-muted">{formatPct(p.participacion)}</span>
                         </div>
                       </td>
                     </tr>
@@ -396,81 +415,99 @@ function VistaFlujo({ data }: { data: FinanzasData }) {
     <div className="space-y-4">
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <div className="card xl:col-span-2">
-          <div className="mb-3 flex items-start justify-between">
+          <div className="mb-3 flex items-start justify-between gap-3">
             <div>
-              <p className="card-title">Cobros vs. egresos por día</p>
-              <p className="mt-0.5 text-[10.5px] text-slate-400">Caja real del período · línea = acumulado</p>
+              <p className="card-title mb-0.5">Cobros vs. egresos por día</p>
+              <p className="text-2xs text-muted">Caja real del período · línea = acumulado</p>
             </div>
-            <LineChart size={15} className="text-slate-400" />
+            <LineChart size={15} className="text-muted" aria-hidden="true" />
           </div>
-          <ResponsiveContainer width="100%" height={270}>
-            <ComposedChart data={serie} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-              <CartesianGrid stroke="#eef2f6" strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="label" tick={{ fontSize: 9.5, fill: '#94a3b8' }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
-              <YAxis
-                yAxisId="left"
-                tick={{ fontSize: 9.5, fill: '#94a3b8' }}
-                tickFormatter={(v) => `$${Math.round(Number(v) / 1000)}K`}
-                axisLine={false}
-                tickLine={false}
-                width={44}
-              />
-              <YAxis
-                yAxisId="right"
-                orientation="right"
-                tick={{ fontSize: 9.5, fill: '#94a3b8' }}
-                tickFormatter={(v) => `$${Math.round(Number(v) / 1000)}K`}
-                axisLine={false}
-                tickLine={false}
-                width={44}
-              />
-              <Tooltip formatter={(v: any, name: any) => [formatCOP(Number(v)), String(name)]} contentStyle={tooltipStyle} />
-              <Legend wrapperStyle={{ fontSize: 10.5 }} />
-              <ReferenceLine y={0} yAxisId="left" stroke="#cbd5e1" />
-              <Bar yAxisId="left" dataKey="ingresos" name="Cobros" fill={C.green} barSize={9} radius={[2, 2, 0, 0]} />
-              <Bar yAxisId="left" dataKey="egresos" name="Compras" fill={C.red} barSize={9} radius={[2, 2, 0, 0]} />
-              <Line yAxisId="right" type="monotone" dataKey="acumulado" name="Acumulado" stroke={C.blue} strokeWidth={2} dot={false} />
-            </ComposedChart>
-          </ResponsiveContainer>
+          <div role="img" aria-label="Gráfico diario de cobros, compras y caja acumulada del período">
+            <ResponsiveContainer width="100%" height={270}>
+              <ComposedChart data={serie} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+                <CartesianGrid {...CHART.grid} />
+                <XAxis
+                  dataKey="label"
+                  tick={CHART.axisTick}
+                  axisLine={false}
+                  tickLine={false}
+                  interval="preserveStartEnd"
+                />
+                <YAxis
+                  yAxisId="left"
+                  tick={CHART.axisTick}
+                  tickFormatter={formatCOPCompact}
+                  axisLine={false}
+                  tickLine={false}
+                  width={46}
+                />
+                <YAxis
+                  yAxisId="right"
+                  orientation="right"
+                  tick={CHART.axisTick}
+                  tickFormatter={formatCOPCompact}
+                  axisLine={false}
+                  tickLine={false}
+                  width={46}
+                />
+                <Tooltip formatter={(v: any, name: any) => [formatCOP(Number(v)), String(name)]} {...CHART.tooltip} />
+                <Legend wrapperStyle={CHART.legend.wrapperStyle} />
+                <ReferenceLine y={0} yAxisId="left" stroke={CHART.color.slate} />
+                <Bar yAxisId="left" dataKey="ingresos" name="Cobros" fill={CHART.color.green} barSize={CHART.barSizeNarrow} radius={CHART.barRadius} />
+                <Bar yAxisId="left" dataKey="egresos" name="Compras" fill={CHART.color.red} barSize={CHART.barSizeNarrow} radius={CHART.barRadius} />
+                <Line yAxisId="right" type="monotone" dataKey="acumulado" name="Acumulado" stroke={CHART.color.blue} strokeWidth={2} dot={false} />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
         <div className="card">
           <div className="mb-3 flex items-center justify-between">
             <div>
-              <p className="card-title">Saldos por destino</p>
-              <p className="mt-0.5 text-[10.5px] text-slate-400">Cobros del período</p>
+              <p className="card-title mb-0.5">Saldos por destino</p>
+              <p className="text-2xs text-muted">Cobros del período</p>
             </div>
-            <Landmark size={15} className="text-slate-400" />
+            <Landmark size={15} className="text-muted" aria-hidden="true" />
           </div>
           {f.saldos_destino.length === 0 ? (
             <Empty message="Sin cobros en el período" />
           ) : (
             <div className="space-y-3">
-              {f.saldos_destino.map((s) => (
-                <div key={s.destino_dinero}>
-                  <div className="mb-1 flex items-center justify-between">
-                    <BadgeDestino destino={s.destino_dinero} />
-                    <span className="font-mono text-[11.5px] font-semibold text-slate-800">{formatCOP(s.total)}</span>
+              {f.saldos_destino.map((s) => {
+                const pct = Math.min(100, (s.total / maxSaldo) * 100);
+                return (
+                  <div key={s.destino_dinero}>
+                    <div className="mb-1 flex items-center justify-between gap-2">
+                      <BadgeDestino destino={s.destino_dinero} />
+                      <span className="money text-tiny font-semibold text-slate-800">{formatCOP(s.total)}</span>
+                    </div>
+                    <div
+                      className="progress-track"
+                      role="progressbar"
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={Math.round(pct)}
+                      aria-label={`Participación de ${s.destino_dinero} en los cobros`}
+                    >
+                      <div className="progress-bar bg-teal" style={{ width: `${pct}%` }} />
+                    </div>
+                    <p className="mt-0.5 text-2xs text-muted">{s.transacciones} transacción(es)</p>
                   </div>
-                  <div className="progress-track">
-                    <div className="progress-bar bg-teal" style={{ width: `${Math.min(100, (s.total / maxSaldo) * 100)}%` }} />
-                  </div>
-                  <p className="mt-0.5 text-[9.5px] text-slate-400">{s.transacciones} transacción(es)</p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
 
           <div className="mt-4 border-t border-line pt-3">
             <p className="section-label mb-2">Por medio de pago</p>
             {f.por_medio.length === 0 ? (
-              <p className="text-[11px] text-slate-400">Sin datos</p>
+              <p className="text-tiny text-muted">Sin datos</p>
             ) : (
               <div className="space-y-2">
                 {f.por_medio.map((m) => (
                   <div key={m.medio_pago} className="flex items-center justify-between">
                     <BadgeMedioPago medio={m.medio_pago as 'efectivo' | 'transferencia'} />
-                    <span className="font-mono text-[11.5px] text-slate-700">{formatCOP(m.total)}</span>
+                    <span className="money text-tiny text-slate-700">{formatCOP(m.total)}</span>
                   </div>
                 ))}
               </div>
@@ -482,27 +519,27 @@ function VistaFlujo({ data }: { data: FinanzasData }) {
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <div className="panel-dark p-4">
           <div className="flex items-center justify-between">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Posición de caja</p>
-            <Wallet size={15} className="text-slate-400" />
+            <p className="text-2xs font-semibold uppercase tracking-widest text-slate-400">Posición de caja</p>
+            <Wallet size={15} className="text-slate-400" aria-hidden="true" />
           </div>
-          <p className={clsx('mt-2 font-mono text-[26px] font-semibold tabular-nums', f.posicion_caja >= 0 ? 'text-emerald-300' : 'text-red-300')}>
+          <p className={clsx('mt-2 font-mono text-[26px] font-semibold tabular-nums', f.posicion_caja >= 0 ? 'text-success-invert' : 'text-danger-invert')}>
             {formatCOP(f.posicion_caja)}
           </p>
-          <p className="mt-1 text-[10.5px] text-slate-400">Cobros históricos − compras históricas</p>
-          <div className="mt-4 space-y-2 border-t border-white/10 pt-3 text-[11.5px]">
+          <p className="mt-1 text-2xs text-slate-400">Cobros históricos − compras históricas</p>
+          <div className="mt-4 space-y-2 border-t border-white/10 pt-3 text-tiny">
             <DarkRow label="Cobros del período" value={formatCOP(f.ingresos)} />
             <DarkRow label="Compras del período" value={formatCOP(f.egresos)} />
-            <DarkRow label="Flujo neto" value={formatCOP(f.neto)} strong valueClass={f.neto >= 0 ? 'text-emerald-300' : 'text-red-300'} />
+            <DarkRow label="Flujo neto" value={formatCOP(f.neto)} strong valueClass={f.neto >= 0 ? 'text-success-invert' : 'text-danger-invert'} />
           </div>
         </div>
 
         <div className="overflow-hidden rounded-md border border-line bg-white shadow-panel xl:col-span-2">
           <div className="card-header">
             <div>
-              <p className="text-[12px] font-semibold text-slate-800">Compras y egresos del período</p>
-              <p className="text-[10.5px] text-slate-400">{f.num_compras} compra(s) registrada(s)</p>
+              <p className="text-xs font-semibold text-slate-800">Compras y egresos del período</p>
+              <p className="text-2xs text-muted">{f.num_compras} compra(s) registrada(s)</p>
             </div>
-            <Boxes size={15} className="text-slate-400" />
+            <Boxes size={15} className="text-muted" />
           </div>
           {f.egresos_detalle.length === 0 ? (
             <Empty message="Sin compras en el período" />
@@ -522,19 +559,19 @@ function VistaFlujo({ data }: { data: FinanzasData }) {
                 <tbody>
                   {f.egresos_detalle.map((c) => (
                     <tr key={c.id}>
-                      <td className="font-mono text-slate-400">#{c.id}</td>
-                      <td className="text-slate-500">{formatFechaCorta(c.fecha_compra)}</td>
+                      <td className="font-mono text-muted">#{c.id}</td>
+                      <td className="whitespace-nowrap text-muted">{formatFechaCorta(c.fecha_compra)}</td>
                       <td className="font-medium text-slate-700">{c.proveedor}</td>
-                      <td className="text-right font-mono">{formatCOP(c.total_productos)}</td>
-                      <td className="text-right font-mono text-slate-500">{formatCOP(c.total_gastos)}</td>
-                      <td className="text-right font-mono font-semibold text-slate-900">{formatCOP(c.total_inversion)}</td>
+                      <td className="num">{formatCOP(c.total_productos)}</td>
+                      <td className="num text-muted">{formatCOP(c.total_gastos)}</td>
+                      <td className="num font-semibold text-slate-900">{formatCOP(c.total_inversion)}</td>
                     </tr>
                   ))}
                 </tbody>
                 <tfoot>
                   <tr>
                     <td colSpan={5}>Total egresos</td>
-                    <td className="text-right font-mono">{formatCOP(f.egresos)}</td>
+                    <td className="num">{formatCOP(f.egresos)}</td>
                   </tr>
                 </tfoot>
               </table>
@@ -546,8 +583,8 @@ function VistaFlujo({ data }: { data: FinanzasData }) {
       <div className="overflow-hidden rounded-md border border-line bg-white shadow-panel">
         <div className="card-header">
           <div>
-            <p className="text-[12px] font-semibold text-slate-800">Detalle diario de caja</p>
-            <p className="text-[10.5px] text-slate-400">Movimiento acumulado del período</p>
+            <p className="text-xs font-semibold text-slate-800">Detalle diario de caja</p>
+            <p className="text-2xs text-muted">Movimiento acumulado del período</p>
           </div>
           <span className="chip">{serie.length} día(s)</span>
         </div>
@@ -565,13 +602,13 @@ function VistaFlujo({ data }: { data: FinanzasData }) {
             <tbody>
               {serie.map((d) => (
                 <tr key={d.fecha}>
-                  <td className="text-slate-500">{d.label}</td>
-                  <td className="text-right font-mono text-success">{d.ingresos ? formatCOP(d.ingresos) : '—'}</td>
-                  <td className="text-right font-mono text-danger">{d.egresos ? formatCOP(d.egresos) : '—'}</td>
-                  <td className={clsx('text-right font-mono font-semibold', d.neto >= 0 ? 'text-slate-700' : 'text-danger')}>
+                  <td className="whitespace-nowrap text-muted">{d.label}</td>
+                  <td className="num text-success">{d.ingresos ? formatCOP(d.ingresos) : '—'}</td>
+                  <td className="num text-danger">{d.egresos ? formatCOP(d.egresos) : '—'}</td>
+                  <td className={clsx('num font-semibold', d.neto >= 0 ? 'text-slate-700' : 'text-danger')}>
                     {formatCOP(d.neto)}
                   </td>
-                  <td className={clsx('text-right font-mono font-semibold', d.acumulado >= 0 ? 'text-slate-800' : 'text-danger')}>
+                  <td className={clsx('num font-semibold', d.acumulado >= 0 ? 'text-slate-800' : 'text-danger')}>
                     {formatCOP(d.acumulado)}
                   </td>
                 </tr>
@@ -651,40 +688,50 @@ function VistaIndicadores({ data }: { data: FinanzasData }) {
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <div className="card xl:col-span-2">
-          <div className="mb-3 flex items-start justify-between">
+          <div className="mb-3 flex items-start justify-between gap-3">
             <div>
-              <p className="card-title">Tendencia de los últimos 6 meses</p>
-              <p className="mt-0.5 text-[10.5px] text-slate-400">Ventas, utilidad operativa y flujo de caja</p>
+              <p className="card-title mb-0.5">Tendencia de los últimos 6 meses</p>
+              <p className="text-2xs text-muted">Ventas, utilidad operativa y flujo de caja</p>
             </div>
-            <TrendingUp size={15} className="text-slate-400" />
+            <TrendingUp size={15} className="text-muted" aria-hidden="true" />
           </div>
-          <ResponsiveContainer width="100%" height={290}>
-            <ComposedChart data={tendencia} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-              <CartesianGrid stroke="#eef2f6" strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="label" tick={{ fontSize: 9.5, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-              <YAxis
-                tick={{ fontSize: 9.5, fill: '#94a3b8' }}
-                tickFormatter={(v) => `$${Math.round(Number(v) / 1000)}K`}
-                axisLine={false}
-                tickLine={false}
-                width={46}
-              />
-              <Tooltip formatter={(v: any, name: any) => [formatCOP(Number(v)), String(name)]} contentStyle={tooltipStyle} />
-              <Legend wrapperStyle={{ fontSize: 10.5 }} />
-              <ReferenceLine y={0} stroke="#cbd5e1" />
-              <Bar dataKey="ventas" name="Ventas" fill={C.blue} barSize={18} radius={[2, 2, 0, 0]} />
-              <Bar dataKey="utilidad_operativa" name="Utilidad operativa" fill={C.teal} barSize={18} radius={[2, 2, 0, 0]} />
-              <Line type="monotone" dataKey="flujo" name="Flujo de caja" stroke={C.amber} strokeWidth={2} dot={{ r: 2 }} />
-            </ComposedChart>
-          </ResponsiveContainer>
+          <div role="img" aria-label="Gráfico de tendencia de ventas, utilidad operativa y flujo de caja de los últimos seis meses">
+            <ResponsiveContainer width="100%" height={290}>
+              <ComposedChart data={tendencia} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+                <CartesianGrid {...CHART.grid} />
+                <XAxis dataKey="label" tick={CHART.axisTick} axisLine={false} tickLine={false} />
+                <YAxis
+                  tick={CHART.axisTick}
+                  tickFormatter={formatCOPCompact}
+                  axisLine={false}
+                  tickLine={false}
+                  width={48}
+                />
+                <Tooltip formatter={(v: any, name: any) => [formatCOP(Number(v)), String(name)]} {...CHART.tooltip} />
+                <Legend wrapperStyle={CHART.legend.wrapperStyle} />
+                <ReferenceLine y={0} stroke={CHART.color.slate} />
+                <Bar dataKey="ventas" name="Ventas" fill={CHART.color.blue} barSize={CHART.barSize} radius={CHART.barRadius} />
+                <Bar dataKey="utilidad_operativa" name="Utilidad operativa" fill={CHART.color.teal} barSize={CHART.barSize} radius={CHART.barRadius} />
+                <Line
+                  type="monotone"
+                  dataKey="flujo"
+                  name="Flujo de caja"
+                  stroke={CHART.color.amber}
+                  strokeWidth={2}
+                  dot={{ ...CHART.dot, stroke: CHART.color.amber }}
+                  activeDot={{ ...CHART.activeDot, stroke: CHART.color.amber }}
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
         <div className="card">
           <div className="mb-3 flex items-center justify-between">
-            <p className="card-title">Lectura del período</p>
-            <Gauge size={15} className="text-slate-400" />
+            <p className="card-title mb-0">Lectura del período</p>
+            <Gauge size={15} className="text-muted" aria-hidden="true" />
           </div>
-          <ul className="space-y-3 text-[11.5px] leading-relaxed text-slate-600">
+          <ul className="space-y-3 text-tiny leading-relaxed text-slate-600">
             <Insight>
               {i.crecimiento_ventas == null
                 ? 'No hay ventas del mes anterior para comparar el crecimiento.'
@@ -721,8 +768,8 @@ function VistaIndicadores({ data }: { data: FinanzasData }) {
         <div className="overflow-hidden rounded-md border border-line bg-white shadow-panel">
           <div className="card-header">
             <div>
-              <p className="text-[12px] font-semibold text-slate-800">Ranking de productos por utilidad</p>
-              <p className="text-[10.5px] text-slate-400">Margen y participación sobre ventas</p>
+              <p className="text-xs font-semibold text-slate-800">Ranking de productos por utilidad</p>
+              <p className="text-2xs text-muted">Margen y participación sobre ventas</p>
             </div>
             <span className="chip">{data.productos.length} producto(s)</span>
           </div>
@@ -743,18 +790,25 @@ function VistaIndicadores({ data }: { data: FinanzasData }) {
                   {[...data.productos].sort((a, b) => b.utilidad - a.utilidad).map((p: ProductoFinanciero) => (
                     <tr key={p.id}>
                       <td className="font-medium text-slate-800">{p.nombre}</td>
-                      <td className={clsx('text-right font-mono font-semibold', p.utilidad >= 0 ? 'text-success' : 'text-danger')}>
+                      <td className={clsx('num font-semibold', p.utilidad >= 0 ? 'text-success' : 'text-danger')}>
                         {formatCOP(p.utilidad)}
                       </td>
-                      <td className={clsx('text-right font-mono', p.margen >= 0 ? 'text-slate-700' : 'text-danger')}>
+                      <td className={clsx('num', p.margen >= 0 ? 'text-slate-700' : 'text-danger')}>
                         {formatPct(p.margen)}
                       </td>
                       <td>
                         <div className="flex items-center gap-1.5">
-                          <div className="progress-track w-14">
+                          <div
+                            className="progress-track w-14"
+                            role="progressbar"
+                            aria-valuemin={0}
+                            aria-valuemax={100}
+                            aria-valuenow={Math.round(Math.min(100, p.participacion))}
+                            aria-label={`Participación de ${p.nombre}`}
+                          >
                             <div className="progress-bar" style={{ width: `${Math.min(100, p.participacion)}%` }} />
                           </div>
-                          <span className="text-[10px] text-slate-500">{formatPct(p.participacion)}</span>
+                          <span className="text-2xs text-muted">{formatPct(p.participacion)}</span>
                         </div>
                       </td>
                     </tr>
@@ -768,10 +822,10 @@ function VistaIndicadores({ data }: { data: FinanzasData }) {
         <div className="overflow-hidden rounded-md border border-line bg-white shadow-panel">
           <div className="card-header">
             <div>
-              <p className="text-[12px] font-semibold text-slate-800">Comparativo mensual</p>
-              <p className="text-[10.5px] text-slate-400">Mes actual vs. {data.comparativo.periodo_label}</p>
+              <p className="text-xs font-semibold text-slate-800">Comparativo mensual</p>
+              <p className="text-2xs text-muted">Mes actual vs. {data.comparativo.periodo_label}</p>
             </div>
-            <Scale size={15} className="text-slate-400" />
+            <Scale size={15} className="text-muted" />
           </div>
           <table className="table-base table-dense">
             <thead>
@@ -798,17 +852,10 @@ function VistaIndicadores({ data }: { data: FinanzasData }) {
 
 // ── Componentes auxiliares ─────────────────────────────
 
-const tooltipStyle = {
-  fontSize: 11,
-  borderRadius: 4,
-  border: '1px solid #dfe4ea',
-  boxShadow: '0 8px 24px rgba(16,24,40,.12)',
-};
-
 function PylSection({ label }: { label: string }) {
   return (
     <tr className="bg-slate-50/80">
-      <td colSpan={3} className="px-3 py-1.5 text-[9.5px] font-semibold uppercase tracking-widest text-slate-400">
+      <td colSpan={3} className="px-3 py-1.5 text-2xs font-semibold uppercase tracking-widest text-muted">
         {label}
       </td>
     </tr>
@@ -829,13 +876,13 @@ function PylRow({
   const isNegative = negative || value < 0;
   return (
     <tr className={strong ? 'bg-slate-50/40' : undefined}>
-      <td className={clsx('py-2 px-3', indent && 'pl-6', strong ? 'font-semibold text-slate-900' : 'text-slate-600')}>
+      <td className={clsx('py-2', indent && 'pl-6', strong ? 'font-semibold text-slate-900' : 'text-slate-600')}>
         {label}
       </td>
-      <td className={clsx('py-2 px-3 text-right money', isNegative ? 'text-danger' : strong ? 'font-semibold text-slate-900' : 'text-slate-700')}>
+      <td className={clsx('num py-2', isNegative ? 'text-danger' : strong ? 'font-semibold text-slate-900' : 'text-slate-700')}>
         {isNegative ? `(${formatCOP(Math.abs(value))})` : formatCOP(value)}
       </td>
-      <td className="w-20 py-2 px-3 text-right text-[10.5px] text-slate-400">
+      <td className="w-20 py-2 text-right font-mono text-2xs tabular-nums text-muted">
         {formatPct(Math.abs(pct))}
       </td>
     </tr>
@@ -846,19 +893,19 @@ function MiniStat({ label, value, sub }: { label: string; value: string; sub?: s
   return (
     <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-2 last:border-0 last:pb-0">
       <div>
-        <p className="text-[11.5px] font-medium text-slate-600">{label}</p>
-        {sub && <p className="text-[9.5px] text-slate-400">{sub}</p>}
+        <p className="text-tiny font-medium text-slate-600">{label}</p>
+        {sub && <p className="text-2xs text-muted">{sub}</p>}
       </div>
-      <p className="shrink-0 font-mono text-[13px] font-semibold text-slate-900">{value}</p>
+      <p className="money shrink-0 text-[13px] font-semibold text-slate-900">{value}</p>
     </div>
   );
 }
 
 function DarkRow({ label, value, strong, valueClass }: { label: string; value: string; strong?: boolean; valueClass?: string }) {
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between gap-3">
       <span className="text-slate-400">{label}</span>
-      <span className={clsx('font-mono', strong ? 'font-semibold' : 'font-medium', valueClass ?? 'text-slate-100')}>{value}</span>
+      <span className={clsx('font-mono tabular-nums', strong ? 'font-semibold' : 'font-medium', valueClass ?? 'text-slate-100')}>{value}</span>
     </div>
   );
 }
@@ -876,12 +923,12 @@ function IndicadorCard({
     <div className="rounded-md border border-line bg-white p-3.5 shadow-panel">
       <div className="flex items-start justify-between gap-2">
         <p className="section-label leading-tight">{label}</p>
-        <span className="flex h-6 w-6 items-center justify-center rounded-sm border border-line bg-slate-50 text-slate-500">
+        <span className="flex h-6 w-6 items-center justify-center rounded-sm border border-line bg-slate-50 text-slate-500" aria-hidden="true">
           {icon}
         </span>
       </div>
-      <p className={clsx('mt-2 font-mono text-[20px] font-semibold tabular-nums leading-none', accent)}>{value}</p>
-      {sub && <p className="mt-1.5 text-[10.5px] text-slate-500">{sub}</p>}
+      <p className={clsx('stat-value mt-2 text-[20px]', accent)}>{value}</p>
+      {sub && <p className="mt-1.5 text-2xs text-muted">{sub}</p>}
     </div>
   );
 }
@@ -906,7 +953,7 @@ function ComparativoRow({
   const diff = previo !== 0 ? ((actual - previo) / Math.abs(previo)) * 100 : null;
   const positivo = diff != null && diff >= 0;
   const color = diff == null
-    ? 'text-slate-400'
+    ? 'text-muted'
     : invertirColor
       ? (positivo ? 'text-danger' : 'text-success')
       : (positivo ? 'text-success' : 'text-danger');
@@ -914,9 +961,9 @@ function ComparativoRow({
   return (
     <tr>
       <td className="font-medium text-slate-700">{label}</td>
-      <td className="text-right font-mono text-slate-800">{formatCOP(actual)}</td>
-      <td className="text-right font-mono text-slate-500">{formatCOP(previo)}</td>
-      <td className={clsx('text-right font-mono font-semibold', color)}>
+      <td className="num text-slate-800">{formatCOP(actual)}</td>
+      <td className="num text-muted">{formatCOP(previo)}</td>
+      <td className={clsx('num font-semibold', color)}>
         {diff == null ? '—' : `${diff >= 0 ? '+' : ''}${diff.toFixed(1)}%`}
       </td>
     </tr>

@@ -1,8 +1,9 @@
 import client from './client';
 import type {
-  AuthTokens, DashboardData, Producto, Venta, Compra,
+  AuthTokens, DashboardData, Producto, Categoria, Venta, Compra,
   Cliente, Proveedor, TipoGasto, FiltrosVenta, ApiResponse,
   Notificacion, ReporteMensual, BackupLog, UsuarioAdmin, FinanzasData, CobroQr,
+  Etiqueta,
 } from '../types';
 
 async function get<T>(url: string, params?: object): Promise<T> {
@@ -41,17 +42,36 @@ export const dashboardApi = {
 };
 
 export const productosApi = {
-  listar:       ()           => get<Producto[]>('/productos'),
+  listar:       () => get<Producto[]>('/productos'),
+  listarAdmin:  (incluirInactivos = false) =>
+    get<Producto[]>('/productos', incluirInactivos ? { incluir_inactivos: 1 } : undefined),
   detalle:      (id: number) => get<Producto>(`/productos/${id}`),
   porCodigo:    (codigo: string) => get<Producto>(`/productos/codigo/${encodeURIComponent(codigo)}`),
+  crear:        (body: object) => post<Producto>('/productos', body),
+  editar:       (id: number, body: object) => put<Producto>(`/productos/${id}`, body),
+  desactivar:   (id: number) => del<Producto>(`/productos/${id}`),
+  reactivar:    (id: number) => patch<Producto>(`/productos/${id}/reactivar`),
   historial:    (id: number) => get<any[]>(`/productos/${id}/historial`),
   updatePrecio: (id: number, body: object) => put<Producto>(`/productos/${id}/precio`, body),
   ajustarStock: (id: number, cantidad: number, motivo?: string) =>
     patch<null>(`/productos/${id}/stock`, { cantidad, motivo }),
 };
 
+export const categoriasApi = {
+  listar: () => get<Categoria[]>('/categorias'),
+  crear:  (body: object) => post<Categoria>('/categorias', body),
+};
+
 export const stockApi = {
   movimientos: () => get<any[]>('/stock/movimientos'),
+};
+
+export const etiquetasApi = {
+  listar:  (filtros: { producto_id?: number; tipo?: string; estado?: string; lote?: string; q?: string } = {}) =>
+    get<Etiqueta[]>('/etiquetas', filtros),
+  crear:   (body: object) => post<Etiqueta[]>('/etiquetas', body),
+  detalle: (codigo: string) => get<Etiqueta>(`/etiquetas/${encodeURIComponent(codigo)}`),
+  anular:  (codigo: string) => post<Etiqueta>(`/etiquetas/${encodeURIComponent(codigo)}/anular`),
 };
 
 export const ventasApi = {

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { toDataURL } from 'qrcode';
 import { cobrosQrApi } from '../../api/endpoints';
-import { NumberInput, Spinner } from '../ui';
+import { Alert, NumberInput, Spinner } from '../ui';
 import {
   formatCOP, num, parseMoneyInput,
   OPCIONES_MEDIO_PAGO, OPCIONES_DESTINO,
@@ -171,15 +171,15 @@ export default function CobroQrModal({
   if (exito) {
     return (
       <div className="space-y-5">
-        <div className="rounded border border-success/25 bg-emerald-50 px-4 py-5 text-center" role="status">
+        <div className="rounded border border-success/25 bg-success-soft px-4 py-5 text-center" role="status">
           <CheckCircle2 size={36} className="mx-auto mb-2 text-success" aria-hidden="true" />
           <p className="text-sm font-semibold text-success">Pago confirmado</p>
-          <p className="mt-1 text-[12px] text-slate-600">
+          <p className="mt-1 text-xs text-slate-600">
             Se registraron {formatCOP(exito.monto)} en la venta #{venta.id}.
           </p>
-          <p className="mt-1 font-mono text-[11px] text-slate-500">Referencia: {exito.referencia}</p>
+          <p className="mt-1 font-mono text-tiny text-muted">Referencia: {exito.referencia}</p>
         </div>
-        <div className="rounded border border-line bg-slate-50 px-3 py-2 text-[11.5px] text-slate-600">
+        <div className="rounded border border-line bg-slate-50 px-3 py-2 text-tiny text-slate-600">
           El saldo de la venta y la cartera ya están actualizados. Puedes cerrar esta ventana.
         </div>
         <button type="button" onClick={onClose} className="btn-primary btn-lg">
@@ -192,17 +192,17 @@ export default function CobroQrModal({
   if (!cobro) {
     return (
       <div className="space-y-4">
-        {error && <div className="rounded bg-red-50 p-3 text-xs text-red-600" role="alert">{error}</div>}
+        {error && <Alert type="error" message={error} />}
 
         <div className="rounded border border-line bg-slate-50 px-3 py-3">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Venta</p>
+              <p className="section-label">Venta</p>
               <p className="text-[13px] font-semibold text-slate-800">#{venta.id} · {venta.cliente_nombre}</p>
             </div>
             <div className="text-right">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Saldo pendiente</p>
-              <p className="font-mono text-[15px] font-bold text-danger">{formatCOP(saldo)}</p>
+              <p className="section-label">Saldo pendiente</p>
+              <p className="money text-[15px] font-bold text-danger">{formatCOP(saldo)}</p>
             </div>
           </div>
         </div>
@@ -217,7 +217,7 @@ export default function CobroQrModal({
             parse={parseMoneyInput}
             onChange={setMonto}
           />
-          <p className="mt-1 text-[11px] text-slate-500">
+          <p className="field-help mt-1">
             Puedes cobrar el saldo completo o un abono. El cobro vence a los 15 minutos.
           </p>
         </div>
@@ -227,7 +227,7 @@ export default function CobroQrModal({
           {creando ? 'Generando…' : 'Generar QR de cobro'}
         </button>
 
-        <p className="text-[11px] leading-relaxed text-slate-500">
+        <p className="text-tiny leading-relaxed text-muted">
           El QR identifica la venta, el monto y una referencia única. El pago se confirma
           manualmente después de verificarlo en la app del banco o la billetera.
         </p>
@@ -237,7 +237,7 @@ export default function CobroQrModal({
 
   return (
     <div className="space-y-4">
-      {error && <div className="rounded bg-red-50 p-3 text-xs text-red-600" role="alert">{error}</div>}
+      {error && <Alert type="error" message={error} />}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-[210px_minmax(0,1fr)]">
         <div className="flex flex-col items-center gap-2 rounded border border-line bg-slate-50 p-3">
@@ -252,7 +252,7 @@ export default function CobroQrModal({
               <Spinner />
             </div>
           )}
-          <p className="max-w-full break-all text-center font-mono text-[10.5px] leading-tight text-slate-500">
+          <p className="max-w-full break-all text-center font-mono text-2xs leading-tight text-muted">
             {cobro.codigo}
           </p>
           <div className="flex flex-wrap justify-center gap-1.5">
@@ -270,11 +270,11 @@ export default function CobroQrModal({
         <div className="space-y-3">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Monto del cobro</p>
-              <p className="font-mono text-[22px] font-bold tabular-nums text-slate-900">
+              <p className="section-label">Monto del cobro</p>
+              <p className="stat-value mt-1 text-[22px]">
                 {formatCOP(num(cobro.monto))}
               </p>
-              <p className="text-[11px] text-slate-500">Venta #{venta.id} · {venta.cliente_nombre}</p>
+              <p className="text-tiny text-muted">Venta #{venta.id} · {venta.cliente_nombre}</p>
             </div>
             <span className={pendiente ? 'badge-orange' : 'badge-gray'}>
               {ETIQUETA_ESTADO[cobro.estado]}
@@ -285,17 +285,17 @@ export default function CobroQrModal({
             <div className="flex items-center gap-2 rounded border border-line px-3 py-2">
               <Timer size={15} className={restante <= 60 ? 'text-danger' : 'text-primary'} aria-hidden="true" />
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Vence en</p>
+                <p className="section-label">Vence en</p>
                 <p className={`font-mono text-[15px] font-bold tabular-nums ${restante <= 60 ? 'text-danger' : 'text-slate-800'}`} aria-hidden="true">
                   {mmss(restante)}
                 </p>
               </div>
-              <p className="ml-auto max-w-[150px] text-right text-[10.5px] leading-tight text-slate-500">
+              <p className="ml-auto max-w-[150px] text-right text-2xs leading-tight text-muted">
                 Si vence, genera un QR nuevo.
               </p>
             </div>
           ) : (
-            <div className="rounded border border-line bg-slate-50 px-3 py-2 text-[11.5px] text-slate-600" aria-live="polite">
+            <div className="rounded border border-line bg-slate-50 px-3 py-2 text-tiny text-slate-600" aria-live="polite">
               {cobro.estado === 'expirado'
                 ? 'Este cobro expiró y ya no se puede confirmar.'
                 : cobro.estado === 'pagado'
@@ -305,10 +305,10 @@ export default function CobroQrModal({
           )}
 
           <div className="rounded border border-primary/15 bg-primary-50 px-3 py-2">
-            <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
+            <p className="flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-wide text-primary">
               <ShieldCheck size={13} aria-hidden="true" /> Confirmación manual
             </p>
-            <ol className="mt-1 list-decimal space-y-0.5 pl-4 text-[11px] leading-relaxed text-slate-600">
+            <ol className="mt-1 list-decimal space-y-0.5 pl-4 text-tiny leading-relaxed text-slate-600">
               <li>El cliente escanea el QR o usa el código.</li>
               <li>Verifica la transacción en tu banco o billetera.</li>
               <li>Registra la referencia para conciliar el pago.</li>
@@ -359,7 +359,7 @@ export default function CobroQrModal({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div className="field">
                   <label htmlFor="cobro-qr-medio" className="label">Medio</label>
                   <select id="cobro-qr-medio" className="input" value={medio} onChange={(e) => setMedio(e.target.value as 'efectivo' | 'transferencia')}>

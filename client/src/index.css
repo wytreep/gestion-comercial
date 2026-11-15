@@ -5,18 +5,29 @@
 
 @layer base {
   * { box-sizing: border-box; }
-  html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    color-scheme: light;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+  }
   body {
     @apply font-sans text-ink bg-canvas antialiased;
     font-size: 13px;
+    line-height: 1.5;
     font-feature-settings: 'tnum' 1, 'cv05' 1;
   }
   ::selection { background: #cfe2f7; color: #083a6e; }
-  input[type='date'], input[type='month'] { color-scheme: light; }
+  input[type='date'],
+  input[type='month'],
+  input[type='time'] { color-scheme: light; }
+  input[type='checkbox'],
+  input[type='radio'] { accent-color: theme('colors.primary.DEFAULT'); }
 
   /* Foco visible para navegación por teclado en todo el panel. */
   :focus-visible {
-    outline: 2px solid #0b5cab;
+    outline: 2px solid theme('colors.primary.DEFAULT');
     outline-offset: 2px;
   }
   header :focus-visible,
@@ -28,7 +39,7 @@
 @layer components {
   /* ── Accesibilidad ───────────────────────────────── */
   .skip-link {
-    @apply fixed left-3 top-3 z-[70] -translate-y-20 rounded bg-white px-3 py-2 text-[12.5px]
+    @apply fixed left-3 top-3 z-[70] -translate-y-20 rounded bg-white px-3 py-2 text-tiny
            font-semibold text-primary shadow-dropdown transition-transform;
   }
   .skip-link:focus,
@@ -36,111 +47,147 @@
 
   /* ── Botones ─────────────────────────────────────── */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-1.5 bg-primary text-white font-medium px-3.5 py-2 rounded
-           border border-primary hover:bg-primary-hover hover:border-primary-hover transition-colors
-           disabled:opacity-50 disabled:cursor-not-allowed text-[13px] shadow-panel;
+    @apply inline-flex min-h-[34px] items-center justify-center gap-1.5 rounded border border-primary
+           bg-primary px-3.5 py-1.5 text-[13px] font-medium text-white transition-colors
+           hover:border-primary-hover hover:bg-primary-hover active:bg-primary-dark
+           disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-1.5 bg-white text-slate-700 font-medium px-3.5 py-2 rounded
-           border border-line hover:bg-slate-50 hover:border-slate-300 transition-colors text-[13px] shadow-panel;
+    @apply inline-flex min-h-[34px] items-center justify-center gap-1.5 rounded border border-line
+           bg-white px-3.5 py-1.5 text-[13px] font-medium text-slate-700 transition-colors
+           hover:border-slate-300 hover:bg-slate-50 active:bg-slate-100
+           disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-success {
-    @apply inline-flex items-center justify-center gap-1.5 bg-success text-white font-medium px-3.5 py-2 rounded
-           border border-success hover:bg-emerald-800 transition-colors text-[13px] shadow-panel;
+    @apply inline-flex min-h-[34px] items-center justify-center gap-1.5 rounded border border-success
+           bg-success px-3.5 py-1.5 text-[13px] font-medium text-white transition-colors
+           hover:border-success-dark hover:bg-success-dark active:bg-success-dark
+           disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-danger {
-    @apply inline-flex items-center justify-center gap-1.5 bg-danger text-white font-medium px-3.5 py-2 rounded
-           border border-danger hover:bg-red-800 transition-colors text-[13px] shadow-panel;
+    @apply inline-flex min-h-[34px] items-center justify-center gap-1.5 rounded border border-danger
+           bg-danger px-3.5 py-1.5 text-[13px] font-medium text-white transition-colors
+           hover:border-danger-dark hover:bg-danger-dark active:bg-danger-dark
+           disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-1.5 text-slate-600 font-medium px-2.5 py-1.5 rounded
-           hover:bg-slate-100 transition-colors text-[12px];
+    @apply inline-flex min-h-[30px] items-center justify-center gap-1.5 rounded px-2.5 py-1.5
+           text-xs font-medium text-slate-600 transition-colors
+           hover:bg-slate-100 hover:text-slate-800 active:bg-slate-200;
   }
-  .btn-sm { @apply px-2.5 py-1.5 text-[11px]; }
-  .btn-lg { @apply px-5 py-2.5 text-sm w-full; }
+  .btn-icon {
+    @apply inline-flex h-8 w-8 shrink-0 items-center justify-center rounded text-slate-500
+           transition-colors hover:bg-slate-100 hover:text-slate-800 active:bg-slate-200;
+  }
+  .btn-sm { @apply min-h-[28px] px-2.5 py-1 text-2xs; }
+  .btn-lg { @apply min-h-[40px] w-full px-5 py-2.5 text-sm; }
 
   /* ── Formularios ─────────────────────────────────── */
   .input {
-    @apply w-full bg-white border border-line rounded px-2.5 py-2 text-[13px] text-ink
-           placeholder:text-slate-400 focus:outline-none focus:border-primary-light
-           focus:ring-2 focus:ring-primary/10 transition-colors;
+    @apply w-full rounded border border-line bg-white px-2.5 py-1.5 text-[13px] text-ink
+           placeholder:text-slate-400 transition-colors;
+    min-height: 34px;
   }
+  .input:focus {
+    outline: none;
+    border-color: theme('colors.primary.light');
+    box-shadow: 0 0 0 3px rgb(11 92 171 / 0.12);
+  }
+  .input:disabled {
+    @apply cursor-not-allowed bg-slate-50 text-slate-500;
+  }
+  .input[aria-invalid='true'] {
+    border-color: theme('colors.danger.DEFAULT');
+    box-shadow: 0 0 0 3px rgb(180 35 24 / 0.1);
+  }
+  select.input {
+    appearance: none;
+    padding-right: 2rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235b6b7f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 12px;
+  }
+  textarea.input { min-height: 76px; resize: vertical; }
   .label {
-    @apply block text-2xs font-semibold text-slate-500 uppercase tracking-wider mb-1;
+    @apply mb-1 block text-2xs font-semibold uppercase tracking-wide text-slate-600;
   }
   .field { @apply flex flex-col gap-1; }
+  .field-help { @apply text-tiny text-muted; }
+  .input-error { @apply text-tiny font-medium text-danger; }
 
   /* ── Superficies ─────────────────────────────────── */
   .card {
-    @apply bg-white rounded-md border border-line shadow-panel p-4;
+    @apply rounded-md border border-line bg-white p-4 shadow-panel;
   }
   .card-title {
-    @apply text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-3;
+    @apply mb-3 text-2xs font-semibold uppercase tracking-wide text-slate-600;
   }
   .card-header {
-    @apply flex items-center justify-between gap-3 px-4 py-3 border-b border-line;
+    @apply flex items-center justify-between gap-3 border-b border-line px-4 py-3;
   }
   .card-body { @apply p-4; }
   .panel-dark {
-    @apply bg-navy-900 text-white rounded-md border border-navy-800;
+    @apply rounded-md border border-navy-800 bg-navy-900 text-white;
   }
 
   /* ── Tipografía de datos ─────────────────────────── */
-  .page-header { @apply flex flex-wrap items-center justify-between gap-3 mb-5; }
-  .page-title  { @apply text-[20px] font-semibold text-slate-900 tracking-tight; }
-  .page-subtitle { @apply text-[12px] text-slate-600 mt-0.5; }
-  .section-label { @apply text-2xs font-semibold uppercase tracking-widest text-slate-500; }
-  .stat-value { @apply text-[22px] font-semibold font-mono text-slate-900 tabular-nums leading-none; }
-  .stat-value-sm { @apply text-[17px] font-semibold font-mono text-slate-900 tabular-nums leading-none; }
+  .page-header { @apply flex flex-wrap items-center justify-between gap-3; }
+  .page-title  { @apply text-[20px] font-semibold tracking-tight text-slate-900; }
+  .page-subtitle { @apply mt-0.5 text-tiny text-muted; }
+  .section-label { @apply text-2xs font-semibold uppercase tracking-wide text-muted; }
+  .stat-value { @apply font-mono text-[22px] font-semibold leading-none tabular-nums text-slate-900; }
+  .stat-value-sm { @apply font-mono text-[17px] font-semibold leading-none tabular-nums text-slate-900; }
   .money { @apply font-mono tabular-nums; }
   .money-positive { @apply font-mono tabular-nums text-success; }
   .money-negative { @apply font-mono tabular-nums text-danger; }
 
   /* ── Barras de herramientas y pestañas ───────────── */
   .toolbar {
-    @apply flex flex-wrap items-end gap-3 bg-white border border-line rounded-md p-3 shadow-panel;
+    @apply flex flex-wrap items-end gap-3 rounded-md border border-line bg-white p-3 shadow-panel;
   }
   .tabs {
-    @apply flex items-center gap-1 border-b border-line overflow-x-auto;
+    @apply flex items-center gap-1 overflow-x-auto border-b border-line;
   }
   .tab {
-    @apply inline-flex items-center gap-2 px-3 py-2.5 text-[12px] font-medium text-slate-500
-           border-b-2 border-transparent hover:text-slate-800 hover:border-slate-300 transition-colors whitespace-nowrap;
+    @apply inline-flex items-center gap-2 whitespace-nowrap border-b-2 border-transparent px-3 py-2.5
+           text-xs font-medium text-muted transition-colors hover:border-slate-300 hover:text-slate-800;
   }
-  .tab-active { @apply text-primary border-primary hover:text-primary hover:border-primary; }
+  .tab-active { @apply border-primary text-primary hover:border-primary hover:text-primary; }
 
   /* ── Badges ──────────────────────────────────────── */
-  .badge-green   { @apply inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[10.5px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap; }
-  .badge-blue    { @apply inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[10.5px] font-semibold bg-sky-50 text-sky-700 border border-sky-200 whitespace-nowrap; }
-  .badge-orange  { @apply inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[10.5px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap; }
-  .badge-red     { @apply inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[10.5px] font-semibold bg-red-50 text-red-700 border border-red-200 whitespace-nowrap; }
-  .badge-gray    { @apply inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[10.5px] font-semibold bg-slate-100 text-slate-600 border border-slate-200 whitespace-nowrap; }
+  .badge-green   { @apply inline-flex items-center gap-1 whitespace-nowrap rounded-sm border border-success/20 bg-success-soft px-1.5 py-0.5 text-2xs font-semibold text-success; }
+  .badge-blue    { @apply inline-flex items-center gap-1 whitespace-nowrap rounded-sm border border-primary/20 bg-primary-50 px-1.5 py-0.5 text-2xs font-semibold text-primary; }
+  .badge-orange  { @apply inline-flex items-center gap-1 whitespace-nowrap rounded-sm border border-warning/20 bg-warning-soft px-1.5 py-0.5 text-2xs font-semibold text-warning; }
+  .badge-red     { @apply inline-flex items-center gap-1 whitespace-nowrap rounded-sm border border-danger/20 bg-danger-soft px-1.5 py-0.5 text-2xs font-semibold text-danger; }
+  .badge-gray    { @apply inline-flex items-center gap-1 whitespace-nowrap rounded-sm border border-slate-200 bg-slate-100 px-1.5 py-0.5 text-2xs font-semibold text-slate-600; }
 
   /* ── Tablas ──────────────────────────────────────── */
-  .table-base { @apply w-full text-[12.5px] border-collapse; }
+  .table-base { @apply w-full border-collapse text-xs; }
   .table-base th {
-    @apply text-left text-2xs font-semibold text-slate-500 uppercase tracking-wider
-           py-2.5 px-3 bg-slate-50 border-b border-line whitespace-nowrap;
+    @apply whitespace-nowrap border-b border-line bg-slate-50 px-3 py-2.5 text-left text-2xs
+           font-semibold uppercase tracking-wide text-slate-600;
   }
-  .table-base td { @apply py-2.5 px-3 border-b border-slate-100 align-middle; }
+  .table-base td { @apply border-b border-slate-100 px-3 py-2.5 align-middle text-slate-700; }
   .table-base tbody tr:hover { @apply bg-slate-50; }
-  .table-base tfoot td { @apply py-2.5 px-3 font-semibold bg-slate-50/70; }
-  .table-dense th { @apply py-2 px-2.5; }
-  .table-dense td { @apply py-1.5 px-2.5; }
+  .table-base tfoot td { @apply border-b-0 bg-slate-50/70 px-3 py-2.5 font-semibold text-slate-800; }
+  .table-dense th { @apply px-2.5 py-2; }
+  .table-dense td { @apply px-2.5 py-1.5; }
   .table-sticky thead th { @apply sticky top-0 z-10; }
+  .num { @apply text-right font-mono tabular-nums; }
 
   /* ── Indicadores y progreso ──────────────────────── */
-  .progress-track { @apply h-1.5 w-full bg-slate-100 rounded-sm overflow-hidden; }
-  .progress-bar   { @apply h-full bg-primary rounded-sm; }
+  .progress-track { @apply h-2 w-full overflow-hidden rounded-full bg-slate-100; }
+  .progress-bar   { @apply h-full rounded-full bg-primary transition-[width] duration-300; }
   .chip {
-    @apply inline-flex items-center gap-1.5 px-2 py-1 rounded-sm border border-line bg-white
-           text-[11px] font-medium text-slate-600;
+    @apply inline-flex items-center gap-1.5 rounded-sm border border-line bg-white px-2 py-1
+           text-tiny font-medium text-slate-600;
   }
   .divider { @apply h-px w-full bg-line; }
 
   /* ── Scrollbar discreto ──────────────────────────── */
   .scroll-slim::-webkit-scrollbar { width: 8px; height: 8px; }
-  .scroll-slim::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
+  .scroll-slim::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
   .scroll-slim::-webkit-scrollbar-track { background: transparent; }
 }
 
@@ -149,6 +196,58 @@
   main { padding: 0 !important; overflow: visible !important; }
   body { background: #fff; }
   .card { box-shadow: none; break-inside: avoid; }
+  .badge-green, .badge-blue, .badge-orange, .badge-red, .badge-gray {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+/* ── Etiquetas QR (impresión 50 × 30 mm) ─────────────── */
+.etiquetas-print { display: none; }
+
+.etiqueta-impresa {
+  display: flex;
+  align-items: center;
+  gap: 1.5mm;
+  width: 50mm;
+  height: 30mm;
+  box-sizing: border-box;
+  padding: 2mm;
+  overflow: hidden;
+  background: #fff;
+  color: #000;
+}
+.etq-qr { flex: none; width: 22mm; height: 22mm; }
+.etq-qr img { display: block; width: 100%; height: 100%; }
+.etq-datos { min-width: 0; flex: 1; line-height: 1.15; }
+.etq-nombre {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 8pt;
+  font-weight: 700;
+}
+.etq-codigo { font-family: ui-monospace, monospace; font-size: 5pt; }
+.etq-fuerte { font-size: 10pt; font-weight: 800; }
+.etq-dato   { font-size: 6pt; }
+
+@media print {
+  @page etiqueta { size: 50mm 30mm; margin: 0; }
+
+  body.printing-etiquetas #root { display: none !important; }
+  body.printing-etiquetas .etiquetas-print {
+    display: flex !important;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: 0;
+  }
+  body.printing-etiquetas .etiqueta-impresa {
+    page: etiqueta;
+    break-inside: avoid;
+    break-after: page;
+  }
+  body.printing-etiquetas .etiqueta-impresa:last-child { break-after: auto; }
 }
 
 @media (prefers-reduced-motion: reduce) {

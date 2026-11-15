@@ -3,6 +3,17 @@ import type { EstadoPago, EstadoPedido, EstadoCompra, TipoMovimiento, TipoNotifi
 const COP = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
 export const formatCOP  = (n: number | null | undefined) => COP.format(Number(n) || 0);
 
+/** Formato compacto para ejes de gráficos: $1,2M · $850K · $950. */
+export const formatCOPCompact = (n: number | null | undefined) => {
+  const valor = Number(n) || 0;
+  const abs = Math.abs(valor);
+  if (abs >= 1_000_000) {
+    return `$${(valor / 1_000_000).toLocaleString('es-CO', { maximumFractionDigits: 1 })}M`;
+  }
+  if (abs >= 1_000) return `$${Math.round(valor / 1_000)}K`;
+  return `$${Math.round(valor)}`;
+};
+
 /**
  * Convierte un DECIMAL que llega de la API a number.
  * PDO devuelve los DECIMAL como string ("40000.00", "1.500"); si ese texto

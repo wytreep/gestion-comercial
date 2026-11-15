@@ -43,6 +43,41 @@ export interface Producto {
   margen_porcentaje?: number | null;
   categoria:         string;
   activo:            boolean;
+  /** Presente solo cuando el código escaneado resuelve a una etiqueta. */
+  etiqueta?:         Etiqueta;
+}
+
+// ── Categoría ─────────────────────────────────────────
+export interface Categoria {
+  id:          number;
+  nombre:      string;
+  descripcion: string | null;
+  activo:      boolean;
+  productos?:  number;
+}
+
+// ── Etiqueta QR ───────────────────────────────────────
+export type TipoEtiqueta   = 'producto' | 'canasta' | 'lote';
+export type EstadoEtiqueta = 'activa' | 'anulada';
+
+export interface Etiqueta {
+  id:              number;
+  codigo:          string;
+  tipo:            TipoEtiqueta;
+  producto_id:     number;
+  producto:        string | null;
+  codigo_producto: string | null;
+  unidad_medida:   'kilo' | 'canasta' | 'unidad' | null;
+  precio_venta:    number | null;
+  /** Peso de la canasta o del lote etiquetado. */
+  peso_kg:         number | null;
+  lote:            string | null;
+  fecha_empaque:   string;
+  estado:          EstadoEtiqueta;
+  usuario_id:      number | null;
+  usuario:         string | null;
+  created_at:      string;
+  contenido_qr:    string;
 }
 
 // ── Stock movimiento ──────────────────────────────────

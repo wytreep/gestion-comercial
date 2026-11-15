@@ -27,46 +27,54 @@ export default function NotificacionesPage() {
   return (
     <div className="space-y-5">
       <div className="page-header">
-        <h1 className="page-title">
-          Alertas y notificaciones
-          {pendientes > 0 && (
-            <span className="ml-2 bg-orange-400 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-              {pendientes}
-            </span>
-          )}
-        </h1>
+        <div>
+          <h1 className="page-title">
+            Alertas y notificaciones
+            {pendientes > 0 && (
+              <span className="ml-2 inline-flex min-w-5 items-center justify-center rounded-full bg-warning px-1.5 py-0.5 align-middle text-2xs font-bold text-white">
+                {pendientes}
+              </span>
+            )}
+          </h1>
+          <p className="page-subtitle">Deudas vencidas, stock bajo y avisos del sistema</p>
+        </div>
         {pendientes > 0 && (
-          <button onClick={() => leerTodasMut.mutate()} className="btn-secondary flex items-center gap-2">
-            <CheckCheck size={15} /> Marcar todas como leídas
+          <button onClick={() => leerTodasMut.mutate()} className="btn-secondary">
+            <CheckCheck size={15} aria-hidden="true" /> Marcar todas como leídas
           </button>
         )}
       </div>
 
       {isLoading ? <Spinner /> : notifs.length === 0 ? (
-        <div className="card flex flex-col items-center py-12 gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50 text-success">
-            <CheckCircle2 size={20} />
-          </span>
-          <p className="font-semibold text-success">Sin alertas pendientes</p>
-          <p className="text-[11.5px] text-slate-400">El sistema revisará deudas vencidas y stock bajo automáticamente</p>
+        <div className="card">
+          <Empty
+            icon={<CheckCircle2 size={20} />}
+            title="Sin alertas pendientes"
+            description="El sistema revisará deudas vencidas y stock bajo automáticamente."
+          />
         </div>
       ) : (
         <div className="space-y-2">
           {notifs.map(n => (
-            <div key={n.id}
-              className={`card flex items-start gap-4 ${!n.leida ? 'border-l-4 border-l-orange-400 bg-orange-50/30' : 'opacity-60'}`}>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
+            <div
+              key={n.id}
+              className={`card flex items-start gap-4 ${!n.leida ? 'border-l-4 border-l-warning bg-warning-soft/30' : 'opacity-60'}`}
+            >
+              <div className="min-w-0 flex-1">
+                <div className="mb-1 flex flex-wrap items-center gap-2">
                   <BadgeNotif tipo={n.tipo} />
-                  <span className="text-xs text-gray-400">{formatDateTime(n.created_at)}</span>
+                  <span className="text-2xs text-muted">{formatDateTime(n.created_at)}</span>
                 </div>
-                <p className="text-sm font-semibold text-gray-800">{n.titulo}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{n.mensaje}</p>
+                <p className="text-xs font-semibold text-slate-800">{n.titulo}</p>
+                <p className="mt-0.5 text-tiny leading-relaxed text-muted">{n.mensaje}</p>
               </div>
               {!n.leida && (
-                <button onClick={() => leerMut.mutate(n.id)}
-                  className="shrink-0 btn-secondary btn-sm flex items-center gap-1">
-                  <Check size={12} /> Leída
+                <button
+                  onClick={() => leerMut.mutate(n.id)}
+                  className="btn-secondary btn-sm shrink-0"
+                  aria-label={`Marcar como leída: ${n.titulo}`}
+                >
+                  <Check size={12} aria-hidden="true" /> Leída
                 </button>
               )}
             </div>

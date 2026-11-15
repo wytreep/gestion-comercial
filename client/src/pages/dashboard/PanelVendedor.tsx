@@ -6,7 +6,7 @@ import {
   PlusCircle, ReceiptText, Users,
 } from 'lucide-react';
 import { dashboardApi } from '../../api/endpoints';
-import { KpiCard, Spinner, BadgeEstadoPago, BadgeEstadoPedido } from '../../components/ui';
+import { Alert, KpiCard, Spinner, BadgeEstadoPago, BadgeEstadoPedido, Empty } from '../../components/ui';
 import { currentMonthKey, formatCOP, formatCantidad, formatMes } from '../../utils/format';
 
 export default function PanelVendedor() {
@@ -21,18 +21,14 @@ export default function PanelVendedor() {
 
   if (isLoading) return <Spinner size="lg" />;
   if (error || !data) {
-    return (
-      <div className="rounded-sm border border-red-200 bg-red-50 px-3 py-2.5 text-[12px] text-red-700">
-        No fue posible cargar el panel de control.
-      </div>
-    );
+    return <Alert type="error" message="No fue posible cargar el panel de control. Intenta recargar la página." />;
   }
 
   const r = data.resumen_mes;
   const ticket = r.ventas_count > 0 ? r.ventas_total / r.ventas_count : 0;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div className="page-header">
         <div>
           <h1 className="page-title">Panel de control</h1>
@@ -40,10 +36,10 @@ export default function PanelVendedor() {
         </div>
         <div className="no-print flex flex-wrap items-center gap-2">
           <button onClick={() => navigate('/cartera')} className="btn-secondary">
-            <HandCoins size={14} /> Cobrar cartera
+            <HandCoins size={14} aria-hidden="true" /> Cobrar cartera
           </button>
           <button onClick={() => navigate('/ventas/nueva')} className="btn-primary">
-            <PlusCircle size={14} /> Nueva venta
+            <PlusCircle size={14} aria-hidden="true" /> Nueva venta
           </button>
         </div>
       </div>
@@ -51,14 +47,14 @@ export default function PanelVendedor() {
       {data.notificaciones_pendientes > 0 && (
         <button
           onClick={() => navigate('/notificaciones')}
-          className="flex w-full items-center gap-2.5 rounded-sm border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-left text-[12px] text-amber-800 transition-colors hover:bg-amber-100"
+          className="flex w-full items-center gap-2.5 rounded border border-warning/25 bg-warning-soft px-3.5 py-2.5 text-left text-xs text-warning transition-colors hover:bg-warning/10"
         >
-          <AlertTriangle size={15} className="shrink-0" />
+          <AlertTriangle size={15} className="shrink-0" aria-hidden="true" />
           <span className="font-medium">
             {data.notificaciones_pendientes} alerta{data.notificaciones_pendientes === 1 ? '' : 's'} pendiente{data.notificaciones_pendientes === 1 ? '' : 's'}
           </span>
-          <span className="ml-auto inline-flex items-center gap-1 text-[11px] underline">
-            Revisar <ArrowRight size={11} />
+          <span className="ml-auto inline-flex items-center gap-1 text-tiny underline">
+            Revisar <ArrowRight size={11} aria-hidden="true" />
           </span>
         </button>
       )}
@@ -98,11 +94,11 @@ export default function PanelVendedor() {
         <div className="overflow-hidden rounded-md border border-line bg-white shadow-panel xl:col-span-2">
           <div className="card-header">
             <div>
-              <p className="text-[12px] font-semibold text-slate-800">Últimas ventas</p>
-              <p className="text-[10.5px] text-slate-500">Movimientos recientes</p>
+              <p className="text-xs font-semibold text-slate-800">Últimas ventas</p>
+              <p className="text-2xs text-muted">Movimientos recientes</p>
             </div>
             <button onClick={() => navigate('/ventas')} className="btn-ghost">
-              Ver todas <ArrowRight size={12} />
+              Ver todas <ArrowRight size={12} aria-hidden="true" />
             </button>
           </div>
           <div className="overflow-x-auto">
@@ -120,17 +116,17 @@ export default function PanelVendedor() {
               <tbody>
                 {data.ultimas_ventas.map((v: any) => (
                   <tr key={v.id}>
-                    <td className="font-mono text-slate-500">#{v.id}</td>
+                    <td className="font-mono text-muted">#{v.id}</td>
                     <td className="font-medium text-slate-700">{v.cliente}</td>
-                    <td className="text-slate-500">{v.fecha}</td>
-                    <td className="text-right font-mono font-semibold text-slate-900">{formatCOP(v.total)}</td>
+                    <td className="whitespace-nowrap text-muted">{v.fecha}</td>
+                    <td className="num font-semibold text-slate-900">{formatCOP(v.total)}</td>
                     <td><BadgeEstadoPago estado={v.estado_pago} /></td>
                     <td><BadgeEstadoPedido estado={v.estado_pedido} /></td>
                   </tr>
                 ))}
                 {data.ultimas_ventas.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="py-8 text-center text-[11.5px] text-slate-500">Sin ventas registradas</td>
+                    <td colSpan={6} className="py-8 text-center text-tiny text-muted">Sin ventas registradas</td>
                   </tr>
                 )}
               </tbody>
@@ -142,25 +138,28 @@ export default function PanelVendedor() {
           <div className="card">
             <div className="mb-3 flex items-center justify-between">
               <p className="card-title mb-0">Stock disponible</p>
-              <Boxes size={15} className="text-slate-400" />
+              <Boxes size={15} className="text-muted" aria-hidden="true" />
             </div>
-            <div className="space-y-3">
-              {data.stock.map((p) => (
-                <div key={p.nombre} className="flex items-center justify-between gap-3 border-b border-slate-100 pb-2.5 last:border-0 last:pb-0">
-                  <div className="min-w-0">
-                    <p className="truncate text-[12px] font-medium text-slate-700">{p.nombre}</p>
-                    <p className="text-[10px] text-slate-500">{formatCOP(p.precio_venta)} / {p.unidad_medida === 'unidad' ? 'unidad' : 'kg'}</p>
+            {data.stock.length === 0 ? (
+              <Empty message="Sin productos activos" />
+            ) : (
+              <div className="space-y-3">
+                {data.stock.map((p) => (
+                  <div key={p.nombre} className="flex items-center justify-between gap-3 border-b border-slate-100 pb-2.5 last:border-0 last:pb-0">
+                    <div className="min-w-0">
+                      <p className="truncate text-xs font-medium text-slate-700">{p.nombre}</p>
+                      <p className="text-2xs text-muted">{formatCOP(p.precio_venta)} / {p.unidad_medida === 'unidad' ? 'unidad' : 'kg'}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="money text-xs font-semibold text-slate-900">{formatCantidad(p.stock_actual)}</p>
+                      <p className="text-2xs text-muted">{p.unidad_medida === 'canasta' ? 'kg en stock' : p.unidad_medida}</p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-mono text-[12.5px] font-semibold text-slate-900">{formatCantidad(p.stock_actual)}</p>
-                    <p className="text-[9.5px] text-slate-500">{p.unidad_medida === 'canasta' ? 'kg en stock' : p.unidad_medida}</p>
-                  </div>
-                </div>
-              ))}
-              {data.stock.length === 0 && <p className="py-4 text-center text-[11.5px] text-slate-500">Sin productos activos</p>}
-            </div>
+                ))}
+              </div>
+            )}
             <button onClick={() => navigate('/productos')} className="btn-ghost mt-3 w-full justify-between border-t border-line pt-2.5">
-              Ver productos <ArrowUpRight size={12} />
+              Ver productos <ArrowUpRight size={12} aria-hidden="true" />
             </button>
           </div>
 
@@ -185,8 +184,8 @@ function QuickAction({ label, icon, onClick }: { label: string; icon: ReactNode;
       onClick={onClick}
       className="flex flex-col items-start gap-1.5 rounded border border-line bg-white px-3 py-2.5 text-left transition-colors hover:border-primary hover:bg-primary-50"
     >
-      <span className="text-slate-400">{icon}</span>
-      <span className="text-[11.5px] font-medium text-slate-700">{label}</span>
+      <span className="text-primary" aria-hidden="true">{icon}</span>
+      <span className="text-tiny font-medium text-slate-700">{label}</span>
     </button>
   );
 }

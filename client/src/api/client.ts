@@ -52,11 +52,32 @@ client.interceptors.response.use(
         return Promise.reject(e);
       } finally { refreshing = false; }
     }
-    return Promise.reject(new Error(
-      error.response?.data?.message ?? error.message ?? 'Error de conexión'
-    ));
+    return Promise.reject(new Error(mensajeError(error)));
   }
 );
+
+/**
+ * Mensaje legible para el usuario.
+ *
+ * Las validaciones del backend devuelven `data.errors` con un mensaje por
+ * campo. Mostrar solo "Error de validación" obliga al usuario a adivinar qué
+ * corregir, así que se prioriza el primer error concreto.
+ */
+function mensajeError(error: AxiosError<ApiResponse>): string {
+  const payload = error.response?.data as
+    | { message?: string; data?: { errors?: Record<string, string> } }
+    | undefined;
+
+  const errores = payload?.data?.errors;
+  if (errores && typeof errores === 'object') {
+    const primero = Object.values(errores).find(
+      (mensaje): mensaje is string => typeof mensaje === 'string' && mensaje !== ''
+    );
+    if (primero) return primero;
+  }
+
+  return payload?.message ?? error.message ?? 'Error de conexión';
+}
 
 function clearSession() {
   localStorage.removeItem('access_token');
