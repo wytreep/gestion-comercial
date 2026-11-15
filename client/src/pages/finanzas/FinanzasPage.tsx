@@ -57,9 +57,6 @@ export default function FinanzasPage() {
       <div className="page-header">
         <div>
           <h1 className="page-title">Finanzas</h1>
-          <p className="page-subtitle">
-            Estado de resultados, flujo de caja e indicadores · {data.periodo_label}
-          </p>
         </div>
         <div className="no-print flex flex-wrap items-end gap-2">
           <div className="field">
@@ -185,10 +182,10 @@ function VistaPyL({ data }: { data: FinanzasData }) {
     <div className="space-y-4">
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         {/* Estado de resultados */}
-        <div className="overflow-hidden rounded-md border border-line bg-white shadow-panel xl:col-span-2">
+        <div className="overflow-hidden rounded-md border border-line bg-card shadow-panel xl:col-span-2">
           <div className="card-header">
             <div>
-              <p className="text-xs font-semibold text-slate-800">Estado de resultados</p>
+              <p className="text-xs font-semibold text-ink">Estado de resultados</p>
               <p className="text-2xs text-muted">Del 1 al último día de {data.periodo_label}</p>
             </div>
             <span className="chip">Devengado · sin IVA</span>
@@ -313,8 +310,8 @@ function VistaPyL({ data }: { data: FinanzasData }) {
                 return (
                   <div key={g.categoria}>
                     <div className="mb-1 flex items-center justify-between gap-2 text-tiny">
-                      <span className="text-slate-600">{CATEGORIA_GASTO[g.categoria] ?? g.categoria}</span>
-                      <span className="money font-semibold text-slate-800">{formatCOP(g.monto)}</span>
+                      <span className="text-soft">{CATEGORIA_GASTO[g.categoria] ?? g.categoria}</span>
+                      <span className="money font-semibold text-ink">{formatCOP(g.monto)}</span>
                     </div>
                     <div
                       className="progress-track"
@@ -331,16 +328,16 @@ function VistaPyL({ data }: { data: FinanzasData }) {
               })}
               <div className="flex items-center justify-between border-t border-line pt-2 text-tiny">
                 <span className="font-medium text-muted">Total gastos</span>
-                <span className="money font-semibold text-slate-900">{formatCOP(er.gastos_operativos)}</span>
+                <span className="money font-semibold text-ink">{formatCOP(er.gastos_operativos)}</span>
               </div>
             </div>
           )}
         </div>
 
-        <div className="overflow-hidden rounded-md border border-line bg-white shadow-panel xl:col-span-2">
+        <div className="overflow-hidden rounded-md border border-line bg-card shadow-panel xl:col-span-2">
           <div className="card-header">
             <div>
-              <p className="text-xs font-semibold text-slate-800">Rentabilidad por producto</p>
+              <p className="text-xs font-semibold text-ink">Rentabilidad por producto</p>
               <p className="text-2xs text-muted">Ventas, costo y margen del período</p>
             </div>
             <span className="chip">{plural(data.productos.length, 'producto')}</span>
@@ -365,7 +362,7 @@ function VistaPyL({ data }: { data: FinanzasData }) {
                   {data.productos.map((p) => (
                     <tr key={p.id}>
                       <td>
-                        <p className="font-medium text-slate-800">{p.nombre}</p>
+                        <p className="font-medium text-ink">{p.nombre}</p>
                         <p className="text-2xs capitalize text-muted">{p.unidad_medida}</p>
                       </td>
                       <td className="num">{formatCantidad(p.unidades)}</td>
@@ -374,7 +371,7 @@ function VistaPyL({ data }: { data: FinanzasData }) {
                       <td className={clsx('num font-semibold', p.utilidad >= 0 ? 'text-success' : 'text-danger')}>
                         {formatCOP(p.utilidad)}
                       </td>
-                      <td className={clsx('num font-semibold', p.margen >= 0 ? 'text-slate-700' : 'text-danger')}>
+                      <td className={clsx('num font-semibold', p.margen >= 0 ? 'text-body' : 'text-danger')}>
                         {formatPct(p.margen)}
                       </td>
                       <td>
@@ -479,7 +476,7 @@ function VistaFlujo({ data }: { data: FinanzasData }) {
                   <div key={s.destino_dinero}>
                     <div className="mb-1 flex items-center justify-between gap-2">
                       <BadgeDestino destino={s.destino_dinero} />
-                      <span className="money text-tiny font-semibold text-slate-800">{formatCOP(s.total)}</span>
+                      <span className="money text-tiny font-semibold text-ink">{formatCOP(s.total)}</span>
                     </div>
                     <div
                       className="progress-track"
@@ -507,7 +504,7 @@ function VistaFlujo({ data }: { data: FinanzasData }) {
                 {f.por_medio.map((m) => (
                   <div key={m.medio_pago} className="flex items-center justify-between">
                     <BadgeMedioPago medio={m.medio_pago as 'efectivo' | 'transferencia'} />
-                    <span className="money text-tiny text-slate-700">{formatCOP(m.total)}</span>
+                    <span className="money text-tiny text-body">{formatCOP(m.total)}</span>
                   </div>
                 ))}
               </div>
@@ -519,13 +516,13 @@ function VistaFlujo({ data }: { data: FinanzasData }) {
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <div className="panel-dark p-4">
           <div className="flex items-center justify-between">
-            <p className="text-2xs font-semibold uppercase tracking-widest text-slate-400">Posición de caja</p>
-            <Wallet size={15} className="text-slate-400" aria-hidden="true" />
+            <p className="text-2xs font-semibold uppercase tracking-widest text-subtle">Posición de caja</p>
+            <Wallet size={15} className="text-subtle" aria-hidden="true" />
           </div>
           <p className={clsx('mt-2 font-mono text-[26px] font-semibold tabular-nums', f.posicion_caja >= 0 ? 'text-success-invert' : 'text-danger-invert')}>
             {formatCOP(f.posicion_caja)}
           </p>
-          <p className="mt-1 text-2xs text-slate-400">Cobros históricos − compras históricas</p>
+          <p className="mt-1 text-2xs text-subtle">Cobros históricos − compras históricas</p>
           <div className="mt-4 space-y-2 border-t border-white/10 pt-3 text-tiny">
             <DarkRow label="Cobros del período" value={formatCOP(f.ingresos)} />
             <DarkRow label="Compras del período" value={formatCOP(f.egresos)} />
@@ -533,10 +530,10 @@ function VistaFlujo({ data }: { data: FinanzasData }) {
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-md border border-line bg-white shadow-panel xl:col-span-2">
+        <div className="overflow-hidden rounded-md border border-line bg-card shadow-panel xl:col-span-2">
           <div className="card-header">
             <div>
-              <p className="text-xs font-semibold text-slate-800">Compras y egresos del período</p>
+              <p className="text-xs font-semibold text-ink">Compras y egresos del período</p>
               <p className="text-2xs text-muted">{plural(f.num_compras, 'compra registrada', 'compras registradas')}</p>
             </div>
             <Boxes size={15} className="text-muted" />
@@ -561,10 +558,10 @@ function VistaFlujo({ data }: { data: FinanzasData }) {
                     <tr key={c.id}>
                       <td className="font-mono text-muted">#{c.id}</td>
                       <td className="whitespace-nowrap text-muted">{formatFechaCorta(c.fecha_compra)}</td>
-                      <td className="font-medium text-slate-700">{c.proveedor}</td>
+                      <td className="font-medium text-body">{c.proveedor}</td>
                       <td className="num">{formatCOP(c.total_productos)}</td>
                       <td className="num text-muted">{formatCOP(c.total_gastos)}</td>
-                      <td className="num font-semibold text-slate-900">{formatCOP(c.total_inversion)}</td>
+                      <td className="num font-semibold text-ink">{formatCOP(c.total_inversion)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -580,10 +577,10 @@ function VistaFlujo({ data }: { data: FinanzasData }) {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-md border border-line bg-white shadow-panel">
+      <div className="overflow-hidden rounded-md border border-line bg-card shadow-panel">
         <div className="card-header">
           <div>
-            <p className="text-xs font-semibold text-slate-800">Detalle diario de caja</p>
+            <p className="text-xs font-semibold text-ink">Detalle diario de caja</p>
             <p className="text-2xs text-muted">Movimiento acumulado del período</p>
           </div>
           <span className="chip">{plural(serie.length, 'día')}</span>
@@ -605,10 +602,10 @@ function VistaFlujo({ data }: { data: FinanzasData }) {
                   <td className="whitespace-nowrap text-muted">{d.label}</td>
                   <td className="num text-success">{d.ingresos ? formatCOP(d.ingresos) : '—'}</td>
                   <td className="num text-danger">{d.egresos ? formatCOP(d.egresos) : '—'}</td>
-                  <td className={clsx('num font-semibold', d.neto >= 0 ? 'text-slate-700' : 'text-danger')}>
+                  <td className={clsx('num font-semibold', d.neto >= 0 ? 'text-body' : 'text-danger')}>
                     {formatCOP(d.neto)}
                   </td>
-                  <td className={clsx('num font-semibold', d.acumulado >= 0 ? 'text-slate-800' : 'text-danger')}>
+                  <td className={clsx('num font-semibold', d.acumulado >= 0 ? 'text-ink' : 'text-danger')}>
                     {formatCOP(d.acumulado)}
                   </td>
                 </tr>
@@ -656,7 +653,7 @@ function VistaIndicadores({ data }: { data: FinanzasData }) {
           label="Punto de equilibrio"
           value={formatCOP(i.punto_equilibrio)}
           sub={porEncima >= 0 ? `Superado por ${formatCOP(porEncima)}` : `Faltan ${formatCOP(Math.abs(porEncima))}`}
-          accent={porEncima >= 0 ? 'text-slate-900' : 'text-danger'}
+          accent={porEncima >= 0 ? 'text-ink' : 'text-danger'}
         />
         <IndicadorCard
           icon={<Clock3 size={14} />}
@@ -682,7 +679,7 @@ function VistaIndicadores({ data }: { data: FinanzasData }) {
           label="Cartera sobre ventas"
           value={formatPct(i.cartera_sobre_ventas)}
           sub={`Cartera ${formatCOP(i.cartera)} / ventas del período`}
-          accent={i.cartera_sobre_ventas <= 30 ? 'text-slate-900' : 'text-warning'}
+          accent={i.cartera_sobre_ventas <= 30 ? 'text-ink' : 'text-warning'}
         />
       </div>
 
@@ -731,7 +728,7 @@ function VistaIndicadores({ data }: { data: FinanzasData }) {
             <p className="card-title mb-0">Lectura del período</p>
             <Gauge size={15} className="text-muted" aria-hidden="true" />
           </div>
-          <ul className="space-y-3 text-tiny leading-relaxed text-slate-600">
+          <ul className="space-y-3 text-tiny leading-relaxed text-soft">
             <Insight>
               {i.crecimiento_ventas == null
                 ? 'No hay ventas del mes anterior para comparar el crecimiento.'
@@ -765,10 +762,10 @@ function VistaIndicadores({ data }: { data: FinanzasData }) {
       </div>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <div className="overflow-hidden rounded-md border border-line bg-white shadow-panel">
+        <div className="overflow-hidden rounded-md border border-line bg-card shadow-panel">
           <div className="card-header">
             <div>
-              <p className="text-xs font-semibold text-slate-800">Ranking de productos por utilidad</p>
+              <p className="text-xs font-semibold text-ink">Ranking de productos por utilidad</p>
               <p className="text-2xs text-muted">Margen y participación sobre ventas</p>
             </div>
             <span className="chip">{plural(data.productos.length, 'producto')}</span>
@@ -789,11 +786,11 @@ function VistaIndicadores({ data }: { data: FinanzasData }) {
                 <tbody>
                   {[...data.productos].sort((a, b) => b.utilidad - a.utilidad).map((p: ProductoFinanciero) => (
                     <tr key={p.id}>
-                      <td className="font-medium text-slate-800">{p.nombre}</td>
+                      <td className="font-medium text-ink">{p.nombre}</td>
                       <td className={clsx('num font-semibold', p.utilidad >= 0 ? 'text-success' : 'text-danger')}>
                         {formatCOP(p.utilidad)}
                       </td>
-                      <td className={clsx('num', p.margen >= 0 ? 'text-slate-700' : 'text-danger')}>
+                      <td className={clsx('num', p.margen >= 0 ? 'text-body' : 'text-danger')}>
                         {formatPct(p.margen)}
                       </td>
                       <td>
@@ -819,10 +816,10 @@ function VistaIndicadores({ data }: { data: FinanzasData }) {
           )}
         </div>
 
-        <div className="overflow-hidden rounded-md border border-line bg-white shadow-panel">
+        <div className="overflow-hidden rounded-md border border-line bg-card shadow-panel">
           <div className="card-header">
             <div>
-              <p className="text-xs font-semibold text-slate-800">Comparativo mensual</p>
+              <p className="text-xs font-semibold text-ink">Comparativo mensual</p>
               <p className="text-2xs text-muted">Mes actual vs. {data.comparativo.periodo_label}</p>
             </div>
             <Scale size={15} className="text-muted" />
@@ -854,7 +851,7 @@ function VistaIndicadores({ data }: { data: FinanzasData }) {
 
 function PylSection({ label }: { label: string }) {
   return (
-    <tr className="bg-slate-50/80">
+    <tr className="bg-surface/80">
       <td colSpan={3} className="px-3 py-1.5 text-2xs font-semibold uppercase tracking-widest text-muted">
         {label}
       </td>
@@ -875,11 +872,11 @@ function PylRow({
   const pct = base > 0 ? (value / base) * 100 : 0;
   const isNegative = negative || value < 0;
   return (
-    <tr className={strong ? 'bg-slate-50/40' : undefined}>
-      <td className={clsx('py-2', indent && 'pl-6', strong ? 'font-semibold text-slate-900' : 'text-slate-600')}>
+    <tr className={strong ? 'bg-surface/40' : undefined}>
+      <td className={clsx('py-2', indent && 'pl-6', strong ? 'font-semibold text-ink' : 'text-soft')}>
         {label}
       </td>
-      <td className={clsx('num py-2', isNegative ? 'text-danger' : strong ? 'font-semibold text-slate-900' : 'text-slate-700')}>
+      <td className={clsx('num py-2', isNegative ? 'text-danger' : strong ? 'font-semibold text-ink' : 'text-body')}>
         {isNegative ? `(${formatCOP(Math.abs(value))})` : formatCOP(value)}
       </td>
       <td className="w-20 py-2 text-right font-mono text-2xs tabular-nums text-muted">
@@ -891,12 +888,12 @@ function PylRow({
 
 function MiniStat({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-2 last:border-0 last:pb-0">
+    <div className="flex items-start justify-between gap-3 border-b border-line pb-2 last:border-0 last:pb-0">
       <div>
-        <p className="text-tiny font-medium text-slate-600">{label}</p>
+        <p className="text-tiny font-medium text-soft">{label}</p>
         {sub && <p className="text-2xs text-muted">{sub}</p>}
       </div>
-      <p className="money shrink-0 text-[13px] font-semibold text-slate-900">{value}</p>
+      <p className="money shrink-0 text-[13px] font-semibold text-ink">{value}</p>
     </div>
   );
 }
@@ -904,14 +901,14 @@ function MiniStat({ label, value, sub }: { label: string; value: string; sub?: s
 function DarkRow({ label, value, strong, valueClass }: { label: string; value: string; strong?: boolean; valueClass?: string }) {
   return (
     <div className="flex items-center justify-between gap-3">
-      <span className="text-slate-400">{label}</span>
+      <span className="text-subtle">{label}</span>
       <span className={clsx('font-mono tabular-nums', strong ? 'font-semibold' : 'font-medium', valueClass ?? 'text-slate-100')}>{value}</span>
     </div>
   );
 }
 
 function IndicadorCard({
-  icon, label, value, sub, accent = 'text-slate-900',
+  icon, label, value, sub, accent = 'text-ink',
 }: {
   icon: React.ReactNode;
   label: string;
@@ -920,10 +917,10 @@ function IndicadorCard({
   accent?: string;
 }) {
   return (
-    <div className="rounded-md border border-line bg-white p-3.5 shadow-panel">
+    <div className="rounded-md border border-line bg-card p-3.5 shadow-panel">
       <div className="flex items-start justify-between gap-2">
         <p className="section-label leading-tight">{label}</p>
-        <span className="flex h-6 w-6 items-center justify-center rounded-sm border border-line bg-slate-50 text-slate-500" aria-hidden="true">
+        <span className="flex h-6 w-6 items-center justify-center rounded-sm border border-line bg-surface text-muted" aria-hidden="true">
           {icon}
         </span>
       </div>
@@ -960,8 +957,8 @@ function ComparativoRow({
 
   return (
     <tr>
-      <td className="font-medium text-slate-700">{label}</td>
-      <td className="num text-slate-800">{formatCOP(actual)}</td>
+      <td className="font-medium text-body">{label}</td>
+      <td className="num text-ink">{formatCOP(actual)}</td>
       <td className="num text-muted">{formatCOP(previo)}</td>
       <td className={clsx('num font-semibold', color)}>
         {diff == null ? '—' : `${diff >= 0 ? '+' : ''}${diff.toFixed(1)}%`}

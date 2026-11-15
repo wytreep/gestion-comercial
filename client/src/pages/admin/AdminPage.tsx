@@ -25,7 +25,6 @@ export default function AdminPage() {
       <div className="page-header">
         <div>
           <h1 className="page-title">Administración de usuarios</h1>
-          <p className="page-subtitle">Cuentas, roles y acceso al sistema</p>
         </div>
         <button onClick={() => setCreando(true)} className="btn-primary">
           <Plus size={15} aria-hidden="true" /> Nuevo usuario
@@ -56,7 +55,7 @@ export default function AdminPage() {
               <tbody>
                 {usuarios.map((u) => (
                   <tr key={u.id} className={!u.activo ? 'opacity-60' : undefined}>
-                    <td className="font-medium text-slate-800">{u.nombre}</td>
+                    <td className="font-medium text-ink">{u.nombre}</td>
                     <td className="text-muted">{u.email}</td>
                     <td><BadgeRol rol={u.rol} /></td>
                     <td><span className={u.activo ? 'badge-green' : 'badge-gray'}>{u.activo ? 'Activo' : 'Inactivo'}</span></td>

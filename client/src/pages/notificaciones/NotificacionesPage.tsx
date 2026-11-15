@@ -31,12 +31,11 @@ export default function NotificacionesPage() {
           <h1 className="page-title">
             Alertas y notificaciones
             {pendientes > 0 && (
-              <span className="ml-2 inline-flex min-w-5 items-center justify-center rounded-full bg-warning px-1.5 py-0.5 align-middle text-2xs font-bold text-white">
+              <span className="ml-2 inline-flex min-w-5 items-center justify-center rounded-full bg-warning-solid px-1.5 py-0.5 align-middle text-2xs font-bold text-white">
                 {pendientes}
               </span>
             )}
           </h1>
-          <p className="page-subtitle">Deudas vencidas, stock bajo y avisos del sistema</p>
         </div>
         {pendientes > 0 && (
           <button onClick={() => leerTodasMut.mutate()} className="btn-secondary">
@@ -65,7 +64,7 @@ export default function NotificacionesPage() {
                   <BadgeNotif tipo={n.tipo} />
                   <span className="text-2xs text-muted">{formatDateTime(n.created_at)}</span>
                 </div>
-                <p className="text-xs font-semibold text-slate-800">{n.titulo}</p>
+                <p className="text-xs font-semibold text-ink">{n.titulo}</p>
                 <p className="mt-0.5 text-tiny leading-relaxed text-muted">{n.mensaje}</p>
               </div>
               {!n.leida && (

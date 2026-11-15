@@ -16,33 +16,57 @@ Definidos en `client/tailwind.config.js`. **No se usan colores crudos de
 Tailwind** (`gray-*`, `red-*`, `emerald-*`, `amber-*`, `sky-*`, `teal-*`); todo
 pasa por estos tokens.
 
-### Marca y superficies
+Las superficies, la jerarquía de texto y los semánticos leen **variables CSS**
+declaradas en `client/src/index.css` (`:root` y `.dark`). Por eso cambiar de
+tema no requiere duplicar clases: alcanza con alternar `class="dark"` en
+`<html>`.
+
+### Marca
 
 | Token | Hex | Uso |
 |---|---|---|
-| `primary` | `#0b5cab` | Acción principal, enlaces, foco, acento de gráficos |
-| `primary-light` | `#2f7fc1` | Borde de foco en inputs |
-| `primary-hover` | `#084a8c` | Hover de botón primario |
-| `primary-dark` | `#083a6e` | Active de botón primario |
-| `primary-50` | `#eef5fd` | Fondo suave de selección |
-| `primary-invert` | `#7dd3fc` | Acento sobre navy (sidebar, header) |
+| `brand` | `#0b5cab` | Fondos sólidos de marca (botón primario, logo) |
+| `brand-hover` | `#084a8c` | Hover del botón primario |
+| `brand-dark` | `#083a6e` | Active del botón primario |
+| `accent` | variable | Texto, enlaces, iconos activos y foco |
+| `primary-50` | variable | Fondo suave de selección y badges azules |
 | `navy` | `#16232f` | Sidebar |
 | `navy-800` | `#1b2c3b` | Bordes de superficies oscuras |
 | `navy-900` | `#121e29` | Panel oscuro (posición de caja) |
 | `navy-950` | `#0c151d` | Header y footer del sidebar |
-| `canvas` | `#eef1f5` | Fondo de la aplicación |
-| `line` | `#dfe4ea` | Bordes, divisores, inputs |
-| `surface` | `#f8fafc` | Franjas y fondos alternos |
+
+> `brand` se reserva para fondos con texto blanco; `accent` para texto sobre
+> superficies. Nunca `text-brand` ni `bg-accent`: en modo oscuro el contraste
+> se pierde.
+
+### Superficies y texto
+
+| Token | Claro | Oscuro | Uso |
+|---|---|---|---|
+| `canvas` | `#eef1f5` | `#0b121a` | Fondo de la aplicación |
+| `card` | `#ffffff` | `#151e29` | Tarjetas, modales, header de tabla |
+| `surface` | `#f8fafc` | `#1b2632` | Franjas alternas, hover de fila |
+| `surface-2` | `#f1f5f9` | `#222f3d` | Chips, tracks, badges neutros |
+| `line` | `#dfe4ea` | `#2d3c4d` | Bordes, divisores, inputs |
+| `ink` | `#1f2937` | `#e9eff6` | Títulos y cifras principales |
+| `body` | `#334155` | `#cbd5e2` | Cuerpo de tabla |
+| `soft` | `#475569` | `#b0bdcc` | Etiquetas y texto de apoyo |
+| `muted` | `#5b6b7f` | `#9cabbc` | Texto secundario |
+| `subtle` | `#8a99ab` | `#8293a5` | Solo iconos decorativos y deshabilitados |
 
 ### Semánticos de estado
 
-| Token | Hex | Fondo suave | Uso |
-|---|---|---|---|
-| `success` | `#157347` | `success-soft` `#e9f5ef` | Pagado, utilidad, flujo positivo |
-| `warning` | `#b45309` | `warning-soft` `#fdf3e4` | Pendiente, abono, alertas |
-| `danger` | `#b42318` | `danger-soft` `#fdeceb` | Fiado, saldo, error, cancelado |
-| `teal` | `#0f766e` | — | Serie secundaria de gráficos |
-| `emerald` | `#047857` | — | Utilidad bruta en KPIs |
+| Token | Claro | Oscuro | Fondo suave | Uso |
+|---|---|---|---|---|
+| `success` | `#157347` | `#6ee7b7` | `success-soft` | Pagado, utilidad, flujo positivo |
+| `warning` | `#b45309` | `#fcd34d` | `warning-soft` | Pendiente, abono, alertas |
+| `danger` | `#b42318` | `#fca5a5` | `danger-soft` | Fiado, saldo, error, cancelado |
+| `teal` | `#0f766e` | `#2dd4bf` | — | Serie secundaria de gráficos |
+| `emerald` | `#047857` | — | — | Utilidad bruta en KPIs |
+
+Los semánticos cambian con el tema para mantener contraste sobre superficies
+oscuras. Para **fondos con texto blanco** (botones, contadores) usar la variante
+sólida, que no cambia: `success-solid`, `warning-solid`, `danger-solid`.
 
 Sobre superficies oscuras (navy) usar los tintes `*-invert`:
 
@@ -55,22 +79,54 @@ Sobre superficies oscuras (navy) usar los tintes `*-invert`:
 
 ### Jerarquía de texto
 
-| Token / clase | Hex | Uso |
-|---|---|---|
-| `ink` / `text-slate-900` | `#1f2937` | Títulos y cifras principales |
-| `text-slate-800` | — | Nombres propios en tablas |
-| `text-slate-700` | — | Cuerpo de tabla |
-| `text-slate-600` | — | Etiquetas y texto de apoyo |
-| `text-muted` | `#5b6b7f` | Texto secundario (5.4:1 sobre blanco) |
-| `text-subtle` | `#8a99ab` | Solo iconos decorativos y estados deshabilitados |
-| `text-slate-400` | — | Iconos y texto sobre fondos oscuros |
+| Token / clase | Uso |
+|---|---|
+| `text-ink` | Títulos, cifras principales, nombres en tablas |
+| `text-body` | Cuerpo de tabla y formularios |
+| `text-soft` | Etiquetas y texto de apoyo |
+| `text-muted` | Texto secundario (metadatos, ayudas) |
+| `text-subtle` | Solo iconos decorativos y estados deshabilitados |
+| `text-accent` | Enlaces, acciones de texto, iconos activos |
 
-**Nunca** usar `text-slate-500` sobre fondos oscuros: se pierde legibilidad.
-Ahí va `text-slate-400`.
+**Nunca** usar `text-subtle` para texto legible ni `text-muted` sobre navy: ahí
+va `text-slate-400`. Las clases `text-slate-*` solo se conservan en la barra
+lateral y el header, que son superficies fijas.
+
+---
+
+## 1.b Modo oscuro
+
+- Se activa con `class="dark"` en `<html>`; `tailwind.config.js` usa
+  `darkMode: 'class'`.
+- Preferencia por usuario en `usuarios.tema` (`claro` · `oscuro` · `sistema`),
+  guardada por `PATCH /api/v1/auth/preferencias`. Sin sesión se guarda en
+  `localStorage` (`tema`).
+- `sistema` sigue `prefers-color-scheme` y se actualiza si el dispositivo
+  cambia mientras la app está abierta.
+- `client/index.html` aplica el tema antes del primer pintado para evitar el
+  destello blanco.
+- El selector `TemaMenu` de la cabecera expone `role="menu"` /
+  `menuitemradio`, flechas, Escape y devuelve el foco al botón.
+- Los gráficos leen variables `--chart-*`, así que heredan el tema sin
+  recalcular series.
+- `color-scheme` se ajusta para que los controles nativos (fecha, scrollbar)
+  acompañen.
+
+**Reglas al crear componentes**
+
+- Usar siempre tokens (`bg-card`, `text-body`, `border-line`), nunca `bg-white`
+  ni hex.
+- Fondos con texto blanco: `brand`, `*-solid` o navy, nunca `bg-danger` (en
+  oscuro se aclara y pierde contraste).
+- Probar cada pantalla nueva en claro y oscuro antes de cerrar el cambio.
 
 ---
 
 ## 2. Escala tipográfica
+
+Tipografía: **Source Sans 3** para toda la interfaz (400/500/600/700) e
+**IBM Plex Mono** para cifras y códigos. Se cargan desde Google Fonts en
+`index.css` y se declaran en `tailwind.config.js` (`font-sans` / `font-mono`).
 
 | Clase | Tamaño / interlineado | Uso |
 |---|---|---|
@@ -127,9 +183,9 @@ Los botones **no llevan sombra**; solo cambio de color en hover/active.
 ### Formularios
 
 - `.field` agrupa `label` + control + ayuda.
-- `.label` en mayúsculas, `text-2xs`, `text-slate-600`.
-- `.input` 34 px de alto, borde `line`, foco con anillo
-  `primary` al 12 %, error con `aria-invalid="true"`.
+- `.label` en mayúsculas, `text-2xs`, `text-soft`.
+- `.input` 34 px de alto, borde `line`, foco con anillo de `accent` al 22 %,
+  error con `aria-invalid="true"`.
 - Los `select` llevan chevron SVG incrustado desde CSS.
 - Ayuda contextual: `.field-help`; error: `.input-error`.
 
@@ -158,8 +214,8 @@ Se generan desde `BADGE_PAGO`, `BADGE_PEDIDO`, `BADGE_COMPRA`,
   <thead><tr><th>Cliente</th><th className="text-right">Total</th></tr></thead>
   <tbody>
     <tr>
-      <td className="font-medium text-slate-800">Nombre</td>
-      <td className="num font-semibold text-slate-900">$ 12.000</td>
+      <td className="font-medium text-ink">Nombre</td>
+      <td className="num font-semibold text-ink">$ 12.000</td>
     </tr>
   </tbody>
 </table>
@@ -167,11 +223,12 @@ Se generan desde `BADGE_PAGO`, `BADGE_PEDIDO`, `BADGE_COMPRA`,
 
 - Columnas numéricas: `className="num"` (alineación derecha + mono + tabular).
 - Encabezados numéricos también `text-right`.
-- Importes secundarios: `text-muted`; importes principales: `text-slate-900`.
+- Importes secundarios: `text-muted`; importes principales: `text-ink`.
 - Filas canceladas o inactivas: `opacity-60` o `line-through`, no color rojo
   en toda la fila.
 - Tablas dentro de tarjeta: contenedor `card overflow-hidden p-0` y
   `overflow-x-auto` para el scroll horizontal.
+- Cabecera fija: `.table-sticky` (usa `z-sticky`, por debajo de menús y modales).
 
 ---
 
@@ -193,7 +250,7 @@ participación.
 </div>
 ```
 
-- Track `h-2` con `bg-slate-100`; barra con `bg-primary` por defecto.
+- Track `h-2` con `bg-surface-2`; barra con `bg-primary` por defecto.
 - Colores: `bg-success` (positivo), `bg-warning` (gastos), `bg-danger`
   (negativo), `bg-teal` (destinos).
 - Siempre con `aria-valuenow` y `aria-label` descriptivo.
@@ -255,6 +312,29 @@ Reglas:
 
 ---
 
+## 8.b Capas (z-index)
+
+Escala única en `tailwind.config.js`; no usar valores arbitrarios salvo en
+casos puntuales justificados.
+
+| Token | Valor | Elemento |
+|---|---|---|
+| `z-sticky` | 10 | Header, cabecera fija de tablas |
+| `z-dropdown` | 30 | Menús, sugerencias, overlay del drawer |
+| `z-drawer` | 40 | Drawer móvil |
+| `z-modal` | 50 | Modales y diálogos |
+| `z-toast` | 60 | Avisos flotantes |
+| `z-skip` | 70 | Enlace “Saltar al contenido” |
+
+Reglas:
+
+- Un modal nunca comparte capa con el drawer: si se abre un modal desde el
+  drawer, el modal va por encima.
+- El overlay del drawer usa `z-dropdown` para quedar debajo del panel.
+- Los tooltips de gráficos (Recharts) viven dentro del SVG y no compiten.
+
+---
+
 ## 9. Responsive
 
 - Rejilla de KPIs: `grid-cols-1 sm:grid-cols-2 xl:grid-cols-5`.
@@ -294,9 +374,21 @@ Cada vez que un cambio altere la estructura visual, repasar:
 
 **Color y contraste**
 - [ ] No quedan colores crudos (`gray-*`, `red-*`, `sky-*`, `emerald-*`, `amber-*`).
+- [ ] Nada de `bg-white` ni hex sueltos: todo vía tokens de superficie.
 - [ ] Nada de `text-slate-500` sobre navy.
-- [ ] Texto secundario en `text-muted`, no en `text-slate-400` sobre blanco.
+- [ ] Texto secundario en `text-muted`, no en `text-subtle`.
 - [ ] Estados usan `success` / `warning` / `danger` y su `-soft`.
+- [ ] Fondos con texto blanco usan `brand` o `*-solid`, no el semántico base.
+
+**Modo oscuro**
+- [ ] La pantalla se ve bien en claro y en oscuro.
+- [ ] El tema persiste al recargar y sigue al dispositivo en “Sistema”.
+- [ ] Gráficos, badges y scrollbar acompañan el tema.
+- [ ] El selector de tema funciona con teclado (flechas, Escape, foco).
+
+**Capas**
+- [ ] Header con `z-sticky`; menús con `z-dropdown`; drawer con `z-drawer`.
+- [ ] Modales con `z-modal`; ningún `z-50`/`z-[…]` suelto.
 
 **Tipografía**
 - [ ] Nada por debajo de 11 px.
@@ -318,6 +410,13 @@ Cada vez que un cambio altere la estructura visual, repasar:
 - [ ] Gráficos con `CHART` y `role="img"`.
 - [ ] Botones sin sombra; una sola acción `btn-primary` por vista.
 - [ ] Iconos decorativos con `aria-hidden="true"`.
+
+**Accesibilidad de teclado**
+- [ ] Tab recorre la pantalla en orden lógico; el skip link aparece al enfocar.
+- [ ] Drawer y modales atrapan el foco, cierran con Escape y lo devuelven.
+- [ ] Menús (tema, sugerencias) se abren con Enter/Espacio y navegan con flechas.
+- [ ] Todo control con solo icono tiene `aria-label` y `title`.
+- [ ] El foco es visible en claro y en oscuro.
 
 **Verificación técnica**
 - [ ] `npm run build` en `client/` compila sin errores.

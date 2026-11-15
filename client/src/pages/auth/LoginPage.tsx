@@ -29,14 +29,14 @@ export default function LoginPage() {
               <BarChart3 size={21} className="text-white" strokeWidth={2.4} aria-hidden="true" />
             </div>
             <div>
-              <p className="text-[15px] font-semibold leading-tight tracking-tight text-slate-900">Gestión Comercial</p>
+              <p className="text-[15px] font-semibold leading-tight tracking-tight text-ink">Gestión Comercial</p>
               <p className="text-2xs font-medium uppercase tracking-widest text-muted">ERP de distribución</p>
             </div>
           </div>
 
-          <div className="rounded-md border border-line bg-white shadow-panel">
+          <div className="rounded-md border border-line bg-card shadow-panel">
             <div className="border-b border-line px-5 py-4">
-              <h1 className="text-[15px] font-semibold text-slate-900">Iniciar sesión</h1>
+              <h1 className="text-[15px] font-semibold text-ink">Iniciar sesión</h1>
               <p className="mt-0.5 text-tiny text-muted">Accede con tu cuenta corporativa.</p>
             </div>
 

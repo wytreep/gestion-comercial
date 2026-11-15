@@ -103,7 +103,6 @@ export default function NuevaVentaPage() {
       <div className="page-header">
         <div>
           <h1 className="page-title">Nueva venta</h1>
-          <p className="page-subtitle">Pedido, cliente, pago inicial y productos</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button
@@ -123,7 +122,7 @@ export default function NuevaVentaPage() {
       {scanOk && (
         <div className="flex items-center justify-between rounded border border-success/25 bg-success-soft px-3 py-2 text-xs font-medium text-success">
           <span className="flex items-center gap-1.5"><Check size={14} aria-hidden="true" /> {scanOk}</span>
-          <button onClick={() => setScanOk('')} className="rounded-sm p-1 text-success/70 hover:bg-white hover:text-success" title="Cerrar aviso" aria-label="Cerrar aviso de escaneo">
+          <button onClick={() => setScanOk('')} className="rounded-sm p-1 text-success/70 hover:bg-card hover:text-success" title="Cerrar aviso" aria-label="Cerrar aviso de escaneo">
             <X size={14} aria-hidden="true" />
           </button>
         </div>
@@ -136,22 +135,22 @@ export default function NuevaVentaPage() {
             <div className="card">
               <p className="card-title">1. Cliente</p>
               {cliente ? (
-                <div className="flex items-center justify-between rounded border border-primary/20 bg-primary-50 px-3 py-2.5">
+                <div className="flex items-center justify-between rounded border border-accent/25 bg-primary-50 px-3 py-2.5">
                   <div className="min-w-0">
-                    <p className="truncate text-[13px] font-semibold text-slate-800">{cliente.nombre}</p>
+                    <p className="truncate text-[13px] font-semibold text-ink">{cliente.nombre}</p>
                     {cliente.telefono && <p className="text-tiny text-muted">{cliente.telefono}</p>}
                   </div>
-                  <button onClick={() => setCliente(null)} className="btn-icon hover:bg-white" title="Quitar cliente" aria-label="Quitar cliente">
+                  <button onClick={() => setCliente(null)} className="btn-icon hover:bg-card" title="Quitar cliente" aria-label="Quitar cliente">
                     <X size={15} aria-hidden="true" />
                   </button>
                 </div>
               ) : clienteLibre ? (
                 <div className="flex items-center justify-between rounded border border-warning/25 bg-warning-soft px-3 py-2.5">
                   <div className="min-w-0">
-                    <p className="truncate text-[13px] font-semibold text-slate-800">{clienteLibre}</p>
+                    <p className="truncate text-[13px] font-semibold text-ink">{clienteLibre}</p>
                     <p className="text-tiny font-medium text-warning">Cliente no registrado</p>
                   </div>
-                  <button onClick={() => setClienteLibre('')} className="btn-icon hover:bg-white" title="Quitar cliente" aria-label="Quitar cliente">
+                  <button onClick={() => setClienteLibre('')} className="btn-icon hover:bg-card" title="Quitar cliente" aria-label="Quitar cliente">
                     <X size={15} aria-hidden="true" />
                   </button>
                 </div>
@@ -173,15 +172,15 @@ export default function NuevaVentaPage() {
                     }}
                   />
                   {showCli && (clientes.length > 0 || busqueda.trim().length >= 2) && (
-                    <ul className="absolute z-20 mt-1 max-h-56 w-full overflow-y-auto rounded border border-line bg-white shadow-dropdown" aria-label="Sugerencias de cliente">
+                    <ul className="absolute z-dropdown mt-1 max-h-56 w-full overflow-y-auto rounded border border-line bg-card shadow-dropdown" aria-label="Sugerencias de cliente">
                       {clientes.map(c => (
                         <li key={c.id}>
                           <button
                             type="button"
-                            className="block w-full px-3 py-2 text-left text-xs hover:bg-slate-50 focus:bg-slate-50"
+                            className="block w-full px-3 py-2 text-left text-xs hover:bg-surface focus:bg-surface"
                             onClick={() => { setCliente(c); setBusqueda(''); setShowCli(false); }}
                           >
-                            <p className="font-medium text-slate-800">{c.nombre}</p>
+                            <p className="font-medium text-ink">{c.nombre}</p>
                             {c.telefono && <p className="text-tiny text-muted">{c.telefono}</p>}
                           </button>
                         </li>
@@ -271,15 +270,15 @@ export default function NuevaVentaPage() {
                   key={p.id}
                   type="button"
                   onClick={() => addLinea(p)}
-                  className="group flex items-center justify-between gap-2 rounded border border-line bg-white px-3 py-2 text-left transition-colors hover:border-primary hover:bg-primary-50"
+                  className="group flex items-center justify-between gap-2 rounded border border-line bg-card px-3 py-2 text-left transition-colors hover:border-primary hover:bg-primary-50"
                 >
                   <span className="min-w-0">
-                    <span className="block truncate text-xs font-medium text-slate-800">{p.nombre}</span>
+                    <span className="block truncate text-xs font-medium text-ink">{p.nombre}</span>
                     <span className="block text-2xs text-muted">
                       {formatCOP(p.precio_venta)} / {p.unidad_medida === 'unidad' ? 'unidad' : p.unidad_medida === 'canasta' ? 'canasta' : 'kg'}
                     </span>
                   </span>
-                  <Plus size={14} className="shrink-0 text-muted transition-colors group-hover:text-primary" aria-hidden="true" />
+                  <Plus size={14} className="shrink-0 text-muted transition-colors group-hover:text-accent" aria-hidden="true" />
                 </button>
               ))}
             </div>
@@ -299,7 +298,7 @@ export default function NuevaVentaPage() {
                   <tbody>
                     {lineas.map((l, idx) => (
                       <tr key={idx}>
-                        <td className="font-medium text-slate-800">{l.nombre}</td>
+                        <td className="font-medium text-ink">{l.nombre}</td>
                         <td>
                           <NumberInput
                             inputMode="decimal"
@@ -322,7 +321,7 @@ export default function NuevaVentaPage() {
                             onChange={(v) => setLineas((prev) => prev.map((x, i) => i === idx ? { ...x, precio: v } : x))}
                           />
                         </td>
-                        <td className="num font-semibold text-slate-900">{formatCOP(l.cantidad * l.precio)}</td>
+                        <td className="num font-semibold text-ink">{formatCOP(l.cantidad * l.precio)}</td>
                         <td>
                           <button
                             onClick={() => setLineas((prev) => prev.filter((_, i) => i !== idx))}
@@ -339,15 +338,15 @@ export default function NuevaVentaPage() {
                   <tfoot>
                     <tr>
                       <td colSpan={3} className="text-right text-2xs font-semibold uppercase tracking-wide text-muted">Total del pedido</td>
-                      <td className="num text-[15px] font-bold text-slate-900">{formatCOP(total)}</td>
+                      <td className="num text-[15px] font-bold text-ink">{formatCOP(total)}</td>
                       <td></td>
                     </tr>
                   </tfoot>
                 </table>
               </div>
             ) : (
-              <div className="mt-4 rounded border border-dashed border-line bg-slate-50/60 px-4 py-8 text-center">
-                <p className="text-xs font-medium text-slate-600">Selecciona un producto para agregarlo al pedido</p>
+              <div className="mt-4 rounded border border-dashed border-line bg-surface/60 px-4 py-8 text-center">
+                <p className="text-xs font-medium text-soft">Selecciona un producto para agregarlo al pedido</p>
                 <p className="mt-0.5 text-2xs text-muted">Puedes ajustar cantidad y precio en la tabla</p>
               </div>
             )}
@@ -358,29 +357,29 @@ export default function NuevaVentaPage() {
         <aside className="card space-y-3 xl:sticky xl:top-3">
           <p className="card-title mb-0">Resumen del pedido</p>
 
-          <div className="rounded border border-line bg-slate-50/70 px-3 py-2">
+          <div className="rounded border border-line bg-surface/70 px-3 py-2">
             <p className="section-label">Cliente</p>
-            <p className="truncate text-xs font-medium text-slate-800">{nombreCliente || 'Sin asignar'}</p>
+            <p className="truncate text-xs font-medium text-ink">{nombreCliente || 'Sin asignar'}</p>
           </div>
 
           <dl className="space-y-2 text-xs">
             <div className="flex items-center justify-between gap-2">
               <dt className="text-muted">Líneas</dt>
-              <dd className="money text-slate-800">{lineas.length}</dd>
+              <dd className="money text-ink">{lineas.length}</dd>
             </div>
             <div className="flex items-center justify-between gap-2">
               <dt className="text-muted">Unidades</dt>
-              <dd className="money text-slate-800">
+              <dd className="money text-ink">
                 {lineas.reduce((s, l) => s + (l.cantidad || 0), 0).toLocaleString('es-CO', { maximumFractionDigits: 2 })}
               </dd>
             </div>
             <div className="flex items-center justify-between gap-2 border-t border-line pt-2">
-              <dt className="font-medium text-slate-600">Total</dt>
-              <dd className="money text-[15px] font-bold text-slate-900">{formatCOP(total)}</dd>
+              <dt className="font-medium text-soft">Total</dt>
+              <dd className="money text-[15px] font-bold text-ink">{formatCOP(total)}</dd>
             </div>
             <div className="flex items-center justify-between gap-2">
               <dt className="text-muted">Abono inicial</dt>
-              <dd className="money text-slate-800">{formatCOP(pagoInicial)}</dd>
+              <dd className="money text-ink">{formatCOP(pagoInicial)}</dd>
             </div>
           </dl>
 
@@ -389,7 +388,7 @@ export default function NuevaVentaPage() {
             <p className={saldo > 0 ? 'mt-0.5 font-mono text-[18px] font-bold tabular-nums text-warning' : 'mt-0.5 font-mono text-[18px] font-bold tabular-nums text-success'}>
               {formatCOP(saldo)}
             </p>
-            <p className="text-tiny text-slate-600">{saldo > 0 ? 'Queda registrado en cartera' : 'Pedido pagado en su totalidad'}</p>
+            <p className="text-tiny text-soft">{saldo > 0 ? 'Queda registrado en cartera' : 'Pedido pagado en su totalidad'}</p>
           </div>
 
           <button onClick={guardar} disabled={saving || lineas.length === 0} className="btn-primary btn-lg">

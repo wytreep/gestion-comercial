@@ -30,7 +30,6 @@ export default function ReportesPage() {
       <div className="page-header">
         <div>
           <h1 className="page-title">Reportes mensuales</h1>
-          <p className="page-subtitle">Resumen de ventas, cartera y stock por período</p>
         </div>
       </div>
 
@@ -64,7 +63,7 @@ export default function ReportesPage() {
               <div className="card-header">
                 <div className="flex items-center gap-2">
                   <Users size={15} className="text-muted" aria-hidden="true" />
-                  <p className="text-xs font-semibold text-slate-800">Top clientes del período</p>
+                  <p className="text-xs font-semibold text-ink">Top clientes del período</p>
                 </div>
               </div>
               {data.top_clientes.length === 0 ? (
@@ -83,7 +82,7 @@ export default function ReportesPage() {
                     <tbody>
                       {data.top_clientes.map((c: any, i: number) => (
                         <tr key={i}>
-                          <td className="font-medium text-slate-800">{c.nombre}</td>
+                          <td className="font-medium text-ink">{c.nombre}</td>
                           <td className="num">{c.pedidos}</td>
                           <td className="num">{formatCOP(c.total)}</td>
                           <td className={`num ${c.saldo > 0 ? 'font-semibold text-danger' : ''}`}>{formatCOP(c.saldo)}</td>
@@ -99,7 +98,7 @@ export default function ReportesPage() {
               <div className="card-header">
                 <div className="flex items-center gap-2">
                   <Wallet size={15} className="text-muted" aria-hidden="true" />
-                  <p className="text-xs font-semibold text-slate-800">Cartera pendiente</p>
+                  <p className="text-xs font-semibold text-ink">Cartera pendiente</p>
                 </div>
                 <span className="font-mono text-xs font-semibold text-danger">{formatCOP(data.cartera.total)}</span>
               </div>
@@ -118,7 +117,7 @@ export default function ReportesPage() {
                     <tbody>
                       {data.cartera.detalle.map((c: any, i: number) => (
                         <tr key={i}>
-                          <td className="font-medium text-slate-800">{c.nombre}</td>
+                          <td className="font-medium text-ink">{c.nombre}</td>
                           <td className="num">{c.pedidos_pendientes}</td>
                           <td className="num font-semibold text-danger">{formatCOP(c.saldo_total)}</td>
                         </tr>
@@ -134,7 +133,7 @@ export default function ReportesPage() {
             <div className="card-header">
               <div className="flex items-center gap-2">
                 <Boxes size={15} className="text-muted" aria-hidden="true" />
-                <p className="text-xs font-semibold text-slate-800">Stock actual</p>
+                <p className="text-xs font-semibold text-ink">Stock actual</p>
               </div>
               <span className="chip">{plural(data.stock.length, 'producto')}</span>
             </div>
@@ -152,7 +151,7 @@ export default function ReportesPage() {
                 <tbody>
                   {data.stock.map((p: any, i: number) => (
                     <tr key={i}>
-                      <td className="font-medium text-slate-800">{p.nombre}</td>
+                      <td className="font-medium text-ink">{p.nombre}</td>
                       <td className="num">{formatCantidad(p.stock_actual)}</td>
                       <td className="num">{formatCOP(p.precio_compra)}</td>
                       <td className="num">{formatCOP(p.precio_venta)}</td>

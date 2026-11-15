@@ -40,11 +40,11 @@ export default function BackupPage() {
 
       <div className="card border-l-4 border-l-primary">
         <div className="mb-3 flex items-center gap-2.5">
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-50 text-primary">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-50 text-accent">
             <Shield size={16} aria-hidden="true" />
           </span>
           <div>
-            <p className="text-xs font-semibold text-slate-800">Genera un backup de toda la información</p>
+            <p className="text-xs font-semibold text-ink">Genera un backup de toda la información</p>
             <p className="text-2xs text-muted">Ventas, compras, clientes, proveedores, pagos y stock</p>
           </div>
         </div>
@@ -61,7 +61,7 @@ export default function BackupPage() {
         <div className="card-header">
           <div className="flex items-center gap-2">
             <Database size={15} className="text-muted" aria-hidden="true" />
-            <p className="text-xs font-semibold text-slate-800">Historial de backups</p>
+            <p className="text-xs font-semibold text-ink">Historial de backups</p>
           </div>
           {historial.length > 0 && <span className="chip">{plural(historial.length, 'archivo')}</span>}
         </div>

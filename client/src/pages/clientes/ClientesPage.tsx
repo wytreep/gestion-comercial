@@ -23,7 +23,6 @@ export default function ClientesPage() {
       <div className="page-header">
         <div>
           <h1 className="page-title">Clientes</h1>
-          <p className="page-subtitle">Datos de contacto y notas de cada cliente</p>
         </div>
         <button onClick={() => setCreando(true)} className="btn-primary">
           <Plus size={15} aria-hidden="true" /> Nuevo cliente
@@ -69,7 +68,7 @@ export default function ClientesPage() {
               <tbody>
                 {clientes.map((c) => (
                   <tr key={c.id}>
-                    <td className="font-medium text-slate-800">{c.nombre}</td>
+                    <td className="font-medium text-ink">{c.nombre}</td>
                     <td className="whitespace-nowrap text-muted">{c.telefono ?? '—'}</td>
                     <td className="text-muted">{c.direccion ?? '—'}</td>
                     <td className="max-w-[240px] truncate text-muted" title={c.notas ?? undefined}>{c.notas ?? '—'}</td>

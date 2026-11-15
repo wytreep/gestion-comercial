@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { User, AuthTokens, Rol } from '../types';
 import { authApi } from '../api/endpoints';
+import { aplicarTema } from '../utils/theme';
 
 interface AuthCtx {
   user:      User | null;
@@ -39,6 +40,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('access_token', tokens.access_token);
     localStorage.setItem('auth_user',    JSON.stringify(tokens.user));
     if (tokens.refresh_token) localStorage.setItem('refresh_token', tokens.refresh_token);
+    // La preferencia guardada en la cuenta manda sobre la de este dispositivo.
+    if (tokens.user?.tema) aplicarTema(tokens.user.tema);
     setUser(tokens.user);
   };
 

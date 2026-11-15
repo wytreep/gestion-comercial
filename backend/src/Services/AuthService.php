@@ -32,7 +32,7 @@ final class AuthService extends BaseService
         $this->throttle->assertAllowed($email, $ip);
 
         $user = $this->queryOne(
-            'SELECT id, nombre, email, password_hash, rol
+            'SELECT id, nombre, email, password_hash, rol, tema
              FROM usuarios WHERE email = :email AND activo = 1',
             [':email' => $email]
         );
@@ -58,6 +58,7 @@ final class AuthService extends BaseService
                 'nombre' => $user['nombre'],
                 'email'  => $user['email'],
                 'rol'    => $user['rol'],
+                'tema'   => $user['tema'] ?? 'sistema',
             ],
         ];
     }
@@ -127,6 +128,15 @@ final class AuthService extends BaseService
             throw new BusinessException("Rol '{$rol}' no válido.");
         }
         $this->execute('UPDATE usuarios SET rol = :rol WHERE id = :id', [':rol' => $rol, ':id' => $id]);
+    }
+
+    /** Guarda el tema elegido (claro · oscuro · sistema) para la cuenta. */
+    public function guardarTema(int $id, string $tema): void
+    {
+        if (!in_array($tema, ['claro', 'oscuro', 'sistema'], true)) {
+            throw new BusinessException("Tema '{$tema}' no válido.");
+        }
+        $this->execute('UPDATE usuarios SET tema = :tema WHERE id = :id', [':tema' => $tema, ':id' => $id]);
     }
 
     public function cambiarPassword(int $id, string $passwordActual, string $nueva): void

@@ -174,12 +174,12 @@ export default function CobroQrModal({
         <div className="rounded border border-success/25 bg-success-soft px-4 py-5 text-center" role="status">
           <CheckCircle2 size={36} className="mx-auto mb-2 text-success" aria-hidden="true" />
           <p className="text-sm font-semibold text-success">Pago confirmado</p>
-          <p className="mt-1 text-xs text-slate-600">
+          <p className="mt-1 text-xs text-soft">
             Se registraron {formatCOP(exito.monto)} en la venta #{venta.id}.
           </p>
           <p className="mt-1 font-mono text-tiny text-muted">Referencia: {exito.referencia}</p>
         </div>
-        <div className="rounded border border-line bg-slate-50 px-3 py-2 text-tiny text-slate-600">
+        <div className="rounded border border-line bg-surface px-3 py-2 text-tiny text-soft">
           El saldo de la venta y la cartera ya están actualizados. Puedes cerrar esta ventana.
         </div>
         <button type="button" onClick={onClose} className="btn-primary btn-lg">
@@ -194,11 +194,11 @@ export default function CobroQrModal({
       <div className="space-y-4">
         {error && <Alert type="error" message={error} />}
 
-        <div className="rounded border border-line bg-slate-50 px-3 py-3">
+        <div className="rounded border border-line bg-surface px-3 py-3">
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="section-label">Venta</p>
-              <p className="text-[13px] font-semibold text-slate-800">#{venta.id} · {venta.cliente_nombre}</p>
+              <p className="text-[13px] font-semibold text-ink">#{venta.id} · {venta.cliente_nombre}</p>
             </div>
             <div className="text-right">
               <p className="section-label">Saldo pendiente</p>
@@ -240,15 +240,15 @@ export default function CobroQrModal({
       {error && <Alert type="error" message={error} />}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-[210px_minmax(0,1fr)]">
-        <div className="flex flex-col items-center gap-2 rounded border border-line bg-slate-50 p-3">
+        <div className="flex flex-col items-center gap-2 rounded border border-line bg-surface p-3">
           {dataUrl ? (
             <img
               src={dataUrl}
               alt={`Código QR para cobrar la venta ${venta.id} por ${formatCOP(num(cobro.monto))}`}
-              className="h-[190px] w-[190px] rounded-sm bg-white"
+              className="h-[190px] w-[190px] rounded-sm bg-card"
             />
           ) : (
-            <div className="flex h-[190px] w-[190px] items-center justify-center rounded-sm bg-white">
+            <div className="flex h-[190px] w-[190px] items-center justify-center rounded-sm bg-card">
               <Spinner />
             </div>
           )}
@@ -283,10 +283,10 @@ export default function CobroQrModal({
 
           {pendiente ? (
             <div className="flex items-center gap-2 rounded border border-line px-3 py-2">
-              <Timer size={15} className={restante <= 60 ? 'text-danger' : 'text-primary'} aria-hidden="true" />
+              <Timer size={15} className={restante <= 60 ? 'text-danger' : 'text-accent'} aria-hidden="true" />
               <div>
                 <p className="section-label">Vence en</p>
-                <p className={`font-mono text-[15px] font-bold tabular-nums ${restante <= 60 ? 'text-danger' : 'text-slate-800'}`} aria-hidden="true">
+                <p className={`font-mono text-[15px] font-bold tabular-nums ${restante <= 60 ? 'text-danger' : 'text-ink'}`} aria-hidden="true">
                   {mmss(restante)}
                 </p>
               </div>
@@ -295,7 +295,7 @@ export default function CobroQrModal({
               </p>
             </div>
           ) : (
-            <div className="rounded border border-line bg-slate-50 px-3 py-2 text-tiny text-slate-600" aria-live="polite">
+            <div className="rounded border border-line bg-surface px-3 py-2 text-tiny text-soft" aria-live="polite">
               {cobro.estado === 'expirado'
                 ? 'Este cobro expiró y ya no se puede confirmar.'
                 : cobro.estado === 'pagado'
@@ -305,10 +305,10 @@ export default function CobroQrModal({
           )}
 
           <div className="rounded border border-primary/15 bg-primary-50 px-3 py-2">
-            <p className="flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-wide text-primary">
+            <p className="flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-wide text-accent">
               <ShieldCheck size={13} aria-hidden="true" /> Confirmación manual
             </p>
-            <ol className="mt-1 list-decimal space-y-0.5 pl-4 text-tiny leading-relaxed text-slate-600">
+            <ol className="mt-1 list-decimal space-y-0.5 pl-4 text-tiny leading-relaxed text-soft">
               <li>El cliente escanea el QR o usa el código.</li>
               <li>Verifica la transacción en tu banco o billetera.</li>
               <li>Registra la referencia para conciliar el pago.</li>

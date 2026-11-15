@@ -32,7 +32,7 @@ export default function PanelVendedor() {
       <div className="page-header">
         <div>
           <h1 className="page-title">Panel de control</h1>
-          <p className="page-subtitle">Resumen operativo · {formatMes(mes)}</p>
+          <p className="page-subtitle">{formatMes(mes)}</p>
         </div>
         <div className="no-print flex flex-wrap items-center gap-2">
           <button onClick={() => navigate('/cartera')} className="btn-secondary">
@@ -91,10 +91,10 @@ export default function PanelVendedor() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <div className="overflow-hidden rounded-md border border-line bg-white shadow-panel xl:col-span-2">
+        <div className="overflow-hidden rounded-md border border-line bg-card shadow-panel xl:col-span-2">
           <div className="card-header">
             <div>
-              <p className="text-xs font-semibold text-slate-800">Últimas ventas</p>
+              <p className="text-xs font-semibold text-ink">Últimas ventas</p>
               <p className="text-2xs text-muted">Movimientos recientes</p>
             </div>
             <button onClick={() => navigate('/ventas')} className="btn-ghost">
@@ -117,9 +117,9 @@ export default function PanelVendedor() {
                 {data.ultimas_ventas.map((v: any) => (
                   <tr key={v.id}>
                     <td className="font-mono text-muted">#{v.id}</td>
-                    <td className="font-medium text-slate-700">{v.cliente}</td>
+                    <td className="font-medium text-body">{v.cliente}</td>
                     <td className="whitespace-nowrap text-muted">{v.fecha}</td>
-                    <td className="num font-semibold text-slate-900">{formatCOP(v.total)}</td>
+                    <td className="num font-semibold text-ink">{formatCOP(v.total)}</td>
                     <td><BadgeEstadoPago estado={v.estado_pago} /></td>
                     <td><BadgeEstadoPedido estado={v.estado_pedido} /></td>
                   </tr>
@@ -145,13 +145,13 @@ export default function PanelVendedor() {
             ) : (
               <div className="space-y-3">
                 {data.stock.map((p) => (
-                  <div key={p.nombre} className="flex items-center justify-between gap-3 border-b border-slate-100 pb-2.5 last:border-0 last:pb-0">
+                  <div key={p.nombre} className="flex items-center justify-between gap-3 border-b border-line pb-2.5 last:border-0 last:pb-0">
                     <div className="min-w-0">
-                      <p className="truncate text-xs font-medium text-slate-700">{p.nombre}</p>
+                      <p className="truncate text-xs font-medium text-body">{p.nombre}</p>
                       <p className="text-2xs text-muted">{formatCOP(p.precio_venta)} / {p.unidad_medida === 'unidad' ? 'unidad' : 'kg'}</p>
                     </div>
                     <div className="text-right">
-                      <p className="money text-xs font-semibold text-slate-900">{formatCantidad(p.stock_actual)}</p>
+                      <p className="money text-xs font-semibold text-ink">{formatCantidad(p.stock_actual)}</p>
                       <p className="text-2xs text-muted">{p.unidad_medida === 'canasta' ? 'kg en stock' : p.unidad_medida}</p>
                     </div>
                   </div>
@@ -182,10 +182,10 @@ function QuickAction({ label, icon, onClick }: { label: string; icon: ReactNode;
   return (
     <button
       onClick={onClick}
-      className="flex flex-col items-start gap-1.5 rounded border border-line bg-white px-3 py-2.5 text-left transition-colors hover:border-primary hover:bg-primary-50"
+      className="flex flex-col items-start gap-1.5 rounded border border-line bg-card px-3 py-2.5 text-left transition-colors hover:border-primary hover:bg-primary-50"
     >
-      <span className="text-primary" aria-hidden="true">{icon}</span>
-      <span className="text-tiny font-medium text-slate-700">{label}</span>
+      <span className="text-accent" aria-hidden="true">{icon}</span>
+      <span className="text-tiny font-medium text-body">{label}</span>
     </button>
   );
 }

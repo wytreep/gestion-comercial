@@ -69,7 +69,6 @@ export default function ProductosPage() {
       <div className="page-header">
         <div>
           <h1 className="page-title">Productos y precios</h1>
-          <p className="page-subtitle">Catálogo, precio de venta y stock disponible</p>
         </div>
         {isAdmin && (
           <button onClick={() => setCreando(true)} className="btn-primary">
@@ -79,10 +78,10 @@ export default function ProductosPage() {
       </div>
 
       {isAdmin && (
-        <div className="flex items-start gap-2 rounded border border-primary/20 bg-primary-50 px-3 py-2 text-tiny text-slate-600">
-          <Info size={14} className="mt-0.5 shrink-0 text-primary" aria-hidden="true" />
+        <div className="flex items-start gap-2 rounded border border-accent/25 bg-primary-50 px-3 py-2 text-tiny text-soft">
+          <Info size={14} className="mt-0.5 shrink-0 text-accent" aria-hidden="true" />
           <p>
-            <strong className="text-slate-800">Pescado:</strong> el margen se calcula con el precio y el costo por kg
+            <strong className="text-ink">Pescado:</strong> el margen se calcula con el precio y el costo por kg
             (costo/kg ÷ precio venta/kg). Define los kg por canasta para ver el margen real.
           </p>
         </div>
@@ -91,7 +90,7 @@ export default function ProductosPage() {
       {accionError && <Alert type="error" message={accionError} />}
 
       {isAdmin && (
-        <label className="inline-flex w-fit cursor-pointer items-center gap-2 rounded border border-line bg-white px-3 py-2 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50">
+        <label className="inline-flex w-fit cursor-pointer items-center gap-2 rounded border border-line bg-card px-3 py-2 text-xs font-medium text-soft transition-colors hover:bg-surface">
           <input
             type="checkbox"
             className="h-3.5 w-3.5 accent-primary"
@@ -128,7 +127,7 @@ export default function ProductosPage() {
                     <td>
                       <div className="flex items-center gap-2">
                         <div className="min-w-0">
-                          <p className="font-medium text-slate-800">
+                          <p className="font-medium text-ink">
                             {p.nombre}
                             {!p.activo && <span className="badge-gray ml-2">Inactivo</span>}
                           </p>
@@ -146,7 +145,7 @@ export default function ProductosPage() {
                       </div>
                     </td>
                     <td>
-                      <p className="text-slate-700">{p.unidad_medida === 'canasta' ? 'Media canasta' : p.unidad_medida}</p>
+                      <p className="text-body">{p.unidad_medida === 'canasta' ? 'Media canasta' : p.unidad_medida}</p>
                       {p.unidad_medida === 'canasta' && (
                         <p className={p.kilos_por_canasta ? 'text-2xs text-muted' : 'text-2xs font-medium text-warning'}>
                           {p.kilos_por_canasta ? `${p.kilos_por_canasta} kg/canasta` : 'sin kg/canasta'}
@@ -390,7 +389,7 @@ function FormProducto({ producto, onSuccess }: { producto?: Producto; onSuccess:
             <input
               id="producto-stock"
               type="text"
-              className="input bg-slate-50"
+              className="input bg-surface"
               value={`${formatCantidad(producto.stock_actual)} ${producto.unidad_medida === 'unidad' ? 'u' : 'kg'}`}
               disabled
             />
@@ -497,14 +496,14 @@ function QrProducto({ producto }: { producto: Producto }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-center rounded border border-line bg-slate-50 p-3">
+      <div className="flex justify-center rounded border border-line bg-surface p-3">
         {dataUrl
           ? <img src={dataUrl} alt={`QR ${producto.codigo}`} className="h-56 w-56" />
-          : <div className="h-56 w-56 animate-pulse rounded bg-slate-200" />}
+          : <div className="h-56 w-56 animate-pulse rounded bg-surface-2" />}
       </div>
 
       <div className="text-center">
-        <p className="text-[13px] font-semibold text-slate-800">{producto.nombre}</p>
+        <p className="text-[13px] font-semibold text-ink">{producto.nombre}</p>
         <p className="mt-1 font-mono text-xs text-muted">{producto.codigo}</p>
         <p className="mt-1 text-tiny text-muted">
           {formatCOP(producto.precio_venta)} / {producto.unidad_medida === 'canasta' ? 'canasta' : producto.unidad_medida === 'unidad' ? 'unidad' : 'kg'}

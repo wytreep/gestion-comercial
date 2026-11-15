@@ -1,7 +1,92 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Source+Sans+3:wght@400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ── Variables de tema ─────────────────────────────── */
+:root {
+  --canvas:    238 241 245;
+  --card:      255 255 255;
+  --surface:   248 250 252;
+  --surface-2: 241 245 249;
+  --line:      223 228 234;
+  --ink:       31 41 55;
+  --body:      51 65 85;
+  --soft:      71 85 105;
+  --muted:     91 107 127;
+  --subtle:    138 153 171;
+  --shadow:    16 24 40;
+  --accent:    11 92 171;
+
+  --primary-soft: 238 245 253;
+  --success:       21 115 71;
+  --success-light: 31 157 92;
+  --success-dark:  15 92 57;
+  --success-soft:  233 245 239;
+  --warning:       180 83 9;
+  --warning-light: 217 119 6;
+  --warning-dark:  143 66 7;
+  --warning-soft:  253 243 228;
+  --danger:        180 35 24;
+  --danger-light:  217 45 32;
+  --danger-dark:   143 28 19;
+  --danger-soft:   253 236 235;
+
+  --chart-blue:  #0b5cab;
+  --chart-green: #157347;
+  --chart-teal:  #0f766e;
+  --chart-amber: #b45309;
+  --chart-red:   #b42318;
+  --chart-slate: #94a3b8;
+  --chart-grid:  #e8eef4;
+  --chart-axis:  #5b6b7f;
+  --chart-tip-bg: #ffffff;
+  --chart-tip-border: #dfe4ea;
+  --chart-tip-ink: #1f2937;
+  --chart-cursor: rgb(11 92 171 / 0.05);
+}
+
+.dark {
+  --canvas:    11 18 26;
+  --card:      21 30 41;
+  --surface:   27 38 50;
+  --surface-2: 34 47 61;
+  --line:      45 60 77;
+  --ink:       233 239 246;
+  --body:      203 213 226;
+  --soft:      176 189 204;
+  --muted:     156 171 188;
+  --subtle:    130 147 165;
+  --shadow:    0 0 0;
+  --accent:    124 192 240;
+
+  --primary-soft: 23 48 74;
+  --success:       110 231 183;
+  --success-light: 167 243 208;
+  --success-dark:  52 211 153;
+  --success-soft:  18 44 35;
+  --warning:       252 211 77;
+  --warning-light: 253 230 138;
+  --warning-dark:  245 158 11;
+  --warning-soft:  48 36 16;
+  --danger:        252 165 165;
+  --danger-light:  254 202 202;
+  --danger-dark:   248 113 113;
+  --danger-soft:   58 25 25;
+
+  --chart-blue:  #5aa9e6;
+  --chart-green: #34d399;
+  --chart-teal:  #2dd4bf;
+  --chart-amber: #fbbf24;
+  --chart-red:   #f87171;
+  --chart-slate: #94a3b8;
+  --chart-grid:  #2a3949;
+  --chart-axis:  #9cabbc;
+  --chart-tip-bg: #1b2634;
+  --chart-tip-border: #33465a;
+  --chart-tip-ink: #e9eff6;
+  --chart-cursor: rgb(124 192 240 / 0.12);
+}
 
 @layer base {
   * { box-sizing: border-box; }
@@ -10,18 +95,24 @@
     text-rendering: optimizeLegibility;
     color-scheme: light;
     scrollbar-width: thin;
-    scrollbar-color: #cbd5e1 transparent;
+    scrollbar-color: rgb(var(--subtle)) transparent;
   }
+  html.dark { color-scheme: dark; }
   body {
     @apply font-sans text-ink bg-canvas antialiased;
     font-size: 13px;
     line-height: 1.5;
     font-feature-settings: 'tnum' 1, 'cv05' 1;
+    transition: background-color 160ms ease, color 160ms ease;
   }
   ::selection { background: #cfe2f7; color: #083a6e; }
+  .dark ::selection { background: #1d4ed8; color: #eef5fd; }
   input[type='date'],
   input[type='month'],
   input[type='time'] { color-scheme: light; }
+  .dark input[type='date'],
+  .dark input[type='month'],
+  .dark input[type='time'] { color-scheme: dark; }
   input[type='checkbox'],
   input[type='radio'] { accent-color: theme('colors.primary.DEFAULT'); }
 
@@ -30,6 +121,7 @@
     outline: 2px solid theme('colors.primary.DEFAULT');
     outline-offset: 2px;
   }
+  .dark :focus-visible { outline-color: #7dd3fc; }
   header :focus-visible,
   .surface-dark :focus-visible {
     outline-color: #7dd3fc;
@@ -39,8 +131,8 @@
 @layer components {
   /* ── Accesibilidad ───────────────────────────────── */
   .skip-link {
-    @apply fixed left-3 top-3 z-[70] -translate-y-20 rounded bg-white px-3 py-2 text-tiny
-           font-semibold text-primary shadow-dropdown transition-transform;
+    @apply fixed left-3 top-3 z-skip -translate-y-20 rounded bg-card px-3 py-2 text-tiny
+           font-semibold text-accent shadow-dropdown transition-transform;
   }
   .skip-link:focus,
   .skip-link:focus-visible { @apply translate-y-0; }
@@ -54,51 +146,51 @@
   }
   .btn-secondary {
     @apply inline-flex min-h-[34px] items-center justify-center gap-1.5 rounded border border-line
-           bg-white px-3.5 py-1.5 text-[13px] font-medium text-slate-700 transition-colors
-           hover:border-slate-300 hover:bg-slate-50 active:bg-slate-100
+           bg-card px-3.5 py-1.5 text-[13px] font-medium text-body transition-colors
+           hover:border-subtle hover:bg-surface active:bg-surface-2
            disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-success {
-    @apply inline-flex min-h-[34px] items-center justify-center gap-1.5 rounded border border-success
-           bg-success px-3.5 py-1.5 text-[13px] font-medium text-white transition-colors
-           hover:border-success-dark hover:bg-success-dark active:bg-success-dark
+    @apply inline-flex min-h-[34px] items-center justify-center gap-1.5 rounded border border-success-solid
+           bg-success-solid px-3.5 py-1.5 text-[13px] font-medium text-white transition-colors
+           hover:border-success-solid-hover hover:bg-success-solid-hover active:bg-success-solid-hover
            disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-danger {
-    @apply inline-flex min-h-[34px] items-center justify-center gap-1.5 rounded border border-danger
-           bg-danger px-3.5 py-1.5 text-[13px] font-medium text-white transition-colors
-           hover:border-danger-dark hover:bg-danger-dark active:bg-danger-dark
+    @apply inline-flex min-h-[34px] items-center justify-center gap-1.5 rounded border border-danger-solid
+           bg-danger-solid px-3.5 py-1.5 text-[13px] font-medium text-white transition-colors
+           hover:border-danger-solid-hover hover:bg-danger-solid-hover active:bg-danger-solid-hover
            disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-ghost {
     @apply inline-flex min-h-[30px] items-center justify-center gap-1.5 rounded px-2.5 py-1.5
-           text-xs font-medium text-slate-600 transition-colors
-           hover:bg-slate-100 hover:text-slate-800 active:bg-slate-200;
+           text-xs font-medium text-soft transition-colors
+           hover:bg-surface-2 hover:text-ink active:bg-line;
   }
   .btn-icon {
-    @apply inline-flex h-8 w-8 shrink-0 items-center justify-center rounded text-slate-500
-           transition-colors hover:bg-slate-100 hover:text-slate-800 active:bg-slate-200;
+    @apply inline-flex h-8 w-8 shrink-0 items-center justify-center rounded text-muted
+           transition-colors hover:bg-surface-2 hover:text-ink active:bg-line;
   }
   .btn-sm { @apply min-h-[28px] px-2.5 py-1 text-2xs; }
   .btn-lg { @apply min-h-[40px] w-full px-5 py-2.5 text-sm; }
 
   /* ── Formularios ─────────────────────────────────── */
   .input {
-    @apply w-full rounded border border-line bg-white px-2.5 py-1.5 text-[13px] text-ink
-           placeholder:text-slate-400 transition-colors;
+    @apply w-full rounded border border-line bg-card px-2.5 py-1.5 text-[13px] text-ink
+           placeholder:text-subtle transition-colors;
     min-height: 34px;
   }
   .input:focus {
     outline: none;
-    border-color: theme('colors.primary.light');
-    box-shadow: 0 0 0 3px rgb(11 92 171 / 0.12);
+    border-color: rgb(var(--accent));
+    box-shadow: 0 0 0 3px rgb(var(--accent) / 0.22);
   }
   .input:disabled {
-    @apply cursor-not-allowed bg-slate-50 text-slate-500;
+    @apply cursor-not-allowed bg-surface text-muted;
   }
   .input[aria-invalid='true'] {
-    border-color: theme('colors.danger.DEFAULT');
-    box-shadow: 0 0 0 3px rgb(180 35 24 / 0.1);
+    border-color: rgb(var(--danger));
+    box-shadow: 0 0 0 3px rgb(var(--danger) / 0.18);
   }
   select.input {
     appearance: none;
@@ -108,9 +200,12 @@
     background-position: right 10px center;
     background-size: 12px;
   }
+  .dark select.input {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239cabbc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  }
   textarea.input { min-height: 76px; resize: vertical; }
   .label {
-    @apply mb-1 block text-2xs font-semibold uppercase tracking-wide text-slate-600;
+    @apply mb-1 block text-2xs font-semibold uppercase tracking-wide text-soft;
   }
   .field { @apply flex flex-col gap-1; }
   .field-help { @apply text-tiny text-muted; }
@@ -118,10 +213,10 @@
 
   /* ── Superficies ─────────────────────────────────── */
   .card {
-    @apply rounded-md border border-line bg-white p-4 shadow-panel;
+    @apply rounded-md border border-line bg-card p-4 shadow-panel;
   }
   .card-title {
-    @apply mb-3 text-2xs font-semibold uppercase tracking-wide text-slate-600;
+    @apply mb-3 text-2xs font-semibold uppercase tracking-wide text-soft;
   }
   .card-header {
     @apply flex items-center justify-between gap-3 border-b border-line px-4 py-3;
@@ -133,61 +228,62 @@
 
   /* ── Tipografía de datos ─────────────────────────── */
   .page-header { @apply flex flex-wrap items-center justify-between gap-3; }
-  .page-title  { @apply text-[20px] font-semibold tracking-tight text-slate-900; }
+  .page-title  { @apply text-[20px] font-semibold tracking-tight text-ink; }
   .page-subtitle { @apply mt-0.5 text-tiny text-muted; }
   .section-label { @apply text-2xs font-semibold uppercase tracking-wide text-muted; }
-  .stat-value { @apply font-mono text-[22px] font-semibold leading-none tabular-nums text-slate-900; }
-  .stat-value-sm { @apply font-mono text-[17px] font-semibold leading-none tabular-nums text-slate-900; }
+  .stat-value { @apply font-mono text-[22px] font-semibold leading-none tabular-nums text-ink; }
+  .stat-value-sm { @apply font-mono text-[17px] font-semibold leading-none tabular-nums text-ink; }
   .money { @apply font-mono tabular-nums; }
   .money-positive { @apply font-mono tabular-nums text-success; }
   .money-negative { @apply font-mono tabular-nums text-danger; }
 
   /* ── Barras de herramientas y pestañas ───────────── */
   .toolbar {
-    @apply flex flex-wrap items-end gap-3 rounded-md border border-line bg-white p-3 shadow-panel;
+    @apply flex flex-wrap items-end gap-3 rounded-md border border-line bg-card p-3 shadow-panel;
   }
   .tabs {
     @apply flex items-center gap-1 overflow-x-auto border-b border-line;
   }
   .tab {
     @apply inline-flex items-center gap-2 whitespace-nowrap border-b-2 border-transparent px-3 py-2.5
-           text-xs font-medium text-muted transition-colors hover:border-slate-300 hover:text-slate-800;
+           text-xs font-medium text-muted transition-colors hover:border-subtle hover:text-ink;
   }
-  .tab-active { @apply border-primary text-primary hover:border-primary hover:text-primary; }
+  .tab-active { @apply border-accent text-accent hover:border-accent hover:text-accent; }
 
   /* ── Badges ──────────────────────────────────────── */
-  .badge-green   { @apply inline-flex items-center gap-1 whitespace-nowrap rounded-sm border border-success/20 bg-success-soft px-1.5 py-0.5 text-2xs font-semibold text-success; }
-  .badge-blue    { @apply inline-flex items-center gap-1 whitespace-nowrap rounded-sm border border-primary/20 bg-primary-50 px-1.5 py-0.5 text-2xs font-semibold text-primary; }
-  .badge-orange  { @apply inline-flex items-center gap-1 whitespace-nowrap rounded-sm border border-warning/20 bg-warning-soft px-1.5 py-0.5 text-2xs font-semibold text-warning; }
-  .badge-red     { @apply inline-flex items-center gap-1 whitespace-nowrap rounded-sm border border-danger/20 bg-danger-soft px-1.5 py-0.5 text-2xs font-semibold text-danger; }
-  .badge-gray    { @apply inline-flex items-center gap-1 whitespace-nowrap rounded-sm border border-slate-200 bg-slate-100 px-1.5 py-0.5 text-2xs font-semibold text-slate-600; }
+  .badge-green   { @apply inline-flex items-center gap-1 whitespace-nowrap rounded-sm border border-success/25 bg-success-soft px-1.5 py-0.5 text-2xs font-semibold text-success; }
+  .badge-blue    { @apply inline-flex items-center gap-1 whitespace-nowrap rounded-sm border border-accent/25 bg-primary-50 px-1.5 py-0.5 text-2xs font-semibold text-accent; }
+  .badge-orange  { @apply inline-flex items-center gap-1 whitespace-nowrap rounded-sm border border-warning/25 bg-warning-soft px-1.5 py-0.5 text-2xs font-semibold text-warning; }
+  .badge-red     { @apply inline-flex items-center gap-1 whitespace-nowrap rounded-sm border border-danger/25 bg-danger-soft px-1.5 py-0.5 text-2xs font-semibold text-danger; }
+  .badge-gray    { @apply inline-flex items-center gap-1 whitespace-nowrap rounded-sm border border-line bg-surface-2 px-1.5 py-0.5 text-2xs font-semibold text-soft; }
 
   /* ── Tablas ──────────────────────────────────────── */
   .table-base { @apply w-full border-collapse text-xs; }
   .table-base th {
-    @apply whitespace-nowrap border-b border-line bg-slate-50 px-3 py-2.5 text-left text-2xs
-           font-semibold uppercase tracking-wide text-slate-600;
+    @apply whitespace-nowrap border-b border-line bg-surface px-3 py-2.5 text-left text-2xs
+           font-semibold uppercase tracking-wide text-soft;
   }
-  .table-base td { @apply border-b border-slate-100 px-3 py-2.5 align-middle text-slate-700; }
-  .table-base tbody tr:hover { @apply bg-slate-50; }
-  .table-base tfoot td { @apply border-b-0 bg-slate-50/70 px-3 py-2.5 font-semibold text-slate-800; }
+  .table-base td { @apply border-b border-line px-3 py-2.5 align-middle text-body; }
+  .table-base tbody tr:hover { @apply bg-surface; }
+  .table-base tfoot td { @apply border-b-0 bg-surface/70 px-3 py-2.5 font-semibold text-ink; }
   .table-dense th { @apply px-2.5 py-2; }
   .table-dense td { @apply px-2.5 py-1.5; }
-  .table-sticky thead th { @apply sticky top-0 z-10; }
+  .table-sticky thead th { @apply sticky top-0 z-sticky; }
   .num { @apply text-right font-mono tabular-nums; }
 
   /* ── Indicadores y progreso ──────────────────────── */
-  .progress-track { @apply h-2 w-full overflow-hidden rounded-full bg-slate-100; }
+  .progress-track { @apply h-2 w-full overflow-hidden rounded-full bg-surface-2; }
   .progress-bar   { @apply h-full rounded-full bg-primary transition-[width] duration-300; }
   .chip {
-    @apply inline-flex items-center gap-1.5 rounded-sm border border-line bg-white px-2 py-1
-           text-tiny font-medium text-slate-600;
+    @apply inline-flex items-center gap-1.5 rounded-sm border border-line bg-card px-2 py-1
+           text-tiny font-medium text-soft;
   }
   .divider { @apply h-px w-full bg-line; }
 
   /* ── Scrollbar discreto ──────────────────────────── */
   .scroll-slim::-webkit-scrollbar { width: 8px; height: 8px; }
-  .scroll-slim::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+  .scroll-slim::-webkit-scrollbar-thumb { background: rgb(var(--subtle) / 0.5); border-radius: 4px; }
+  .scroll-slim::-webkit-scrollbar-thumb:hover { background: rgb(var(--subtle) / 0.75); }
   .scroll-slim::-webkit-scrollbar-track { background: transparent; }
 }
 

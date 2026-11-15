@@ -15,7 +15,6 @@ export default function StockPage() {
       <div className="page-header">
         <div>
           <h1 className="page-title">Movimientos de stock</h1>
-          <p className="page-subtitle">Trazabilidad completa de entradas, salidas y ajustes</p>
         </div>
         {!isLoading && movimientos.length > 0 && (
           <span className="chip">{plural(movimientos.length, 'movimiento')}</span>
@@ -39,7 +38,7 @@ export default function StockPage() {
         <div className="card overflow-hidden p-0">
           <div className="card-header">
             <div>
-              <p className="text-xs font-semibold text-slate-800">Historial de inventario</p>
+              <p className="text-xs font-semibold text-ink">Historial de inventario</p>
               <p className="text-2xs text-muted">Ordenado del más reciente al más antiguo</p>
             </div>
           </div>
@@ -63,13 +62,13 @@ export default function StockPage() {
                   <tr key={m.id}>
                     <td className="font-mono text-muted">#{m.id}</td>
                     <td className="whitespace-nowrap text-muted">{formatDateTime(m.created_at)}</td>
-                    <td className="font-medium text-slate-800">{m.producto}</td>
+                    <td className="font-medium text-ink">{m.producto}</td>
                     <td><BadgeMovimiento tipo={m.tipo} /></td>
                     <td className={`num font-semibold ${num(m.cantidad) > 0 ? 'text-success' : 'text-danger'}`}>
                       {num(m.cantidad) > 0 ? '+' : ''}{formatCantidad(m.cantidad)}
                     </td>
                     <td className="num text-muted">{formatCantidad(m.stock_anterior)}</td>
-                    <td className="num font-semibold text-slate-900">{formatCantidad(m.stock_nuevo)}</td>
+                    <td className="num font-semibold text-ink">{formatCantidad(m.stock_nuevo)}</td>
                     <td className="max-w-[180px] truncate text-muted" title={m.motivo ?? undefined}>{m.motivo ?? '—'}</td>
                     <td className="text-muted">{m.usuario ?? '—'}</td>
                   </tr>

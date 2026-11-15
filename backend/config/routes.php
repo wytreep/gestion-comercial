@@ -187,3 +187,4 @@ $router->post('/api/v1/auth/register', $protect([$authCtrl, 'register'], $adminO
 $router->patch('/api/v1/usuarios/{id}/rol', $protect([$authCtrl, 'cambiarRol'], $adminOnly));
 $router->patch('/api/v1/usuarios/{id}/activo', $protect([$authCtrl, 'toggleActivo'], $adminOnly));
 $router->post('/api/v1/auth/cambiar-password', $protect([$authCtrl, 'cambiarPassword']));
+$router->patch('/api/v1/auth/preferencias', $protect([$authCtrl, 'preferencias']));

@@ -32,6 +32,7 @@ export const authApi = {
   refresh:         (rt: string) => post<{ access_token: string }>('/auth/refresh', { refresh_token: rt }),
   register:        (body: object) => post<{ id: number }>('/auth/register', body),
   cambiarPassword: (body: object) => post<null>('/auth/cambiar-password', body),
+  guardarTema:     (tema: string) => patch<null>('/auth/preferencias', { tema }),
   listarUsuarios:  () => get<UsuarioAdmin[]>('/usuarios'),
   cambiarRol:      (id: number, rol: string) => patch<null>(`/usuarios/${id}/rol`, { rol }),
   toggleActivo:    (id: number, activo: boolean) => patch<null>(`/usuarios/${id}/activo`, { activo }),

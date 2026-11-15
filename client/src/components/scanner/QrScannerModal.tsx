@@ -130,7 +130,7 @@ export default function QrScannerModal({ open, onClose, onCode }: Props) {
 
           {cameraState !== 'active' && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-4 text-center">
-              {cameraState === 'error' ? <RefreshCw size={30} className="text-slate-400" aria-hidden="true" /> : <QrCode size={34} className="text-slate-400" aria-hidden="true" />}
+              {cameraState === 'error' ? <RefreshCw size={30} className="text-subtle" aria-hidden="true" /> : <QrCode size={34} className="text-subtle" aria-hidden="true" />}
               <p className="text-xs font-medium text-white">
                 {cameraState === 'error' ? 'Cámara no disponible' : 'Cámara desactivada'}
               </p>
@@ -172,8 +172,8 @@ export default function QrScannerModal({ open, onClose, onCode }: Props) {
         {error && <Alert type="error" message={error} />}
         {buscando && <p className="text-xs text-muted">Buscando producto…</p>}
 
-        <div className="rounded border border-line bg-slate-50/60 p-3">
-          <div className="mb-2 flex items-center gap-2 text-xs font-medium text-slate-700">
+        <div className="rounded border border-line bg-surface/60 p-3">
+          <div className="mb-2 flex items-center gap-2 text-xs font-medium text-body">
             <Keyboard size={14} aria-hidden="true" /> Código manual o lector USB
           </div>
           <form onSubmit={submitManual} className="flex gap-2">

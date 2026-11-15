@@ -5,8 +5,22 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Gestión Comercial: sistema de ventas, inventario, cartera y finanzas para distribución." />
-    <meta name="theme-color" content="#0f1b2d" />
+    <meta name="theme-color" content="#0b5cab" />
     <title>Gestión Comercial</title>
+    <script>
+      // Tema antes del primer pintado: evita el destello blanco en modo oscuro.
+      (function () {
+        try {
+          var t = localStorage.getItem('tema') || 'sistema';
+          var oscuro = t === 'oscuro' ||
+            (t === 'sistema' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          if (oscuro) document.documentElement.classList.add('dark');
+          document.documentElement.style.colorScheme = oscuro ? 'dark' : 'light';
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.setAttribute('content', oscuro ? '#0c151d' : '#0b5cab');
+        } catch (e) { /* almacenamiento no disponible */ }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

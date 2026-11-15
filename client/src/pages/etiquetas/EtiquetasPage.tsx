@@ -190,7 +190,7 @@ export default function EtiquetasPage() {
           {aviso && (
             <div className="flex items-center justify-between rounded border border-success/25 bg-success-soft px-3 py-2 text-xs font-medium text-success" role="status">
               <span className="flex items-center gap-1.5"><Check size={14} aria-hidden="true" /> {aviso}</span>
-              <button onClick={() => setAviso('')} className="rounded-sm p-1 text-success/70 transition-colors hover:bg-white" aria-label="Cerrar aviso">
+              <button onClick={() => setAviso('')} className="rounded-sm p-1 text-success/70 transition-colors hover:bg-card" aria-label="Cerrar aviso">
                 Cerrar
               </button>
             </div>
@@ -325,7 +325,7 @@ export default function EtiquetasPage() {
           </div>
 
           {generadas.length === 0 ? (
-            <div className="rounded border border-dashed border-line bg-slate-50/60 px-4 py-10 text-center">
+            <div className="rounded border border-dashed border-line bg-surface/60 px-4 py-10 text-center">
               <QrCode size={26} className="mx-auto text-subtle" aria-hidden="true" />
               <p className="mt-2 text-xs text-muted">
                 Genera una etiqueta para ver el QR y los datos que se imprimen.
@@ -339,8 +339,8 @@ export default function EtiquetasPage() {
             </div>
           )}
 
-          <div className="flex items-start gap-2 rounded border border-primary/20 bg-primary-50 px-3 py-2 text-tiny text-slate-600">
-            <Info size={14} className="mt-0.5 shrink-0 text-primary" aria-hidden="true" />
+          <div className="flex items-start gap-2 rounded border border-accent/25 bg-primary-50 px-3 py-2 text-tiny text-soft">
+            <Info size={14} className="mt-0.5 shrink-0 text-accent" aria-hidden="true" />
             <p>
               La etiqueta de canasta lleva el peso en el QR: al escanearla en una venta,
               el sistema agrega esa cantidad de kilos en lugar de 1.
@@ -462,14 +462,14 @@ export default function EtiquetasPage() {
       <Modal open={!!detalle} onClose={() => setDetalle(null)} title={`Etiqueta — ${detalle?.codigo ?? ''}`} size="sm">
         {detalle && (
           <div className="space-y-4">
-            <div className="flex justify-center rounded border border-line bg-slate-50 p-3">
+            <div className="flex justify-center rounded border border-line bg-surface p-3">
               {qrs[detalle.codigo]
                 ? <img src={qrs[detalle.codigo]} alt={`QR ${detalle.codigo}`} className="h-52 w-52" />
                 : <QrResumen codigo={detalle.codigo} />}
             </div>
 
             <div className="space-y-1 text-center">
-              <p className="text-[13px] font-semibold text-slate-800">{detalle.producto}</p>
+              <p className="text-[13px] font-semibold text-ink">{detalle.producto}</p>
               <p className="font-mono text-xs text-muted">{detalle.codigo}</p>
               <p className="text-tiny text-muted">
                 {ETIQUETA_TIPO[detalle.tipo]}
@@ -529,20 +529,20 @@ export default function EtiquetasPage() {
 // ── Etiqueta para pantalla ──────────────────────────────
 function EtiquetaVista({ etiqueta, qr }: { etiqueta: Etiqueta; qr?: string }) {
   return (
-    <div className="flex h-[144px] w-[240px] items-center gap-2 rounded border border-line bg-white p-2 shadow-sm">
-      <div className="flex h-[110px] w-[110px] shrink-0 items-center justify-center bg-white">
+    <div className="flex h-[144px] w-[240px] items-center gap-2 rounded border border-line bg-card p-2 shadow-sm">
+      <div className="flex h-[110px] w-[110px] shrink-0 items-center justify-center bg-card">
         {qr
           ? <img src={qr} alt={`QR ${etiqueta.codigo}`} className="h-full w-full" />
-          : <div className="h-full w-full animate-pulse bg-slate-100" />}
+          : <div className="h-full w-full animate-pulse bg-surface-2" />}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-tiny font-bold leading-tight text-slate-900">{etiqueta.producto}</p>
+        <p className="truncate text-tiny font-bold leading-tight text-ink">{etiqueta.producto}</p>
         <p className="mt-0.5 truncate font-mono text-2xs text-muted">{etiqueta.codigo}</p>
         {etiqueta.tipo === 'canasta' && etiqueta.peso_kg != null && (
-          <p className="mt-1 text-xs font-bold text-slate-900">{formatCantidad(etiqueta.peso_kg)} kg</p>
+          <p className="mt-1 text-xs font-bold text-ink">{formatCantidad(etiqueta.peso_kg)} kg</p>
         )}
         {etiqueta.tipo === 'lote' && etiqueta.lote && (
-          <p className="mt-1 truncate text-2xs font-semibold text-slate-800">Lote {etiqueta.lote}</p>
+          <p className="mt-1 truncate text-2xs font-semibold text-ink">Lote {etiqueta.lote}</p>
         )}
         <p className="mt-0.5 text-2xs text-muted">{formatDate(etiqueta.fecha_empaque)}</p>
         {etiqueta.tipo !== 'lote' && etiqueta.precio_venta != null && (
@@ -594,5 +594,5 @@ function QrResumen({ codigo }: { codigo: string }) {
 
   return url
     ? <img src={url} alt={`QR ${codigo}`} className="h-52 w-52" />
-    : <div className="h-52 w-52 animate-pulse rounded bg-slate-200" />;
+    : <div className="h-52 w-52 animate-pulse rounded bg-surface-2" />;
 }

@@ -16,7 +16,6 @@ export default function CarteraPage() {
       <div className="page-header">
         <div>
           <h1 className="page-title">Cartera — Cuentas por cobrar</h1>
-          <p className="page-subtitle">Saldos pendientes por cliente y deudas vencidas</p>
         </div>
         {cartera.length > 0 && (
           <span className="chip">{plural(cartera.length, 'cliente', 'clientes')} con saldo</span>
@@ -51,7 +50,7 @@ export default function CarteraPage() {
                 {vencidas.map((v: any) => (
                   <tr key={v.venta_id}>
                     <td className="font-mono text-muted">#{v.venta_id}</td>
-                    <td className="font-medium text-slate-800">{v.cliente}</td>
+                    <td className="font-medium text-ink">{v.cliente}</td>
                     <td className="whitespace-nowrap text-muted">{formatDate(v.fecha_vencimiento)}</td>
                     <td className="text-right font-semibold text-danger">{v.dias_vencido} días</td>
                     <td className="num font-semibold text-danger">{formatCOP(v.saldo_pendiente)}</td>
@@ -75,7 +74,7 @@ export default function CarteraPage() {
         <div className="card overflow-hidden p-0">
           <div className="card-header">
             <div>
-              <p className="text-xs font-semibold text-slate-800">Clientes con saldo pendiente</p>
+              <p className="text-xs font-semibold text-ink">Clientes con saldo pendiente</p>
               <p className="text-2xs text-muted">Total vendido, pagado y saldo acumulado</p>
             </div>
           </div>
@@ -94,7 +93,7 @@ export default function CarteraPage() {
               <tbody>
                 {cartera.map((c: any) => (
                   <tr key={c.id}>
-                    <td className="font-medium text-slate-800">{c.nombre}</td>
+                    <td className="font-medium text-ink">{c.nombre}</td>
                     <td className="text-muted">{c.telefono ?? '—'}</td>
                     <td className="num">{c.pedidos_pendientes}</td>
                     <td className="num">{formatCOP(c.total_ventas)}</td>

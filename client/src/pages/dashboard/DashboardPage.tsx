@@ -61,7 +61,7 @@ function PanelAdmin() {
       <div className="page-header">
         <div>
           <h1 className="page-title">Panel de control</h1>
-          <p className="page-subtitle">Resumen operativo y financiero · {f.periodo_label}</p>
+          <p className="page-subtitle">{f.periodo_label}</p>
         </div>
         <div className="no-print flex flex-wrap items-center gap-2">
           <button onClick={() => navigate('/finanzas')} className="btn-secondary">
@@ -175,10 +175,10 @@ function PanelAdmin() {
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-md border border-line bg-white shadow-panel">
+        <div className="overflow-hidden rounded-md border border-line bg-card shadow-panel">
           <div className="card-header">
             <div>
-              <p className="text-xs font-semibold text-slate-800">Estado de resultados</p>
+              <p className="text-xs font-semibold text-ink">Estado de resultados</p>
               <p className="text-2xs text-muted">Resumen del período</p>
             </div>
             <button onClick={() => navigate('/finanzas')} className="btn-ghost">
@@ -210,7 +210,7 @@ function PanelAdmin() {
           <div className="border-t border-line px-4 py-3">
             <div className="flex items-center justify-between text-tiny">
               <span className="text-muted">Punto de equilibrio</span>
-              <span className="money font-semibold text-slate-800">{formatCOP(ind.punto_equilibrio)}</span>
+              <span className="money font-semibold text-ink">{formatCOP(ind.punto_equilibrio)}</span>
             </div>
             <div
               className="progress-track mt-2"
@@ -291,7 +291,7 @@ function PanelAdmin() {
                     <div key={s.destino_dinero}>
                       <div className="mb-1 flex items-center justify-between gap-2">
                         <BadgeDestino destino={s.destino_dinero} />
-                        <span className="money text-tiny font-semibold text-slate-800">{formatCOP(s.total)}</span>
+                        <span className="money text-tiny font-semibold text-ink">{formatCOP(s.total)}</span>
                       </div>
                       <div
                         className="progress-track"
@@ -327,13 +327,13 @@ function PanelAdmin() {
           </div>
           <div className="space-y-3">
             {data.stock.map((p) => (
-              <div key={p.nombre} className="flex items-center justify-between gap-3 border-b border-slate-100 pb-2.5 last:border-0 last:pb-0">
+              <div key={p.nombre} className="flex items-center justify-between gap-3 border-b border-line pb-2.5 last:border-0 last:pb-0">
                 <div className="min-w-0">
-                  <p className="truncate text-xs font-medium text-slate-700">{p.nombre}</p>
+                  <p className="truncate text-xs font-medium text-body">{p.nombre}</p>
                   <p className="text-2xs text-muted">{formatCOP(p.precio_venta)} / {p.unidad_medida === 'unidad' ? 'unidad' : 'kg'}</p>
                 </div>
                 <div className="text-right">
-                  <p className="money text-xs font-semibold text-slate-900">{formatCantidad(p.stock_actual)}</p>
+                  <p className="money text-xs font-semibold text-ink">{formatCantidad(p.stock_actual)}</p>
                   <p className="text-2xs text-muted">{p.unidad_medida === 'canasta' ? 'kg en stock' : p.unidad_medida}</p>
                 </div>
               </div>
@@ -344,10 +344,10 @@ function PanelAdmin() {
           </button>
         </div>
 
-        <div className="overflow-hidden rounded-md border border-line bg-white shadow-panel xl:col-span-2">
+        <div className="overflow-hidden rounded-md border border-line bg-card shadow-panel xl:col-span-2">
           <div className="card-header">
             <div>
-              <p className="text-xs font-semibold text-slate-800">Últimas ventas</p>
+              <p className="text-xs font-semibold text-ink">Últimas ventas</p>
               <p className="text-2xs text-muted">Movimientos recientes</p>
             </div>
             <button onClick={() => navigate('/ventas')} className="btn-ghost">
@@ -370,9 +370,9 @@ function PanelAdmin() {
                 {data.ultimas_ventas.map((v: any) => (
                   <tr key={v.id}>
                     <td className="font-mono text-muted">#{v.id}</td>
-                    <td className="font-medium text-slate-700">{v.cliente}</td>
+                    <td className="font-medium text-body">{v.cliente}</td>
                     <td className="whitespace-nowrap text-muted">{v.fecha}</td>
-                    <td className="num font-semibold text-slate-900">{formatCOP(v.total)}</td>
+                    <td className="num font-semibold text-ink">{formatCOP(v.total)}</td>
                     <td><BadgeEstadoPago estado={v.estado_pago} /></td>
                     <td><BadgeEstadoPedido estado={v.estado_pedido} /></td>
                   </tr>
@@ -401,14 +401,14 @@ function MiniRow({
   positive?: boolean;
 }) {
   return (
-    <tr className={strong ? 'bg-slate-50/60' : undefined}>
-      <td className={clsx('py-2', strong ? 'font-semibold text-slate-900' : 'text-slate-600', muted && 'text-muted')}>
+    <tr className={strong ? 'bg-surface/60' : undefined}>
+      <td className={clsx('py-2', strong ? 'font-semibold text-ink' : 'text-soft', muted && 'text-muted')}>
         {label}
       </td>
       <td className={clsx(
         'num py-2',
         strong ? 'font-semibold' : 'font-medium',
-        positive === true ? 'text-success' : positive === false ? 'text-danger' : 'text-slate-800',
+        positive === true ? 'text-success' : positive === false ? 'text-danger' : 'text-ink',
       )}>
         {value}
       </td>

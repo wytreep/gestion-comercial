@@ -47,7 +47,6 @@ export default function CajaPage() {
       <div className="page-header">
         <div>
           <h1 className="page-title">Caja y flujo de dinero</h1>
-          <p className="page-subtitle">Cobros recibidos, inversiones y saldo del período</p>
         </div>
         {!isLoading && movs.length > 0 && <span className="chip">{plural(movs.length, 'movimiento')}</span>}
       </div>
@@ -99,7 +98,7 @@ export default function CajaPage() {
                         <div className="mb-1 flex items-center justify-between gap-2">
                           <BadgeDestino destino={s.destino_dinero} />
                           <div className="text-right">
-                            <p className="money text-tiny font-semibold text-slate-900">{formatCOP(s.total)}</p>
+                            <p className="money text-tiny font-semibold text-ink">{formatCOP(s.total)}</p>
                             <p className="text-2xs text-muted">{plural(s.transacciones, 'transacción', 'transacciones')}</p>
                           </div>
                         </div>
@@ -135,7 +134,7 @@ export default function CajaPage() {
                       <CartesianGrid {...CHART.grid} />
                       <XAxis dataKey="fecha" tick={CHART.axisTick} axisLine={false} tickLine={false} />
                       <YAxis tick={CHART.axisTick} tickFormatter={formatCOPCompact} axisLine={false} tickLine={false} width={46} />
-                      <Tooltip formatter={(v: any) => [formatCOP(Number(v)), 'Cobrado']} {...CHART.tooltip} cursor={{ fill: 'rgba(11, 92, 171, 0.06)' }} />
+                      <Tooltip formatter={(v: any) => [formatCOP(Number(v)), 'Cobrado']} {...CHART.tooltip} />
                       <Bar
                         dataKey="ingresos"
                         name="Cobrado"
@@ -156,7 +155,7 @@ export default function CajaPage() {
           <div className="card overflow-hidden p-0">
             <div className="card-header">
               <div>
-                <p className="text-xs font-semibold text-slate-800">Movimientos del período</p>
+                <p className="text-xs font-semibold text-ink">Movimientos del período</p>
                 <p className="text-2xs text-muted">Cobros agrupados por fecha, medio y destino</p>
               </div>
               <span className="chip">{plural(movs.length, 'registro')}</span>

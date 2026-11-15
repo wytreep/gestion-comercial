@@ -37,7 +37,6 @@ export default function VentasPage() {
       <div className="page-header">
         <div>
           <h1 className="page-title">Ventas</h1>
-          <p className="page-subtitle">Pedidos, pagos y saldos pendientes del período</p>
         </div>
         <Link to="/ventas/nueva" className="btn-primary">
           <Plus size={15} aria-hidden="true" /> Nueva venta
@@ -93,9 +92,9 @@ export default function VentasPage() {
                 {ventas.map((v) => (
                   <tr key={v.id} className={v.estado_pedido === 'cancelado' ? 'opacity-50' : undefined}>
                     <td className="font-mono text-muted">#{v.id}</td>
-                    <td className={v.estado_pedido === 'cancelado' ? 'font-medium line-through' : 'font-medium text-slate-800'}>{v.cliente_nombre}</td>
+                    <td className={v.estado_pedido === 'cancelado' ? 'font-medium line-through' : 'font-medium text-ink'}>{v.cliente_nombre}</td>
                     <td className="whitespace-nowrap text-muted">{formatDate(v.fecha_venta)}</td>
-                    <td className="num font-semibold text-slate-900">{formatCOP(v.total)}</td>
+                    <td className="num font-semibold text-ink">{formatCOP(v.total)}</td>
                     <td className="num text-success">{formatCOP(v.total_pagado)}</td>
                     <td className={v.saldo_pendiente > 0 ? 'num font-semibold text-danger' : 'num text-muted'}>{formatCOP(v.saldo_pendiente)}</td>
                     <td><BadgeEstadoPago estado={v.estado_pago} /></td>
@@ -159,17 +158,17 @@ function DetalleVenta({ venta, onAbonar, onCobrarQr }: { venta: Venta; onAbonar:
             <tbody>
               {venta.items.map((i) => (
                 <tr key={i.id}>
-                  <td className="font-medium text-slate-800">{i.producto}</td>
+                  <td className="font-medium text-ink">{i.producto}</td>
                   <td className="num">{formatCantidad(i.cantidad)} {i.unidad_medida}</td>
                   <td className="num">{formatCOP(num(i.precio_unitario))}</td>
-                  <td className="num font-semibold text-slate-900">{formatCOP(num(i.subtotal))}</td>
+                  <td className="num font-semibold text-ink">{formatCOP(num(i.subtotal))}</td>
                 </tr>
               ))}
             </tbody>
             <tfoot>
               <tr>
                 <td colSpan={3} className="text-right">Total</td>
-                <td className="num text-slate-900">{formatCOP(venta.total)}</td>
+                <td className="num text-ink">{formatCOP(venta.total)}</td>
               </tr>
             </tfoot>
           </table>
@@ -193,7 +192,7 @@ function DetalleVenta({ venta, onAbonar, onCobrarQr }: { venta: Venta; onAbonar:
                 {venta.pagos.map((p) => (
                   <tr key={p.id}>
                     <td className="whitespace-nowrap text-muted">{formatDateTime(p.fecha_pago)}</td>
-                    <td className="num font-semibold text-slate-900">{formatCOP(p.monto)}</td>
+                    <td className="num font-semibold text-ink">{formatCOP(p.monto)}</td>
                     <td><BadgeMedioPago medio={p.medio_pago} /></td>
                     <td><BadgeDestino destino={p.destino_dinero} /></td>
                   </tr>
@@ -307,7 +306,7 @@ function EditarVenta({ venta, onSuccess }: { venta: Venta; onSuccess: () => void
                 parse={parseMoneyInput}
                 onChange={(v) => setItems((prev) => prev.map((it, i) => i === idx ? { ...it, precio_unitario: v } : it))}
               />
-              <span className="num text-xs font-semibold text-primary">{formatCOP(item.cantidad * item.precio_unitario)}</span>
+              <span className="num text-xs font-semibold text-accent">{formatCOP(item.cantidad * item.precio_unitario)}</span>
               <button type="button" onClick={() => setItems((prev) => prev.filter((_, i) => i !== idx))} className="btn-icon justify-self-end text-danger hover:bg-danger-soft" aria-label={`Quitar producto de la línea ${idx + 1}`}>
                 <X size={15} aria-hidden="true" />
               </button>
@@ -318,7 +317,7 @@ function EditarVenta({ venta, onSuccess }: { venta: Venta; onSuccess: () => void
           <Plus size={12} aria-hidden="true" /> Producto
         </button>
         <div className="mt-2 text-right text-xs">
-          Total: <span className="money font-semibold text-primary">{formatCOP(items.reduce((s, i) => s + i.cantidad * i.precio_unitario, 0))}</span>
+          Total: <span className="money font-semibold text-accent">{formatCOP(items.reduce((s, i) => s + i.cantidad * i.precio_unitario, 0))}</span>
         </div>
       </div>
 
@@ -344,7 +343,7 @@ function AbonarVenta({ venta, onSuccess }: { venta: Venta; onSuccess: () => void
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {error && <Alert type="error" message={error} />}
-      <p className="text-xs text-slate-600">
+      <p className="text-xs text-soft">
         Saldo pendiente: <span className="money font-semibold text-danger">{formatCOP(venta.saldo_pendiente)}</span>
       </p>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

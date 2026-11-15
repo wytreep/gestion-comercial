@@ -55,4 +55,13 @@ final class AuthController extends BaseController
         $this->svc->cambiarPassword((int)$userId, (string)$r->input('password_actual'), (string)$r->input('password_nueva'));
         return Response::ok(null, 'Contraseña actualizada');
     }
+
+    /** Preferencia de tema de la cuenta: claro · oscuro · sistema. */
+    public function preferencias(Request $r): Response
+    {
+        $this->requireFields($r, 'tema');
+        $userId = (int) ($r->authUser()['sub'] ?? 0);
+        $this->svc->guardarTema($userId, (string) $r->input('tema'));
+        return Response::ok(null, 'Preferencias guardadas');
+    }
 }

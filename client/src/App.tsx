@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 
 import AppLayout    from './components/layout/AppLayout';
 import LoginPage    from './pages/auth/LoginPage';
@@ -49,32 +50,34 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<Public><LoginPage /></Public>} />
+        <ThemeProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/login" element={<Public><LoginPage /></Public>} />
 
-            <Route element={<Protected><AppLayout /></Protected>}>
-              <Route index                element={<DashboardPage />} />
-              <Route path="ventas"        element={<VentasPage />} />
-              <Route path="ventas/nueva"  element={<NuevaVentaPage />} />
-              <Route path="compras"       element={<AdminOnly><ComprasPage /></AdminOnly>} />
-              <Route path="compras/nueva" element={<AdminOnly><NuevaCompraPage /></AdminOnly>} />
-              <Route path="productos"     element={<ProductosPage />} />
-              <Route path="clientes"      element={<ClientesPage />} />
-              <Route path="cartera"       element={<CarteraPage />} />
-              <Route path="caja"          element={<AdminOnly><CajaPage /></AdminOnly>} />
-              <Route path="finanzas"      element={<AdminOnly><FinanzasPage /></AdminOnly>} />
-              <Route path="notificaciones"element={<NotificacionesPage />} />
-              <Route path="reportes"      element={<AdminOnly><ReportesPage /></AdminOnly>} />
-              <Route path="stock"         element={<StockPage />} />
-              <Route path="etiquetas"     element={<EtiquetasPage />} />
-              <Route path="admin"         element={<AdminOnly><AdminPage /></AdminOnly>} />
-              <Route path="backup"        element={<AdminOnly><BackupPage /></AdminOnly>} />
-            </Route>
+              <Route element={<Protected><AppLayout /></Protected>}>
+                <Route index                element={<DashboardPage />} />
+                <Route path="ventas"        element={<VentasPage />} />
+                <Route path="ventas/nueva"  element={<NuevaVentaPage />} />
+                <Route path="compras"       element={<AdminOnly><ComprasPage /></AdminOnly>} />
+                <Route path="compras/nueva" element={<AdminOnly><NuevaCompraPage /></AdminOnly>} />
+                <Route path="productos"     element={<ProductosPage />} />
+                <Route path="clientes"      element={<ClientesPage />} />
+                <Route path="cartera"       element={<CarteraPage />} />
+                <Route path="caja"          element={<AdminOnly><CajaPage /></AdminOnly>} />
+                <Route path="finanzas"      element={<AdminOnly><FinanzasPage /></AdminOnly>} />
+                <Route path="notificaciones"element={<NotificacionesPage />} />
+                <Route path="reportes"      element={<AdminOnly><ReportesPage /></AdminOnly>} />
+                <Route path="stock"         element={<StockPage />} />
+                <Route path="etiquetas"     element={<EtiquetasPage />} />
+                <Route path="admin"         element={<AdminOnly><AdminPage /></AdminOnly>} />
+                <Route path="backup"        element={<AdminOnly><BackupPage /></AdminOnly>} />
+              </Route>
 
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </BrowserRouter>
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </BrowserRouter>
+        </ThemeProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

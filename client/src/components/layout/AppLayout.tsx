@@ -3,13 +3,15 @@ import { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../../context/AuthContext';
+import { useTema } from '../../context/ThemeContext';
 import { notifApi } from '../../api/endpoints';
 import { plural } from '../../utils/format';
+import { ETIQUETA_TEMA } from '../../utils/theme';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import {
   LayoutDashboard, ReceiptText, PlusCircle, Wallet, HandCoins, Package,
-  PackagePlus, Users, Tag, LogOut, Bell, FileText, Database, ArrowLeftRight,
-  ShieldCheck, BarChart3, Menu, X, Landmark, QrCode,
+  PackagePlus, Users, Boxes, LogOut, Bell, ChartColumnBig, Database, ArrowUpDown,
+  ShieldCheck, BarChart3, Menu, X, Banknote, QrCode, Monitor, Moon, Sun, Check,
 } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -80,7 +82,7 @@ export default function AppLayout() {
       </a>
 
       {/* ── Barra superior: módulos principales ─────── */}
-      <header className="z-30 flex h-[54px] shrink-0 items-center gap-1.5 border-b border-navy-800 bg-navy-900 px-2.5 text-white md:gap-2 md:px-3 xl:px-4">
+      <header className="z-sticky flex h-[54px] shrink-0 items-center gap-1.5 border-b border-navy-800 bg-navy-900 px-2.5 text-white md:gap-2 md:px-3 xl:px-4">
         <button
           onClick={() => setMobileOpen(true)}
           className="rounded-sm p-1.5 text-slate-400 hover:bg-white/5 hover:text-white md:hidden"
@@ -114,8 +116,8 @@ export default function AppLayout() {
           {isAdmin && <TopItem to="/compras" label="Compras" icon={<Package size={14} />} />}
           <TopItem to="/cartera" label="Cartera" icon={<HandCoins size={14} />} />
           {isAdmin && <TopItem to="/finanzas" label="Finanzas" icon={<Wallet size={14} />} />}
-          {isAdmin && <TopItem to="/caja" label="Caja" icon={<Landmark size={14} />} />}
-          {isAdmin && <TopItem to="/reportes" label="Reportes" icon={<FileText size={14} />} />}
+          {isAdmin && <TopItem to="/caja" label="Caja" icon={<Banknote size={14} />} />}
+          {isAdmin && <TopItem to="/reportes" label="Reportes" icon={<ChartColumnBig size={14} />} />}
         </nav>
 
         <div className="ml-auto flex shrink-0 items-center gap-2">
@@ -124,6 +126,7 @@ export default function AppLayout() {
               <PlusCircle size={13} aria-hidden="true" /> Nueva venta
             </button>
           )}
+          <TemaMenu />
           <button
             onClick={() => navigate('/notificaciones')}
             className={clsx(
@@ -137,7 +140,7 @@ export default function AppLayout() {
           >
             <Bell size={15} aria-hidden="true" />
             {count > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-2xs font-bold text-white" aria-hidden="true">
+              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger-solid px-1 text-2xs font-bold text-white" aria-hidden="true">
                 {count > 99 ? '99+' : count}
               </span>
             )}
@@ -168,7 +171,7 @@ export default function AppLayout() {
 
       <div className="flex min-h-0 flex-1 overflow-hidden">
         {/* ── Riel lateral: acciones y datos maestros ── */}
-        <aside className="hidden w-[58px] shrink-0 border-r border-line bg-white py-2 md:flex">
+        <aside className="hidden w-[58px] shrink-0 border-r border-line bg-card py-2 md:flex">
           <nav aria-label="Acciones y datos maestros" className="flex w-full flex-1 flex-col items-center">
             <RailGroup label="Acciones">
               <RailItem to="/ventas/nueva" label="Nueva venta" icon={<PlusCircle size={17} />} />
@@ -179,8 +182,8 @@ export default function AppLayout() {
 
             <RailGroup label="Datos maestros">
               <RailItem to="/clientes" label="Clientes" icon={<Users size={17} />} />
-              <RailItem to="/productos" label="Productos y precios" icon={<Tag size={17} />} />
-              <RailItem to="/stock" label="Movimientos de stock" icon={<ArrowLeftRight size={17} />} />
+              <RailItem to="/productos" label="Productos y precios" icon={<Boxes size={17} />} />
+              <RailItem to="/stock" label="Movimientos de stock" icon={<ArrowUpDown size={17} />} />
               <RailItem to="/etiquetas" label="Etiquetas QR" icon={<QrCode size={17} />} />
             </RailGroup>
 
@@ -203,7 +206,7 @@ export default function AppLayout() {
             <div className="mb-3 flex items-center gap-1.5 text-2xs text-muted md:hidden">
               <span>{meta.section}</span>
               <span className="text-slate-300">/</span>
-              <span className="font-medium text-slate-600">{meta.label}</span>
+              <span className="font-medium text-soft">{meta.label}</span>
             </div>
             <Outlet />
           </div>
@@ -216,7 +219,7 @@ export default function AppLayout() {
           <button
             aria-label="Cerrar menú"
             onClick={() => setMobileOpen(false)}
-            className="fixed inset-0 z-40 bg-navy-950/50 md:hidden"
+            className="fixed inset-0 z-dropdown bg-navy-950/50 md:hidden"
           />
           <aside
             ref={drawerRef}
@@ -225,7 +228,7 @@ export default function AppLayout() {
             aria-modal="true"
             aria-label="Menú de navegación"
             tabIndex={-1}
-            className="surface-dark fixed inset-y-0 left-0 z-50 flex w-[250px] flex-col bg-navy-900 outline-none md:hidden"
+            className="surface-dark fixed inset-y-0 left-0 z-drawer flex w-[250px] flex-col bg-navy-900 outline-none md:hidden"
           >
             <div className="flex h-[54px] items-center gap-2.5 border-b border-white/[0.07] px-4">
               <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-primary" aria-hidden="true">
@@ -258,13 +261,13 @@ export default function AppLayout() {
               {isAdmin && (
                 <MobileSection label="Finanzas">
                   <MobileItem to="/finanzas" label="Finanzas" icon={<Wallet size={15} />} />
-                  <MobileItem to="/caja" label="Caja y flujo" icon={<Landmark size={15} />} />
-                  <MobileItem to="/reportes" label="Reportes" icon={<FileText size={15} />} />
+                  <MobileItem to="/caja" label="Caja y flujo" icon={<Banknote size={15} />} />
+                  <MobileItem to="/reportes" label="Reportes" icon={<ChartColumnBig size={15} />} />
                 </MobileSection>
               )}
               <MobileSection label="Inventario">
-                <MobileItem to="/productos" label="Productos y precios" icon={<Tag size={15} />} />
-                <MobileItem to="/stock" label="Movimientos de stock" icon={<ArrowLeftRight size={15} />} />
+                <MobileItem to="/productos" label="Productos y precios" icon={<Boxes size={15} />} />
+                <MobileItem to="/stock" label="Movimientos de stock" icon={<ArrowUpDown size={15} />} />
                 <MobileItem to="/etiquetas" label="Etiquetas QR" icon={<QrCode size={15} />} />
               </MobileSection>
               <MobileSection label="Sistema">
@@ -295,6 +298,102 @@ export default function AppLayout() {
             </div>
           </aside>
         </>
+      )}
+    </div>
+  );
+}
+
+// ── Selector de tema ───────────────────────────────────
+
+const TEMAS = [
+  { valor: 'claro',   Icono: Sun },
+  { valor: 'oscuro',  Icono: Moon },
+  { valor: 'sistema', Icono: Monitor },
+] as const;
+
+function TemaMenu() {
+  const { tema, setTema } = useTema();
+  const [abierto, setAbierto] = useState(false);
+  const cajaRef = useRef<HTMLDivElement>(null);
+  const botonRef = useRef<HTMLButtonElement>(null);
+  const itemsRef = useRef<Array<HTMLButtonElement | null>>([]);
+  const actual = TEMAS.find((t) => t.valor === tema) ?? TEMAS[2];
+  const Icono = actual.Icono;
+
+  const cerrar = (devolverFoco = true) => {
+    setAbierto(false);
+    if (devolverFoco) botonRef.current?.focus();
+  };
+
+  useEffect(() => {
+    if (!abierto) return;
+    itemsRef.current[TEMAS.findIndex((t) => t.valor === tema)]?.focus();
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { e.stopPropagation(); cerrar(); }
+    };
+    const onFuera = (e: MouseEvent) => {
+      if (!cajaRef.current?.contains(e.target as Node)) setAbierto(false);
+    };
+    document.addEventListener('keydown', onKey);
+    document.addEventListener('mousedown', onFuera);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.removeEventListener('mousedown', onFuera);
+    };
+  }, [abierto, tema]);
+
+  return (
+    <div ref={cajaRef} className="relative">
+      <button
+        ref={botonRef}
+        type="button"
+        onClick={() => setAbierto((v) => !v)}
+        aria-haspopup="menu"
+        aria-expanded={abierto}
+        aria-label={`Tema: ${ETIQUETA_TEMA[tema]}`}
+        title={`Tema: ${ETIQUETA_TEMA[tema]}`}
+        className="rounded-sm border border-white/10 p-1.5 text-slate-400 transition-colors hover:bg-white/5 hover:text-white"
+      >
+        <Icono size={15} aria-hidden="true" />
+      </button>
+
+      {abierto && (
+        <div
+          role="menu"
+          aria-label="Tema de la interfaz"
+          className="absolute right-0 top-full z-dropdown mt-1.5 w-44 rounded border border-line bg-card p-1 shadow-dropdown"
+        >
+          <p className="px-2 pb-1 pt-0.5 text-2xs font-semibold uppercase tracking-wide text-muted">Tema</p>
+          {TEMAS.map(({ valor, Icono: I }, i) => {
+            const activo = tema === valor;
+            return (
+              <button
+                key={valor}
+                ref={(el) => { itemsRef.current[i] = el; }}
+                type="button"
+                role="menuitemradio"
+                aria-checked={activo}
+                onClick={() => { setTema(valor); cerrar(); }}
+                onKeyDown={(e) => {
+                  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    const delta = e.key === 'ArrowDown' ? 1 : -1;
+                    itemsRef.current[(i + delta + TEMAS.length) % TEMAS.length]?.focus();
+                  }
+                }}
+                className={clsx(
+                  'flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-xs transition-colors',
+                  activo ? 'bg-primary-50 font-semibold text-accent' : 'text-body hover:bg-surface',
+                )}
+              >
+                <I size={14} aria-hidden="true" />
+                <span className="flex-1">{ETIQUETA_TEMA[valor]}</span>
+                {activo && <Check size={13} aria-hidden="true" />}
+              </button>
+            );
+          })}
+        </div>
       )}
     </div>
   );
@@ -343,13 +442,13 @@ function RailItem({ to, label, icon, badge }: { to: string; label: string; icon:
       className={({ isActive }) => clsx(
         'relative flex h-9 w-9 items-center justify-center rounded-sm transition-colors',
         isActive
-          ? 'bg-primary-50 text-primary ring-1 ring-primary/15'
+          ? 'bg-primary-50 text-accent ring-1 ring-primary/15'
           : 'text-muted hover:bg-slate-100 hover:text-slate-700',
       )}
     >
       <span aria-hidden="true">{icon}</span>
       {!!badge && (
-        <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-2xs font-bold text-white" aria-hidden="true">
+        <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger-solid px-1 text-2xs font-bold text-white" aria-hidden="true">
           {badge > 99 ? '99+' : badge}
         </span>
       )}
@@ -385,7 +484,7 @@ function MobileItem({ to, label, icon, badge, end }: { to: string; label: string
           <span className={isActive ? 'text-primary-invert' : 'text-slate-400'} aria-hidden="true">{icon}</span>
           <span className="flex-1 truncate">{label}</span>
           {!!badge && (
-            <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-2xs font-bold text-white" aria-hidden="true">
+            <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-danger-solid px-1 text-2xs font-bold text-white" aria-hidden="true">
               {badge > 99 ? '99+' : badge}
             </span>
           )}

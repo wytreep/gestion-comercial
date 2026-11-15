@@ -1,11 +1,13 @@
 // ── Auth ──────────────────────────────────────────────
 export type Rol = 'admin' | 'vendedor' | 'readonly';
+export type Tema = 'claro' | 'oscuro' | 'sistema';
 
 export interface User {
   id:     number;
   nombre: string;
   email:  string;
   rol:    Rol;
+  tema?:  Tema;
 }
 
 export interface AuthTokens {

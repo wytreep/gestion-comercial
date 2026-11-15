@@ -85,7 +85,7 @@ export function Spinner({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
   const s = { sm: 'h-4 w-4', md: 'h-7 w-7', lg: 'h-10 w-10' }[size];
   return (
     <div className="flex items-center justify-center py-8" role="status">
-      <div className={clsx(s, 'animate-spin rounded-full border-2 border-slate-200 border-t-primary')} />
+      <div className={clsx(s, 'animate-spin rounded-full border-2 border-line border-t-primary')} />
       <span className="sr-only">Cargando…</span>
     </div>
   );
@@ -108,11 +108,11 @@ export function Empty({
   return (
     <div className="flex flex-col items-center justify-center gap-2 px-4 py-10 text-center">
       {icon && (
-        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-subtle" aria-hidden="true">
+        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-2 text-subtle" aria-hidden="true">
           {icon}
         </span>
       )}
-      <p className="text-tiny font-medium text-slate-600">{title ?? message}</p>
+      <p className="text-tiny font-medium text-soft">{title ?? message}</p>
       {description && <p className="max-w-sm text-tiny text-muted">{description}</p>}
       {action && <div className="mt-1">{action}</div>}
     </div>
@@ -123,7 +123,7 @@ export function Empty({
 const ALERT_STYLE = {
   error:   { box: 'border-danger/25 bg-danger-soft text-danger',    Icon: AlertCircle,   role: 'alert'  as const },
   warning: { box: 'border-warning/25 bg-warning-soft text-warning', Icon: AlertTriangle, role: 'status' as const },
-  info:    { box: 'border-primary/20 bg-primary-50 text-primary',   Icon: Info,          role: 'status' as const },
+  info:    { box: 'border-accent/25 bg-primary-50 text-accent',   Icon: Info,          role: 'status' as const },
   success: { box: 'border-success/20 bg-success-soft text-success', Icon: CheckCircle2,  role: 'status' as const },
 };
 
@@ -155,7 +155,7 @@ export function Modal({ open, onClose, title, children, size = 'md' }: { open: b
   const w = { sm: 'max-w-sm', md: 'max-w-xl', lg: 'max-w-3xl', xl: 'max-w-5xl' }[size];
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-navy-950/60 p-4"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-navy-950/60 p-4"
       onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div
@@ -164,10 +164,10 @@ export function Modal({ open, onClose, title, children, size = 'md' }: { open: b
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className={clsx('flex w-full flex-col overflow-hidden rounded-lg border border-line bg-white shadow-dropdown outline-none', 'max-h-[calc(100vh-2rem)]', w)}
+        className={clsx('flex w-full flex-col overflow-hidden rounded-lg border border-line bg-card shadow-dropdown outline-none', 'max-h-[calc(100vh-2rem)]', w)}
       >
         <div className="flex shrink-0 items-center justify-between gap-3 border-b border-line px-4 py-3">
-          <h2 id={titleId} className="text-[15px] font-semibold tracking-tight text-slate-900">{title}</h2>
+          <h2 id={titleId} className="text-[15px] font-semibold tracking-tight text-ink">{title}</h2>
           <button type="button" onClick={onClose} aria-label="Cerrar" className="btn-icon -mr-1">
             <X size={18} aria-hidden="true" />
           </button>
@@ -195,7 +195,7 @@ export function Confirm({ open, title, message, onConfirm, onCancel, danger = fa
   if (!open) return null;
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-navy-950/60 p-4"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-navy-950/60 p-4"
       onMouseDown={(e) => { if (e.target === e.currentTarget) onCancel(); }}
     >
       <div
@@ -205,13 +205,13 @@ export function Confirm({ open, title, message, onConfirm, onCancel, danger = fa
         aria-labelledby={titleId}
         aria-describedby={messageId}
         tabIndex={-1}
-        className="w-full max-w-sm rounded-lg border border-line bg-white p-5 shadow-dropdown outline-none"
+        className="w-full max-w-sm rounded-lg border border-line bg-card p-5 shadow-dropdown outline-none"
       >
         <div className="mb-2 flex items-start gap-2.5">
-          <span className={clsx('flex h-8 w-8 shrink-0 items-center justify-center rounded-full', danger ? 'bg-danger-soft text-danger' : 'bg-primary-50 text-primary')} aria-hidden="true">
+          <span className={clsx('flex h-8 w-8 shrink-0 items-center justify-center rounded-full', danger ? 'bg-danger-soft text-danger' : 'bg-primary-50 text-accent')} aria-hidden="true">
             <AlertTriangle size={16} aria-hidden="true" />
           </span>
-          <h3 id={titleId} className="mt-1 text-[15px] font-semibold tracking-tight text-slate-900">{title}</h3>
+          <h3 id={titleId} className="mt-1 text-[15px] font-semibold tracking-tight text-ink">{title}</h3>
         </div>
         <p id={messageId} className="mb-5 pl-[42px] text-xs leading-relaxed text-muted">{message}</p>
         <div className="flex justify-end gap-2">
@@ -234,13 +234,13 @@ const KPI_ACCENT: Record<string, string> = {
   slate:   'bg-slate-400',
 };
 const KPI_ICON: Record<string, string> = {
-  blue:    'bg-primary-50 text-primary border-primary/15',
+  blue:    'bg-primary-50 text-accent border-primary/15',
   green:   'bg-success-soft text-success border-success/20',
   orange:  'bg-warning-soft text-warning border-warning/20',
   red:     'bg-danger-soft text-danger border-danger/20',
   emerald: 'bg-success-soft text-success border-success/20',
   teal:    'bg-teal/10 text-teal border-teal/25',
-  slate:   'bg-slate-50 text-slate-600 border-slate-200',
+  slate:   'bg-surface text-soft border-line',
 };
 
 export function KpiCard({
@@ -255,7 +255,7 @@ export function KpiCard({
   trendLabel?: string;
 }) {
   return (
-    <div className="relative overflow-hidden rounded-md border border-line bg-white px-4 py-3.5 shadow-panel">
+    <div className="relative overflow-hidden rounded-md border border-line bg-card px-4 py-3.5 shadow-panel">
       <div className={clsx('absolute inset-y-0 left-0 w-[3px]', KPI_ACCENT[color] ?? 'bg-primary')} aria-hidden="true" />
       <div className="flex items-start justify-between gap-2">
         <p className="section-label leading-tight">{label}</p>

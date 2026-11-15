@@ -23,7 +23,6 @@ export function ComprasPage() {
       <div className="page-header">
         <div>
           <h1 className="page-title">Compras</h1>
-          <p className="page-subtitle">Inversión en productos y gastos operativos</p>
         </div>
         <Link to="/compras/nueva" className="btn-primary">
           <Plus size={15} aria-hidden="true" /> Registrar compra
@@ -55,14 +54,14 @@ export function ComprasPage() {
                   <tr key={c.id}>
                     <td className="font-mono text-muted">#{c.id}</td>
                     <td className="whitespace-nowrap text-muted">{formatDate(c.fecha_compra)}</td>
-                    <td className="font-medium text-slate-800">{c.proveedor ?? '—'}</td>
+                    <td className="font-medium text-ink">{c.proveedor ?? '—'}</td>
                     <td className="num">{formatCOP(c.total_productos)}</td>
                     <td className="num text-muted">{formatCOP(c.total_gastos)}</td>
-                    <td className="num font-semibold text-slate-900">{formatCOP(c.total_inversion)}</td>
+                    <td className="num font-semibold text-ink">{formatCOP(c.total_inversion)}</td>
                     <td>
                       <select
                         className={`input w-auto font-semibold ${
-                          c.estado === 'recibida' ? 'text-success' : c.estado === 'parcial' ? 'text-primary' : 'text-warning'
+                          c.estado === 'recibida' ? 'text-success' : c.estado === 'parcial' ? 'text-accent' : 'text-warning'
                         }`}
                         aria-label={`Cambiar estado de la compra ${c.id}`}
                         value={c.estado}
@@ -99,7 +98,7 @@ function DetalleCompra({ compra }: { compra: Compra }) {
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-xs text-muted">Proveedor: <strong className="text-slate-800">{compra.proveedor ?? '—'}</strong></p>
+        <p className="text-xs text-muted">Proveedor: <strong className="text-ink">{compra.proveedor ?? '—'}</strong></p>
         <BadgeEstadoCompra estado={compra.estado} />
       </div>
 
@@ -119,11 +118,11 @@ function DetalleCompra({ compra }: { compra: Compra }) {
             <tbody>
               {compra.items.map((i) => (
                 <tr key={i.id}>
-                  <td className="font-medium text-slate-800">{i.producto}</td>
+                  <td className="font-medium text-ink">{i.producto}</td>
                   <td className="num">{formatCantidad(i.cantidad)} {i.unidad_medida}</td>
                   <td className="num">{num(i.kilos_estimados) ? `${formatCantidad(i.kilos_estimados)} kg` : '—'}</td>
                   <td className="num">{formatCOP(i.precio_unitario)}</td>
-                  <td className="num font-semibold text-slate-900">{formatCOP(i.subtotal)}</td>
+                  <td className="num font-semibold text-ink">{formatCOP(i.subtotal)}</td>
                 </tr>
               ))}
             </tbody>
@@ -146,7 +145,7 @@ function DetalleCompra({ compra }: { compra: Compra }) {
               <tbody>
                 {compra.gastos.map((g) => (
                   <tr key={g.id}>
-                    <td className="font-medium text-slate-800">{g.tipo}</td>
+                    <td className="font-medium text-ink">{g.tipo}</td>
                     <td className="num">{formatCOP(g.monto)}</td>
                     <td className="text-muted">{g.descripcion ?? '—'}</td>
                   </tr>
@@ -157,9 +156,9 @@ function DetalleCompra({ compra }: { compra: Compra }) {
         </div>
       )}
 
-      <div className="flex items-center justify-between border-t border-line pt-3 text-xs font-semibold text-slate-800">
+      <div className="flex items-center justify-between border-t border-line pt-3 text-xs font-semibold text-ink">
         <span>Total inversión</span>
-        <span className="money text-primary">{formatCOP(compra.total_inversion)}</span>
+        <span className="money text-accent">{formatCOP(compra.total_inversion)}</span>
       </div>
     </div>
   );
@@ -267,13 +266,13 @@ export function FormCompra({ compraExistente, onSuccess, conResumen = false }: {
               key={p.id}
               type="button"
               onClick={() => addLinea(p)}
-              className="group flex items-center justify-between gap-2 rounded border border-line bg-white px-3 py-2 text-left transition-colors hover:border-primary hover:bg-primary-50"
+              className="group flex items-center justify-between gap-2 rounded border border-line bg-card px-3 py-2 text-left transition-colors hover:border-primary hover:bg-primary-50"
             >
               <span className="min-w-0">
-                <span className="block truncate text-xs font-medium text-slate-800">{p.nombre}</span>
+                <span className="block truncate text-xs font-medium text-ink">{p.nombre}</span>
                 <span className="block text-2xs text-muted">{formatCOP(p.precio_compra)} / {p.unidad_medida}</span>
               </span>
-              <Plus size={14} className="shrink-0 text-muted transition-colors group-hover:text-primary" aria-hidden="true" />
+              <Plus size={14} className="shrink-0 text-muted transition-colors group-hover:text-accent" aria-hidden="true" />
             </button>
           ))}
         </div>
@@ -343,9 +342,9 @@ export function FormCompra({ compraExistente, onSuccess, conResumen = false }: {
                           parse={parseDecimalInput}
                           onChange={(v) => updateLinea(idx, 'kilos', v || null)}
                         />
-                        {esPescado && <p className="mt-0.5 text-2xs font-medium text-primary">Kilos reales para stock</p>}
+                        {esPescado && <p className="mt-0.5 text-2xs font-medium text-accent">Kilos reales para stock</p>}
                       </td>
-                      <td className="num font-semibold text-slate-900">{formatCOP(l.cantidad * l.precio)}</td>
+                      <td className="num font-semibold text-ink">{formatCOP(l.cantidad * l.precio)}</td>
                       <td>
                         <button
                           type="button"
@@ -365,8 +364,8 @@ export function FormCompra({ compraExistente, onSuccess, conResumen = false }: {
           </div>
         )}
         {lineas.length === 0 && (
-          <div className="mt-4 rounded border border-dashed border-line bg-slate-50/60 px-4 py-8 text-center">
-            <p className="text-xs font-medium text-slate-600">Selecciona un producto para agregarlo a la compra</p>
+          <div className="mt-4 rounded border border-dashed border-line bg-surface/60 px-4 py-8 text-center">
+            <p className="text-xs font-medium text-soft">Selecciona un producto para agregarlo a la compra</p>
             <p className="mt-0.5 text-2xs text-muted">Puedes ajustar cantidad, precio y kilos en la tabla</p>
           </div>
         )}
@@ -432,20 +431,20 @@ export function FormCompra({ compraExistente, onSuccess, conResumen = false }: {
       <dl className="space-y-2 text-xs">
         <div className="flex items-center justify-between gap-2">
           <dt className="text-muted">Costo de productos</dt>
-          <dd className="money text-slate-800">{formatCOP(totalProd)}</dd>
+          <dd className="money text-ink">{formatCOP(totalProd)}</dd>
         </div>
         <div className="flex items-center justify-between gap-2">
           <dt className="text-muted">Gastos operativos</dt>
-          <dd className="money text-slate-800">{formatCOP(totalGasto)}</dd>
+          <dd className="money text-ink">{formatCOP(totalGasto)}</dd>
         </div>
         <div className="flex items-center justify-between gap-2 border-t border-line pt-2">
-          <dt className="font-medium text-slate-600">Total inversión</dt>
-          <dd className="money text-[15px] font-bold text-slate-900">{formatCOP(totalInversion)}</dd>
+          <dt className="font-medium text-soft">Total inversión</dt>
+          <dd className="money text-[15px] font-bold text-ink">{formatCOP(totalInversion)}</dd>
         </div>
       </dl>
-      <div className="rounded border border-line bg-slate-50/70 px-3 py-2">
+      <div className="rounded border border-line bg-surface/70 px-3 py-2">
         <p className="section-label">Líneas</p>
-        <p className="text-xs font-medium text-slate-800">{plural(lineas.length, 'producto')} · {plural(gastos.length, 'gasto')}</p>
+        <p className="text-xs font-medium text-ink">{plural(lineas.length, 'producto')} · {plural(gastos.length, 'gasto')}</p>
       </div>
       <button onClick={guardar} disabled={saving} className="btn-primary btn-lg">
         <Check size={15} aria-hidden="true" /> {saving ? 'Guardando…' : compraExistente ? 'Guardar cambios' : 'Registrar compra'}
@@ -467,7 +466,7 @@ export function FormCompra({ compraExistente, onSuccess, conResumen = false }: {
       ) : (
         <>
           {contenido}
-          <div className="rounded border border-line bg-slate-50 p-3">{resumen}</div>
+          <div className="rounded border border-line bg-surface p-3">{resumen}</div>
         </>
       )}
     </div>
@@ -481,7 +480,6 @@ export function NuevaCompraPage() {
       <div className="page-header">
         <div>
           <h1 className="page-title">Registrar compra</h1>
-          <p className="page-subtitle">Proveedor, productos y gastos operativos</p>
         </div>
         <button onClick={() => navigate('/compras')} className="btn-secondary">
           <ArrowLeft size={14} aria-hidden="true" /> Volver a compras
