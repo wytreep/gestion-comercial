@@ -106,14 +106,38 @@ export const formatMes = (mes: string | null | undefined) => {
 export const formatPct = (n: number | null | undefined, decimales = 1) =>
   `${(Number(n) || 0).toFixed(decimales)}%`;
 
+/**
+ * Pluraliza sin el molesto "(s)" de la interfaz.
+ * Acepta frases completas para casos como "1 alerta pendiente".
+ */
+export const plural = (n: number | null | undefined, singular: string, pluralForm?: string) => {
+  const c = Number(n) || 0;
+  if (c === 1) return `1 ${singular}`;
+  const p = pluralForm ?? (
+    /[aeiou]$/.test(singular)                  ? `${singular}s`
+    : /ón$/.test(singular)                     ? singular.replace(/ón$/, 'ones')
+    : /án$/.test(singular)                     ? singular.replace(/án$/, 'anes')
+    : /én$/.test(singular)                     ? singular.replace(/én$/, 'enes')
+    : /ín$/.test(singular)                     ? singular.replace(/ín$/, 'ines')
+    : /z$/.test(singular)                      ? singular.replace(/z$/, 'ces')
+    : `${singular}es`
+  );
+  return `${c} ${p}`;
+};
+
 export const formatDate = (iso: string | null | undefined) => {
   if (!iso) return '—';
   return new Date(iso.length === 10 ? iso + 'T00:00:00' : iso)
     .toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric' });
 };
+
+// Misma convención que formatDate: dd/mm/aaaa · HH:mm (24 h).
+const HORA = new Intl.DateTimeFormat('es-CO', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
 export const formatDateTime = (iso: string | null | undefined) => {
   if (!iso) return '—';
-  return new Date(iso).toLocaleString('es-CO');
+  const d = new Date(iso.length === 10 ? iso + 'T00:00:00' : iso);
+  if (Number.isNaN(d.getTime())) return '—';
+  return `${formatDate(iso)} · ${HORA.format(d)}`;
 };
 
 type Badge = { label: string; className: string };

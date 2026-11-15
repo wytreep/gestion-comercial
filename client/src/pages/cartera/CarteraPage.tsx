@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { carteraApi } from '../../api/endpoints';
 import { Spinner, Empty } from '../../components/ui';
-import { formatCOP, formatDate } from '../../utils/format';
+import { formatCOP, formatDate, plural } from '../../utils/format';
 import { AlertTriangle, CheckCircle2 } from 'lucide-react';
 
 export default function CarteraPage() {
@@ -19,7 +19,7 @@ export default function CarteraPage() {
           <p className="page-subtitle">Saldos pendientes por cliente y deudas vencidas</p>
         </div>
         {cartera.length > 0 && (
-          <span className="chip">{cartera.length} cliente(s) con saldo</span>
+          <span className="chip">{plural(cartera.length, 'cliente', 'clientes')} con saldo</span>
         )}
       </div>
 
@@ -32,7 +32,7 @@ export default function CarteraPage() {
               </span>
               <div>
                 <p className="text-xs font-semibold text-danger">Deudas vencidas</p>
-                <p className="text-2xs text-muted">{vencidas.length} venta(s) con pago atrasado</p>
+                <p className="text-2xs text-muted">{plural(vencidas.length, 'venta', 'ventas')} con pago atrasado</p>
               </div>
             </div>
           </div>

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { backupApi } from '../../api/endpoints';
 import { Alert, Spinner, Empty } from '../../components/ui';
-import { formatDateTime, formatBytes } from '../../utils/format';
+import { formatDateTime, formatBytes, plural } from '../../utils/format';
 import { Download, Shield, Database } from 'lucide-react';
 
 export default function BackupPage() {
@@ -63,7 +63,7 @@ export default function BackupPage() {
             <Database size={15} className="text-muted" aria-hidden="true" />
             <p className="text-xs font-semibold text-slate-800">Historial de backups</p>
           </div>
-          {historial.length > 0 && <span className="chip">{historial.length} archivo(s)</span>}
+          {historial.length > 0 && <span className="chip">{plural(historial.length, 'archivo')}</span>}
         </div>
         {isLoading ? <Spinner /> : historial.length === 0 ? (
           <Empty

@@ -4,6 +4,7 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../../context/AuthContext';
 import { notifApi } from '../../api/endpoints';
+import { plural } from '../../utils/format';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import {
   LayoutDashboard, ReceiptText, PlusCircle, Wallet, HandCoins, Package,
@@ -131,8 +132,8 @@ export default function AppLayout() {
                 ? 'border-warning/40 bg-warning/15 text-warning-invert hover:bg-warning/25'
                 : 'border-white/10 text-slate-400 hover:bg-white/5 hover:text-white',
             )}
-            title={`${count} alerta(s) pendiente(s)`}
-            aria-label={count > 0 ? `Alertas: ${count} pendiente(s)` : 'Alertas: sin pendientes'}
+            title={plural(count, 'alerta pendiente', 'alertas pendientes')}
+            aria-label={count > 0 ? `Alertas: ${plural(count, 'pendiente')}` : 'Alertas: sin pendientes'}
           >
             <Bell size={15} aria-hidden="true" />
             {count > 0 && (
@@ -142,7 +143,7 @@ export default function AppLayout() {
             )}
           </button>
           <span className="sr-only" role="status" aria-live="polite">
-            {count > 0 ? `${count} alerta(s) pendiente(s)` : 'Sin alertas pendientes'}
+            {count > 0 ? plural(count, 'alerta pendiente', 'alertas pendientes') : 'Sin alertas pendientes'}
           </span>
           <div className="hidden h-6 w-px bg-white/10 md:block" />
           <div className="flex items-center gap-2">

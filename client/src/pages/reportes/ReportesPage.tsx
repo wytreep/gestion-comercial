@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { reporteApi } from '../../api/endpoints';
 import { Alert, Spinner, KpiCard, Empty } from '../../components/ui';
-import { formatCOP, formatCantidad, formatDate } from '../../utils/format';
+import { formatCOP, formatCantidad, formatDate, plural } from '../../utils/format';
 import { FileText, Download, Users, Wallet, Boxes } from 'lucide-react';
 
 export default function ReportesPage() {
@@ -136,7 +136,7 @@ export default function ReportesPage() {
                 <Boxes size={15} className="text-muted" aria-hidden="true" />
                 <p className="text-xs font-semibold text-slate-800">Stock actual</p>
               </div>
-              <span className="chip">{data.stock.length} producto(s)</span>
+              <span className="chip">{plural(data.stock.length, 'producto')}</span>
             </div>
             <div className="overflow-x-auto">
               <table className="table-base">

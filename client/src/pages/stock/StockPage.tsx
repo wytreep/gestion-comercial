@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { stockApi } from '../../api/endpoints';
 import { Alert, Spinner, Empty, BadgeMovimiento } from '../../components/ui';
-import { formatDateTime, formatCantidad, num } from '../../utils/format';
+import { formatDateTime, formatCantidad, num, plural } from '../../utils/format';
 import { Boxes } from 'lucide-react';
 
 export default function StockPage() {
@@ -18,7 +18,7 @@ export default function StockPage() {
           <p className="page-subtitle">Trazabilidad completa de entradas, salidas y ajustes</p>
         </div>
         {!isLoading && movimientos.length > 0 && (
-          <span className="chip">{movimientos.length} movimiento(s)</span>
+          <span className="chip">{plural(movimientos.length, 'movimiento')}</span>
         )}
       </div>
 

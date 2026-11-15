@@ -12,7 +12,7 @@ import clsx from 'clsx';
 import { dashboardApi, finanzasApi } from '../../api/endpoints';
 import { Alert, KpiCard, Spinner, BadgeEstadoPago, BadgeEstadoPedido, BadgeDestino } from '../../components/ui';
 import { CHART } from '../../components/charts/theme';
-import { currentMonthKey, formatCOP, formatCOPCompact, formatCantidad, formatPct } from '../../utils/format';
+import { currentMonthKey, formatCOP, formatCOPCompact, formatCantidad, formatPct, plural } from '../../utils/format';
 import { useAuth } from '../../context/AuthContext';
 import PanelVendedor from './PanelVendedor';
 
@@ -94,7 +94,7 @@ function PanelAdmin() {
         <KpiCard
           label="Ventas del mes"
           value={formatCOP(er.ingresos_operacionales)}
-          sub={`${er.pedidos} pedido${er.pedidos === 1 ? '' : 's'}`}
+          sub={plural(er.pedidos, 'pedido')}
           color="blue"
           icon={<ReceiptText size={14} />}
           trend={ind.crecimiento_ventas}
@@ -157,10 +157,9 @@ function PanelAdmin() {
                 <Tooltip
                   formatter={(v: any, name: any) => [formatCOP(Number(v)), String(name)]}
                   {...CHART.tooltip}
-
                 />
                 <Legend wrapperStyle={CHART.legend.wrapperStyle} />
-                <Bar dataKey="ventas" name="Ventas" fill={CHART.color.blue} barSize={20} radius={CHART.barRadius} />
+                <Bar dataKey="ventas" name="Ventas" fill={CHART.color.blue} barSize={20} radius={CHART.barRadius} isAnimationActive={CHART.animation} />
                 <Line
                   type="monotone"
                   dataKey="utilidad_operativa"
@@ -169,6 +168,7 @@ function PanelAdmin() {
                   strokeWidth={2}
                   dot={{ ...CHART.dot, stroke: CHART.color.teal }}
                   activeDot={{ ...CHART.activeDot, stroke: CHART.color.teal }}
+                  isAnimationActive={CHART.animation}
                 />
               </ComposedChart>
             </ResponsiveContainer>
@@ -265,49 +265,50 @@ function PanelAdmin() {
                 <Tooltip
                   formatter={(v: any, name: any) => [formatCOP(Number(v)), String(name)]}
                   {...CHART.tooltip}
-
                 />
                 <Legend wrapperStyle={CHART.legend.wrapperStyle} />
-                <Bar dataKey="ingresos" name="Cobros" fill={CHART.color.green} barSize={CHART.barSizeNarrow} radius={CHART.barRadius} />
-                <Bar dataKey="egresos" name="Compras" fill={CHART.color.red} barSize={CHART.barSizeNarrow} radius={CHART.barRadius} />
-                <Line type="monotone" dataKey="acumulado" name="Acumulado" stroke={CHART.color.blue} strokeWidth={1.8} dot={false} />
+                <Bar dataKey="ingresos" name="Cobros" fill={CHART.color.green} barSize={CHART.barSizeNarrow} radius={CHART.barRadius} isAnimationActive={CHART.animation} />
+                <Bar dataKey="egresos" name="Compras" fill={CHART.color.red} barSize={CHART.barSizeNarrow} radius={CHART.barRadius} isAnimationActive={CHART.animation} />
+                <Line type="monotone" dataKey="acumulado" name="Acumulado" stroke={CHART.color.blue} strokeWidth={1.8} dot={false} isAnimationActive={CHART.animation} />
               </ComposedChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="card">
+        <div className="card flex flex-col">
           <div className="mb-3 flex items-center justify-between">
             <p className="card-title mb-0">Saldos por destino</p>
             <Wallet size={15} className="text-muted" aria-hidden="true" />
           </div>
-          {data.saldos_destino?.length === 0 ? (
-            <p className="py-6 text-center text-tiny text-muted">Sin cobros registrados</p>
-          ) : (
-            <div className="space-y-3">
-              {(data.saldos_destino ?? []).map((s) => {
-                const pct = Math.min(100, (s.total / maxSaldo) * 100);
-                return (
-                  <div key={s.destino_dinero}>
-                    <div className="mb-1 flex items-center justify-between gap-2">
-                      <BadgeDestino destino={s.destino_dinero} />
-                      <span className="money text-tiny font-semibold text-slate-800">{formatCOP(s.total)}</span>
+          <div className="flex-1">
+            {data.saldos_destino?.length === 0 ? (
+              <p className="py-6 text-center text-tiny text-muted">Sin cobros registrados</p>
+            ) : (
+              <div className="space-y-3">
+                {(data.saldos_destino ?? []).map((s) => {
+                  const pct = Math.min(100, (s.total / maxSaldo) * 100);
+                  return (
+                    <div key={s.destino_dinero}>
+                      <div className="mb-1 flex items-center justify-between gap-2">
+                        <BadgeDestino destino={s.destino_dinero} />
+                        <span className="money text-tiny font-semibold text-slate-800">{formatCOP(s.total)}</span>
+                      </div>
+                      <div
+                        className="progress-track"
+                        role="progressbar"
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-valuenow={Math.round(pct)}
+                        aria-label={`Participación de ${s.destino_dinero} en los saldos`}
+                      >
+                        <div className="progress-bar bg-teal" style={{ width: `${pct}%` }} />
+                      </div>
                     </div>
-                    <div
-                      className="progress-track"
-                      role="progressbar"
-                      aria-valuemin={0}
-                      aria-valuemax={100}
-                      aria-valuenow={Math.round(pct)}
-                      aria-label={`Participación de ${s.destino_dinero} en los saldos`}
-                    >
-                      <div className="progress-bar bg-teal" style={{ width: `${pct}%` }} />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+                  );
+                })}
+              </div>
+            )}
+          </div>
           <div className="mt-4 flex items-center justify-between border-t border-line pt-3 text-tiny">
             <span className="text-muted">Posición de caja</span>
             <span className={clsx('money font-semibold', flujo.posicion_caja >= 0 ? 'text-success' : 'text-danger')}>

@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { CalendarRange, Landmark, TrendingUp } from 'lucide-react';
 import { cajaApi } from '../../api/endpoints';
 import { KpiCard, Spinner, BadgeMedioPago, BadgeDestino, Empty } from '../../components/ui';
 import { CHART } from '../../components/charts/theme';
-import { formatCOP, formatCOPCompact, formatDate, firstDayOfMonth, today } from '../../utils/format';
+import { formatCOP, formatCOPCompact, formatDate, firstDayOfMonth, plural, today } from '../../utils/format';
 
 type Movimiento = {
   fecha: string;
@@ -38,7 +38,9 @@ export default function CajaPage() {
     acc[m.fecha].ingresos += Number(m.total) || 0;
     return acc;
   }, {});
-  const serie = Object.values(porFecha).slice(-14);
+  // Los movimientos llegan del más reciente al más antiguo: ordenar por fecha
+  // para que el eje del gráfico avance en el tiempo.
+  const serie = Object.keys(porFecha).sort().slice(-14).map((k) => porFecha[k]);
 
   return (
     <div className="space-y-5">
@@ -47,7 +49,7 @@ export default function CajaPage() {
           <h1 className="page-title">Caja y flujo de dinero</h1>
           <p className="page-subtitle">Cobros recibidos, inversiones y saldo del período</p>
         </div>
-        {!isLoading && movs.length > 0 && <span className="chip">{movs.length} movimiento(s)</span>}
+        {!isLoading && movs.length > 0 && <span className="chip">{plural(movs.length, 'movimiento')}</span>}
       </div>
 
       <div className="toolbar no-print">
@@ -98,7 +100,7 @@ export default function CajaPage() {
                           <BadgeDestino destino={s.destino_dinero} />
                           <div className="text-right">
                             <p className="money text-tiny font-semibold text-slate-900">{formatCOP(s.total)}</p>
-                            <p className="text-2xs text-muted">{s.transacciones} transacción(es)</p>
+                            <p className="text-2xs text-muted">{plural(s.transacciones, 'transacción', 'transacciones')}</p>
                           </div>
                         </div>
                         <div
@@ -129,21 +131,20 @@ export default function CajaPage() {
               {serie.length > 0 ? (
                 <div role="img" aria-label="Gráfico de ingresos cobrados por día en el período consultado">
                   <ResponsiveContainer width="100%" height={200}>
-                    <LineChart data={serie} margin={{ top: 5, right: 8, left: 0, bottom: 0 }}>
+                    <BarChart data={serie} margin={{ top: 5, right: 8, left: 0, bottom: 0 }}>
                       <CartesianGrid {...CHART.grid} />
                       <XAxis dataKey="fecha" tick={CHART.axisTick} axisLine={false} tickLine={false} />
                       <YAxis tick={CHART.axisTick} tickFormatter={formatCOPCompact} axisLine={false} tickLine={false} width={46} />
-                      <Tooltip formatter={(v: any) => [formatCOP(Number(v)), 'Cobrado']} {...CHART.tooltip} />
-                      <Line
-                        type="monotone"
+                      <Tooltip formatter={(v: any) => [formatCOP(Number(v)), 'Cobrado']} {...CHART.tooltip} cursor={{ fill: 'rgba(11, 92, 171, 0.06)' }} />
+                      <Bar
                         dataKey="ingresos"
                         name="Cobrado"
-                        stroke={CHART.color.blue}
-                        strokeWidth={2}
-                        dot={{ ...CHART.dot, stroke: CHART.color.blue }}
-                        activeDot={{ ...CHART.activeDot, stroke: CHART.color.blue }}
+                        fill={CHART.color.green}
+                        radius={CHART.barRadius}
+                        maxBarSize={34}
+                        isAnimationActive={CHART.animation}
                       />
-                    </LineChart>
+                    </BarChart>
                   </ResponsiveContainer>
                 </div>
               ) : (
@@ -158,7 +159,7 @@ export default function CajaPage() {
                 <p className="text-xs font-semibold text-slate-800">Movimientos del período</p>
                 <p className="text-2xs text-muted">Cobros agrupados por fecha, medio y destino</p>
               </div>
-              <span className="chip">{movs.length} registro(s)</span>
+              <span className="chip">{plural(movs.length, 'registro')}</span>
             </div>
             {movs.length === 0 ? (
               <Empty message="Sin movimientos en el período" />

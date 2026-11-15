@@ -216,13 +216,14 @@ import { CHART } from '../../components/charts/theme';
     <YAxis tick={CHART.axisTick} tickFormatter={formatCOPCompact} axisLine={false} tickLine={false} />
     <Tooltip {...CHART.tooltip} formatter={(v: any) => formatCOP(Number(v))} />
     <Legend wrapperStyle={CHART.legend.wrapperStyle} />
-    <Bar dataKey="ventas" fill={CHART.color.blue} barSize={CHART.barSize} radius={CHART.barRadius} />
+    <Bar dataKey="ventas" fill={CHART.color.blue} barSize={CHART.barSize} radius={CHART.barRadius} isAnimationActive={CHART.animation} />
     <Line
       dataKey="utilidad_operativa"
       stroke={CHART.color.teal}
       strokeWidth={2}
       dot={{ ...CHART.dot, stroke: CHART.color.teal }}
       activeDot={{ ...CHART.activeDot, stroke: CHART.color.teal }}
+      isAnimationActive={CHART.animation}
     />
   </ComposedChart>
 </ResponsiveContainer>
@@ -231,10 +232,15 @@ import { CHART } from '../../components/charts/theme';
 Reglas:
 
 - Envolver en `<div role="img" aria-label="…">`.
-- Ejes sin línea ni ticks; `tick={CHART.axisTick}` (10.5 px, `#5b6b7f`).
+- Ejes sin línea ni ticks; `tick={CHART.axisTick}` (11 px, `#5b6b7f`).
 - `formatCOPCompact` en el eje Y; `formatCOP` completo en el tooltip.
 - Series: azul = ventas, verde = cobros, rojo = compras/gastos, teal =
   utilidad, ámbar = flujo.
+- `CHART.animation` (hoy `false`): las vistas de gestión muestran los datos
+  sin animación de entrada; la animación de Recharts puede dejar el gráfico
+  vacío durante ~1,5 s al entrar o al cambiar de pestaña.
+- Barras verticales: `radius={CHART.barRadius}`. Horizontales:
+  `radius={CHART.barRadiusH}`.
 - No usar más de 3 series por gráfico ni colores fuera de `CHART.color`.
 - Alturas: 190–200 px (panel pequeño), 255–290 px (panel principal).
 
@@ -271,7 +277,18 @@ Reglas:
 
 ---
 
-## 11. Checklist de revisión visual
+## 11. Copy y formatos
+
+- Fechas: `formatDate` → `dd/mm/aaaa`; con hora, `formatDateTime` →
+  `dd/mm/aaaa · HH:mm` (24 h). No usar `toLocaleString` suelto.
+- Conteos: `plural(n, 'pedido')` → “1 pedido” / “22 pedidos”. Nunca
+  “22 pedido(s)”. Para frases: `plural(n, 'alerta pendiente', 'alertas pendientes')`.
+- Dinero: `formatCOP` en tablas y fichas, `formatCOPCompact` solo en ejes.
+- Cifras negativas entre paréntesis únicamente en el estado de resultados.
+
+---
+
+## 12. Checklist de revisión visual
 
 Cada vez que un cambio altere la estructura visual, repasar:
 
@@ -286,6 +303,8 @@ Cada vez que un cambio altere la estructura visual, repasar:
 - [ ] Cifras con `money`/`num` (mono + tabular).
 - [ ] Etiquetas en mayúsculas con `text-2xs`.
 - [ ] Un solo `page-title` por pantalla.
+- [ ] Conteos con `plural()`, sin “(s)”.
+- [ ] Fechas con `formatDate` / `formatDateTime`.
 
 **Espaciado y estructura**
 - [ ] Páginas de lista con `space-y-5`.

@@ -15,7 +15,7 @@ import { finanzasApi } from '../../api/endpoints';
 import { Alert, KpiCard, Spinner, BadgeDestino, BadgeMedioPago, Empty } from '../../components/ui';
 import { CHART } from '../../components/charts/theme';
 import {
-  currentMonthKey, formatCantidad, formatCOP, formatCOPCompact, formatPct,
+  currentMonthKey, formatCantidad, formatCOP, formatCOPCompact, formatPct, plural,
 } from '../../utils/format';
 import type { FinanzasData, ProductoFinanciero } from '../../types';
 
@@ -269,7 +269,7 @@ function VistaPyL({ data }: { data: FinanzasData }) {
                     formatter={(v: any) => [formatCOP(Number(v)), 'Valor']}
                     {...CHART.tooltip}
                   />
-                  <Bar dataKey="value" radius={[0, 3, 3, 0]} barSize={16}>
+                  <Bar dataKey="value" radius={CHART.barRadiusH} barSize={16} isAnimationActive={CHART.animation}>
                     {composicion.map((c) => <Cell key={c.name} fill={c.fill} />)}
                   </Bar>
                 </BarChart>
@@ -343,7 +343,7 @@ function VistaPyL({ data }: { data: FinanzasData }) {
               <p className="text-xs font-semibold text-slate-800">Rentabilidad por producto</p>
               <p className="text-2xs text-muted">Ventas, costo y margen del período</p>
             </div>
-            <span className="chip">{data.productos.length} producto(s)</span>
+            <span className="chip">{plural(data.productos.length, 'producto')}</span>
           </div>
           {data.productos.length === 0 ? (
             <Empty message="Sin ventas registradas en el período" />
@@ -453,9 +453,9 @@ function VistaFlujo({ data }: { data: FinanzasData }) {
                 <Tooltip formatter={(v: any, name: any) => [formatCOP(Number(v)), String(name)]} {...CHART.tooltip} />
                 <Legend wrapperStyle={CHART.legend.wrapperStyle} />
                 <ReferenceLine y={0} yAxisId="left" stroke={CHART.color.slate} />
-                <Bar yAxisId="left" dataKey="ingresos" name="Cobros" fill={CHART.color.green} barSize={CHART.barSizeNarrow} radius={CHART.barRadius} />
-                <Bar yAxisId="left" dataKey="egresos" name="Compras" fill={CHART.color.red} barSize={CHART.barSizeNarrow} radius={CHART.barRadius} />
-                <Line yAxisId="right" type="monotone" dataKey="acumulado" name="Acumulado" stroke={CHART.color.blue} strokeWidth={2} dot={false} />
+                <Bar yAxisId="left" dataKey="ingresos" name="Cobros" fill={CHART.color.green} barSize={CHART.barSizeNarrow} radius={CHART.barRadius} isAnimationActive={CHART.animation} />
+                <Bar yAxisId="left" dataKey="egresos" name="Compras" fill={CHART.color.red} barSize={CHART.barSizeNarrow} radius={CHART.barRadius} isAnimationActive={CHART.animation} />
+                <Line yAxisId="right" type="monotone" dataKey="acumulado" name="Acumulado" stroke={CHART.color.blue} strokeWidth={2} dot={false} isAnimationActive={CHART.animation} />
               </ComposedChart>
             </ResponsiveContainer>
           </div>
@@ -491,7 +491,7 @@ function VistaFlujo({ data }: { data: FinanzasData }) {
                     >
                       <div className="progress-bar bg-teal" style={{ width: `${pct}%` }} />
                     </div>
-                    <p className="mt-0.5 text-2xs text-muted">{s.transacciones} transacción(es)</p>
+                    <p className="mt-0.5 text-2xs text-muted">{plural(s.transacciones, 'transacción', 'transacciones')}</p>
                   </div>
                 );
               })}
@@ -537,7 +537,7 @@ function VistaFlujo({ data }: { data: FinanzasData }) {
           <div className="card-header">
             <div>
               <p className="text-xs font-semibold text-slate-800">Compras y egresos del período</p>
-              <p className="text-2xs text-muted">{f.num_compras} compra(s) registrada(s)</p>
+              <p className="text-2xs text-muted">{plural(f.num_compras, 'compra registrada', 'compras registradas')}</p>
             </div>
             <Boxes size={15} className="text-muted" />
           </div>
@@ -586,7 +586,7 @@ function VistaFlujo({ data }: { data: FinanzasData }) {
             <p className="text-xs font-semibold text-slate-800">Detalle diario de caja</p>
             <p className="text-2xs text-muted">Movimiento acumulado del período</p>
           </div>
-          <span className="chip">{serie.length} día(s)</span>
+          <span className="chip">{plural(serie.length, 'día')}</span>
         </div>
         <div className="max-h-[340px] overflow-auto scroll-slim">
           <table className="table-base table-dense table-sticky">
@@ -635,7 +635,7 @@ function VistaIndicadores({ data }: { data: FinanzasData }) {
           icon={<ReceiptText size={14} />}
           label="Ticket promedio"
           value={formatCOP(i.ticket_promedio)}
-          sub={`${i.pedidos} pedido(s) en el período`}
+          sub={`${plural(i.pedidos, 'pedido')} en el período`}
         />
         <IndicadorCard
           icon={<Percent size={14} />}
@@ -681,7 +681,7 @@ function VistaIndicadores({ data }: { data: FinanzasData }) {
           icon={<Wallet size={14} />}
           label="Cartera sobre ventas"
           value={formatPct(i.cartera_sobre_ventas)}
-          sub={`Saldo de caja ${formatCOP(i.saldo_caja)}`}
+          sub={`Cartera ${formatCOP(i.cartera)} / ventas del período`}
           accent={i.cartera_sobre_ventas <= 30 ? 'text-slate-900' : 'text-warning'}
         />
       </div>
@@ -710,8 +710,8 @@ function VistaIndicadores({ data }: { data: FinanzasData }) {
                 <Tooltip formatter={(v: any, name: any) => [formatCOP(Number(v)), String(name)]} {...CHART.tooltip} />
                 <Legend wrapperStyle={CHART.legend.wrapperStyle} />
                 <ReferenceLine y={0} stroke={CHART.color.slate} />
-                <Bar dataKey="ventas" name="Ventas" fill={CHART.color.blue} barSize={CHART.barSize} radius={CHART.barRadius} />
-                <Bar dataKey="utilidad_operativa" name="Utilidad operativa" fill={CHART.color.teal} barSize={CHART.barSize} radius={CHART.barRadius} />
+                <Bar dataKey="ventas" name="Ventas" fill={CHART.color.blue} barSize={CHART.barSize} radius={CHART.barRadius} isAnimationActive={CHART.animation} />
+                <Bar dataKey="utilidad_operativa" name="Utilidad operativa" fill={CHART.color.teal} barSize={CHART.barSize} radius={CHART.barRadius} isAnimationActive={CHART.animation} />
                 <Line
                   type="monotone"
                   dataKey="flujo"
@@ -771,7 +771,7 @@ function VistaIndicadores({ data }: { data: FinanzasData }) {
               <p className="text-xs font-semibold text-slate-800">Ranking de productos por utilidad</p>
               <p className="text-2xs text-muted">Margen y participación sobre ventas</p>
             </div>
-            <span className="chip">{data.productos.length} producto(s)</span>
+            <span className="chip">{plural(data.productos.length, 'producto')}</span>
           </div>
           {data.productos.length === 0 ? (
             <Empty message="Sin ventas registradas" />

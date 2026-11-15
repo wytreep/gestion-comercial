@@ -82,9 +82,8 @@ export default function ProductosPage() {
         <div className="flex items-start gap-2 rounded border border-primary/20 bg-primary-50 px-3 py-2 text-tiny text-slate-600">
           <Info size={14} className="mt-0.5 shrink-0 text-primary" aria-hidden="true" />
           <p>
-            <strong className="text-slate-800">Pescado:</strong> el margen se calcula como{' '}
-            <code className="rounded bg-white px-1 font-mono text-2xs">(precio venta/kg − costo/kg) / precio venta</code>.
-            Configura los kg por canasta para ver el margen real.
+            <strong className="text-slate-800">Pescado:</strong> el margen se calcula con el precio y el costo por kg
+            (costo/kg ÷ precio venta/kg). Define los kg por canasta para ver el margen real.
           </p>
         </div>
       )}
@@ -162,9 +161,9 @@ export default function ProductosPage() {
                         </p>
                       </td>
                     )}
-                    {isAdmin && <td className="num font-semibold">{p.costo_por_kg ? `${formatCOP(p.costo_por_kg)}/kg` : '—'}</td>}
-                    <td className="num">{formatCOP(p.precio_venta)}<span className="text-2xs text-muted">/{unidadVenta(p)}</span></td>
-                    <td className="num">{formatCantidad(p.stock_actual)} <span className="text-2xs text-muted">{unidadStock(p)}</span></td>
+                    {isAdmin && <td className="num whitespace-nowrap font-semibold">{p.costo_por_kg ? `${formatCOP(p.costo_por_kg)}/kg` : '—'}</td>}
+                    <td className="num whitespace-nowrap">{formatCOP(p.precio_venta)}<span className="text-2xs text-muted">/{unidadVenta(p)}</span></td>
+                    <td className="num whitespace-nowrap">{formatCantidad(p.stock_actual)} <span className="text-2xs text-muted">{unidadStock(p)}</span></td>
                     {isAdmin && <td className={`num ${margenColor(p.margen_porcentaje ?? null)}`}>{p.margen_porcentaje != null ? `${Number(p.margen_porcentaje).toFixed(1)}%` : '—'}</td>}
                     <td>
                       <div className="flex justify-end gap-1">

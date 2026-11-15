@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { clientesApi } from '../../api/endpoints';
 import { Alert, Spinner, Empty, Modal } from '../../components/ui';
+import { plural } from '../../utils/format';
 import type { Cliente } from '../../types';
 import { Plus, Search, Pencil } from 'lucide-react';
 
@@ -42,7 +43,7 @@ export default function ClientesPage() {
             onChange={(e) => setBusqueda(e.target.value)}
           />
         </div>
-        <span className="ml-auto chip">{clientes.length} cliente(s)</span>
+        <span className="ml-auto chip">{plural(clientes.length, 'cliente')}</span>
       </div>
 
       {isLoading ? <Spinner /> : clientes.length === 0 ? (

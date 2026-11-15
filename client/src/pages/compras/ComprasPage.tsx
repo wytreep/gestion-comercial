@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { comprasApi, productosApi, proveedoresApi, tiposGastoApi } from '../../api/endpoints';
 import { Alert, Spinner, Empty, Modal, NumberInput, BadgeEstadoCompra } from '../../components/ui';
-import { formatCOP, formatCantidad, formatDate, OPCIONES_ESTADO_COMPRA, today, num, parseMoneyInput, parseDecimalInput } from '../../utils/format';
+import { formatCOP, formatCantidad, formatDate, OPCIONES_ESTADO_COMPRA, today, num, parseMoneyInput, parseDecimalInput, plural } from '../../utils/format';
 import type { Compra, Producto } from '../../types';
 import { ArrowLeft, Check, Eye, Pencil, Plus, X } from 'lucide-react';
 
@@ -60,17 +60,16 @@ export function ComprasPage() {
                     <td className="num text-muted">{formatCOP(c.total_gastos)}</td>
                     <td className="num font-semibold text-slate-900">{formatCOP(c.total_inversion)}</td>
                     <td>
-                      <div className="flex items-center gap-2">
-                        <BadgeEstadoCompra estado={c.estado} />
-                        <select
-                          className="input w-auto py-1 text-2xs"
-                          aria-label={`Cambiar estado de la compra ${c.id}`}
-                          value={c.estado}
-                          onChange={(e) => estadoMut.mutate({ id: c.id, estado: e.target.value })}
-                        >
-                          {OPCIONES_ESTADO_COMPRA.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-                        </select>
-                      </div>
+                      <select
+                        className={`input w-auto font-semibold ${
+                          c.estado === 'recibida' ? 'text-success' : c.estado === 'parcial' ? 'text-primary' : 'text-warning'
+                        }`}
+                        aria-label={`Cambiar estado de la compra ${c.id}`}
+                        value={c.estado}
+                        onChange={(e) => estadoMut.mutate({ id: c.id, estado: e.target.value })}
+                      >
+                        {OPCIONES_ESTADO_COMPRA.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                      </select>
                     </td>
                     <td>
                       <div className="flex justify-end gap-1.5">
@@ -259,7 +258,7 @@ export function FormCompra({ compraExistente, onSuccess, conResumen = false }: {
       <div className="card">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <p className="card-title mb-0">2. Productos</p>
-          <span className="chip">{lineas.length} producto(s)</span>
+          <span className="chip">{plural(lineas.length, 'producto')}</span>
         </div>
 
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
@@ -446,7 +445,7 @@ export function FormCompra({ compraExistente, onSuccess, conResumen = false }: {
       </dl>
       <div className="rounded border border-line bg-slate-50/70 px-3 py-2">
         <p className="section-label">Líneas</p>
-        <p className="text-xs font-medium text-slate-800">{lineas.length} producto(s) · {gastos.length} gasto(s)</p>
+        <p className="text-xs font-medium text-slate-800">{plural(lineas.length, 'producto')} · {plural(gastos.length, 'gasto')}</p>
       </div>
       <button onClick={guardar} disabled={saving} className="btn-primary btn-lg">
         <Check size={15} aria-hidden="true" /> {saving ? 'Guardando…' : compraExistente ? 'Guardar cambios' : 'Registrar compra'}

@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { ventasApi, productosApi, clientesApi } from '../../api/endpoints';
 import { Alert, Spinner, Empty, Modal, Confirm, BadgeEstadoPago, BadgeEstadoPedido, BadgeMedioPago, BadgeDestino, NumberInput } from '../../components/ui';
-import { formatCOP, formatCantidad, formatDate, formatDateTime, today, firstDayOfMonth, OPCIONES_MEDIO_PAGO, OPCIONES_DESTINO, OPCIONES_ESTADO_PEDIDO, num, parseMoneyInput, parseDecimalInput } from '../../utils/format';
+import { formatCOP, formatCantidad, formatDate, formatDateTime, today, firstDayOfMonth, OPCIONES_MEDIO_PAGO, OPCIONES_DESTINO, OPCIONES_ESTADO_PEDIDO, num, parseMoneyInput, parseDecimalInput, plural } from '../../utils/format';
 import type { FiltrosVenta, Venta, EstadoPago, EstadoPedido } from '../../types';
 import { Eye, Pencil, Trash2, Plus, X, QrCode } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -65,7 +65,7 @@ export default function VentasPage() {
           <label htmlFor="ventas-hasta" className="label">Hasta</label>
           <input id="ventas-hasta" type="date" className="input w-auto" value={filtros.fecha_hasta} onChange={(e) => setFiltros((f) => ({ ...f, fecha_hasta: e.target.value }))} />
         </div>
-        <span className="ml-auto chip">{ventas.length} venta(s)</span>
+        <span className="ml-auto chip">{plural(ventas.length, 'venta')}</span>
       </div>
 
       {isLoading ? <Spinner /> : ventas.length === 0 ? (

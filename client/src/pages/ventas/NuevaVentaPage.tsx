@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { ventasApi, productosApi, clientesApi } from '../../api/endpoints';
 import { Alert, NumberInput } from '../../components/ui';
-import { formatCOP, formatCantidad, today, OPCIONES_MEDIO_PAGO, OPCIONES_DESTINO, num, parseMoneyInput, parseDecimalInput } from '../../utils/format';
+import { formatCOP, formatCantidad, today, OPCIONES_MEDIO_PAGO, OPCIONES_DESTINO, num, parseMoneyInput, parseDecimalInput, plural } from '../../utils/format';
 import type { Producto, Cliente } from '../../types';
 import { ArrowLeft, Check, Plus, QrCode, Search, X } from 'lucide-react';
 
@@ -132,7 +132,7 @@ export default function NuevaVentaPage() {
       <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_330px]">
         {/* ── Columna principal ─────────────────────── */}
         <div className="space-y-4">
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
             <div className="card">
               <p className="card-title">1. Cliente</p>
               {cliente ? (
@@ -262,7 +262,7 @@ export default function NuevaVentaPage() {
           <div className="card">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <p className="card-title mb-0">3. Productos</p>
-              <span className="chip">{lineas.length} producto(s) en el pedido</span>
+              <span className="chip">{plural(lineas.length, 'producto', 'productos')} en el pedido</span>
             </div>
 
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 2xl:grid-cols-3">

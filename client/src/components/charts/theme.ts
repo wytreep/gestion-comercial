@@ -13,7 +13,7 @@ export const CHART = {
     grid:  '#e8eef4',
     axis:  '#5b6b7f',
   },
-  axisTick: { fontSize: 10.5, fill: '#5b6b7f' },
+  axisTick: { fontSize: 11, fill: '#5b6b7f' },
   grid: { stroke: '#e8eef4', strokeDasharray: '3 3', vertical: false },
   tooltip: {
     contentStyle: {
@@ -33,6 +33,9 @@ export const CHART = {
   dot: { r: 3, strokeWidth: 2, fill: '#fff' },
   activeDot: { r: 5, strokeWidth: 2, fill: '#fff' },
   barRadius: [3, 3, 0, 0] as [number, number, number, number],
+  barRadiusH: [0, 3, 3, 0] as [number, number, number, number],
   barSize: 18,
   barSizeNarrow: 10,
+  /** Las vistas de gestión muestran los datos al instante: sin animación de entrada. */
+  animation: false,
 };
