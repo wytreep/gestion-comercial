@@ -31,7 +31,20 @@ export default function LoginPage() {
 
   const [bloqueo,  setBloqueo]  = useState<EstadoIp | null>(null);
   const [restante, setRestante] = useState(0);
+  const [expirada, setExpirada] = useState('');
   const avisoRef = useRef<HTMLDivElement>(null);
+
+  /**
+   * Si el cliente llegó aquí porque su sesión murió, `clearSession()` dejó el
+   * motivo en `sessionStorage`. Se muestra una vez y se retira: al recargar ya
+   * no hay nada que contar.
+   */
+  useEffect(() => {
+    const motivo = sessionStorage.getItem('sesion_expirada');
+    if (!motivo) return;
+    sessionStorage.removeItem('sesion_expirada');
+    setExpirada(motivo);
+  }, []);
 
   /**
    * El bloqueo vive en el servidor (por IP). Al entrar se consulta para que un
@@ -75,6 +88,7 @@ export default function LoginPage() {
 
   const onSubmit = async (d: F) => {
     setErr('');
+    setExpirada('');
     try {
       await login(d.email, d.password);
       navigate('/');
@@ -122,6 +136,7 @@ export default function LoginPage() {
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-3.5 p-5">
+              {expirada && !bloqueo && <Alert type="warning" message={expirada} />}
               {err && <Alert type="error" message={err} />}
 
               {bloqueo && (

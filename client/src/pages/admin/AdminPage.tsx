@@ -338,7 +338,11 @@ function Sesiones({ token, onCaducar, onAviso }: { token: string; onCaducar: () 
   const mut = useMutation({
     mutationFn: (id: number) => seguridadApi.revocarSesion(id, token),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['seg-sesiones'] }); setRevocar(null); },
-    onError: (e: any) => { setRevocar(null); onAviso(e?.message ?? 'No se pudo revocar la sesión.'); },
+    onError: (e: any) => {
+      setRevocar(null);
+      if (e?.status === 401) onCaducar();
+      else onAviso(e?.message ?? 'No se pudo revocar la sesión.');
+    },
   });
 
   useEffect(() => {
@@ -436,13 +440,21 @@ function Bloqueos({ token, onCaducar, onAviso }: { token: string; onCaducar: () 
   const desbloquear = useMutation({
     mutationFn: (ip: string) => seguridadApi.desbloquear(ip, token, 'Desbloqueo manual'),
     onSuccess: () => { invalidar(); setConfirm(null); },
-    onError: (e: any) => { setConfirm(null); onAviso(e?.message ?? 'No se pudo desbloquear la IP.'); },
+    onError: (e: any) => {
+      setConfirm(null);
+      if (e?.status === 401) onCaducar();
+      else onAviso(e?.message ?? 'No se pudo desbloquear la IP.');
+    },
   });
 
   const bloquear = useMutation({
     mutationFn: (ip: string) => seguridadApi.bloquear(ip, token, 'Lista negra manual'),
     onSuccess: () => { invalidar(); setConfirm(null); setNuevaIp(''); },
-    onError: (e: any) => { setConfirm(null); onAviso(e?.message ?? 'No se pudo bloquear la IP.'); },
+    onError: (e: any) => {
+      setConfirm(null);
+      if (e?.status === 401) onCaducar();
+      else onAviso(e?.message ?? 'No se pudo bloquear la IP.');
+    },
   });
 
   useEffect(() => {

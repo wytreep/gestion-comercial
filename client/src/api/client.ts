@@ -37,12 +37,28 @@ const flush = (err: unknown, token: string | null = null) => {
   queue = [];
 };
 
+/**
+ * Solo estas dos rutas emiten tokens. Sus 401 hablan de credenciales o de un
+ * refresh inválido, no de un access vencido: reintentarlas no arregla nada.
+ * El resto (`/auth/seguridad`, `/auth/logout`, `/auth/preferencias`…) sí son
+ * rutas protegidas y su 401 significa que el access murió.
+ */
+const emiteToken = (url = '') => url.includes('/auth/login') || url.includes('/auth/refresh');
+
+/** Un 401 al confirmar la contraseña es una contraseña mal escrita, no un token. */
+const contrasenaIncorrecta = (error: AxiosError<ApiResponse>) =>
+  (error.response?.data as { message?: string } | undefined)?.message === 'Contraseña incorrecta.';
+
 client.interceptors.response.use(
   (r) => r,
   async (error: AxiosError<ApiResponse>) => {
     const orig = error.config as any;
+    const tokenMuerto = error.response?.status === 401 &&
+      !orig?._retry &&
+      !emiteToken(orig?.url) &&
+      !contrasenaIncorrecta(error);
 
-    if (error.response?.status === 401 && !orig?._retry && !orig?.url?.includes('/auth/')) {
+    if (tokenMuerto) {
       if (refreshing) {
         return new Promise((resolve, reject) => queue.push({ resolve, reject }))
           .then((token) => { orig.headers.Authorization = `Bearer ${token}`; return client(orig); });
@@ -57,7 +73,10 @@ client.interceptors.response.use(
         return client(orig);
       } catch (e) {
         flush(e, null);
-        clearSession();
+        // El refresh tampoco sirve: no hay forma de recuperar la sesión.
+        // El detalle técnico queda en la bitácora del servidor; aquí se le
+        // dice a la persona qué pasó y qué hacer.
+        clearSession('Tu sesión terminó. Vuelve a iniciar sesión.');
         return Promise.reject(e);
       } finally {
         refreshing = false;
@@ -136,10 +155,18 @@ function mensajeError(error: AxiosError<ApiResponse>): string {
   return error.message || 'Error de conexión';
 }
 
-function clearSession() {
+/**
+ * Borra la sesión local y vuelve al login.
+ *
+ * `motivo` viaja en `sessionStorage` para que la pantalla de acceso explique
+ * qué pasó en vez de aparecer vacía (y para no repetir el mensaje técnico del
+ * backend, que habla de tokens y no de personas).
+ */
+function clearSession(motivo?: string) {
   localStorage.removeItem('access_token');
   localStorage.removeItem('refresh_token');
   localStorage.removeItem('auth_user');
+  if (motivo) sessionStorage.setItem('sesion_expirada', motivo);
   window.location.href = '/login';
 }
 
