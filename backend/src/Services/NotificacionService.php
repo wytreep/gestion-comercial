@@ -4,23 +4,22 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Repositories\BaseRepository;
-
-final class NotificacionService extends BaseRepository
+final class NotificacionService extends BaseService
 {
-    /**
-     * Ventana de silencio después de marcar una alerta como leída.
-     * Evita que una alerta ya reconocida reaparezca cuando se genera otra
-     * notificación distinta; pasada la ventana, la condición se recuerda.
-     */
-    private const HORAS_REAVISO = 24;
-
     /**
      * Genera y persiste las notificaciones pendientes.
      * Se puede llamar en un cron o al inicio de sesión.
+     *
+     * Una notificación marcada como leída no se vuelve a crear mientras la
+     * condición siga vigente. Solo se elimina (y puede reaparecer) cuando la
+     * condición se resuelve: el stock sube o la deuda se paga/cancela.
      */
     public function generarNotificaciones(): int
     {
+        // Primero limpia las alertas cuya condición ya no aplica; así, si la
+        // condición vuelve a ocurrir más adelante, se genera una nueva.
+        $this->resolverNotificaciones();
+
         $total = 0;
         $total += $this->generarDeudasVencidas();
         $total += $this->generarStockBajo();
@@ -59,6 +58,40 @@ final class NotificacionService extends BaseRepository
         $this->execute('UPDATE notificaciones SET leida = 1, leida_at = NOW() WHERE leida = 0');
     }
 
+    /**
+     * Elimina las notificaciones cuya condición ya no se cumple.
+     *
+     * Se conservan las leídas mientras la condición siga vigente (stock bajo o
+     * deuda vencida). Al resolverse la condición desaparecen, de modo que si
+     * vuelve a ocurrir se cree una notificación nueva.
+     */
+    private function resolverNotificaciones(): void
+    {
+        $this->execute(
+            "DELETE n FROM notificaciones n
+             LEFT JOIN ventas v ON v.id = n.referencia_id
+             WHERE n.tipo = 'deuda_vencida'
+               AND (
+                 v.id IS NULL
+                 OR v.estado_pedido = 'cancelado'
+                 OR COALESCE(v.saldo_pendiente, 0) <= 0
+                 OR NOT EXISTS (
+                   SELECT 1 FROM pagos pg
+                   WHERE pg.venta_id = v.id
+                     AND pg.fecha_vencimiento IS NOT NULL
+                     AND pg.fecha_vencimiento < CURDATE()
+                 )
+               )"
+        );
+
+        $this->execute(
+            "DELETE n FROM notificaciones n
+             LEFT JOIN productos p ON p.id = n.referencia_id
+             WHERE n.tipo = 'stock_bajo'
+               AND (p.id IS NULL OR p.activo = 0 OR p.stock_actual > 0)"
+        );
+    }
+
     // ── Generadores privados ──────────────────────────
 
     private function generarDeudasVencidas(): int
@@ -82,10 +115,6 @@ final class NotificacionService extends BaseRepository
                    SELECT 1 FROM notificaciones n
                    WHERE n.tipo = 'deuda_vencida'
                      AND n.referencia_id = v.id
-                     AND (
-                       n.leida = 0
-                       OR n.created_at >= NOW() - INTERVAL " . self::HORAS_REAVISO . " HOUR
-                     )
                )
              GROUP BY v.id, v.saldo_pendiente, cl.nombre"
         );
@@ -94,7 +123,7 @@ final class NotificacionService extends BaseRepository
         foreach ($vencidas as $v) {
             $saldo = '$' . number_format((float) $v['saldo_pendiente'], 0, ',', '.');
             $this->insert(
-                "INSERT INTO notificaciones (tipo, titulo, mensaje, referencia_id, referencia_tipo)
+                "INSERT IGNORE INTO notificaciones (tipo, titulo, mensaje, referencia_id, referencia_tipo)
                  VALUES ('deuda_vencida', :titulo, :mensaje, :ref_id, 'venta')",
                 [
                     ':titulo' => "Deuda vencida — {$v['cliente']}",
@@ -118,17 +147,13 @@ final class NotificacionService extends BaseRepository
                    SELECT 1 FROM notificaciones n
                    WHERE n.tipo = 'stock_bajo'
                      AND n.referencia_id = productos.id
-                     AND (
-                       n.leida = 0
-                       OR n.created_at >= NOW() - INTERVAL " . self::HORAS_REAVISO . " HOUR
-                     )
                )"
         );
 
         $count = 0;
         foreach ($bajos as $p) {
             $this->insert(
-                "INSERT INTO notificaciones (tipo, titulo, mensaje, referencia_id, referencia_tipo)
+                "INSERT IGNORE INTO notificaciones (tipo, titulo, mensaje, referencia_id, referencia_tipo)
                  VALUES ('stock_bajo', :titulo, :mensaje, :ref_id, 'producto')",
                 [
                     ':titulo' => "Stock bajo — {$p['nombre']}",

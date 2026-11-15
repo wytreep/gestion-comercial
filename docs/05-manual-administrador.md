@@ -92,10 +92,34 @@ El sistema actualiza el saldo y el estado de pago automáticamente.
 
 ## Gestionar precios y stock
 
+### Crear productos y categorías
+
+1. Entra a **Productos** y pulsa **Nuevo producto**.
+2. Escribe el nombre y selecciona la categoría. Si no existe, pulsa
+   **Categoría** para crearla en el mismo formulario.
+3. Define la unidad de medida (`kilo`, `canasta` o `unidad`).
+4. Registra el precio de compra, el precio de venta y el stock inicial.
+   Para canastas, indica cuántos kilos rinde una canasta.
+5. Guarda. El stock inicial queda registrado como un movimiento de ajuste,
+   así que el historial de inventario permanece completo.
+
+No hay un límite de productos: se pueden registrar tantos como necesite la
+operación.
+
+### Editar o desactivar un producto
+
+1. Entra a **Productos**.
+2. Pulsa **Editar** para cambiar nombre, categoría, unidad o precios.
+3. Para retirarlo del catálogo sin perder su historial, pulsa el botón de
+   desactivar y confirma.
+4. Marca **Mostrar productos inactivos** para verlos y usa **Reactivar**
+   cuando vuelva a estar disponible.
+
 ### Precios
 
 1. Entra a **Productos**.
-2. Pulsa **Editar** en el producto.
+2. Pulsa **Precios** para un ajuste rápido, o **Editar** para el formulario
+   completo.
 3. Ajusta precio de compra, precio de venta y kilos por canasta.
 4. Guarda.
 

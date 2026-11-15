@@ -121,9 +121,13 @@ Para roles distintos de `admin`, el servidor omite:
 
 | Método | Ruta | Rol | Descripción |
 |---|---|---|---|
-| GET | `/productos` | Todos | Listado con stock y margen |
+| GET | `/productos` | Todos | Listado con stock y margen. `?incluir_inactivos=1` (solo admin) incluye desactivados |
 | GET | `/productos/{id}` | Todos | Detalle |
-| GET | `/productos/codigo/{codigo}` | Todos | Busca un producto activo por su código QR o de barras |
+| GET | `/productos/codigo/{codigo}` | Todos | Busca un producto activo por su código QR, de barras o de etiqueta |
+| POST | `/productos` | Admin | Crea un producto (con stock inicial opcional) |
+| PUT | `/productos/{id}` | Admin | Edita nombre, categoría, unidad y precios |
+| DELETE | `/productos/{id}` | Admin | Desactiva el producto (no borra su historial) |
+| PATCH | `/productos/{id}/reactivar` | Admin | Vuelve a activar el producto |
 | PUT | `/productos/{id}/precio` | Admin | Actualiza precios y kilos por canasta |
 | GET | `/productos/{id}/historial` | Admin | Historial de precios |
 | PATCH | `/productos/{id}/stock` | Admin | Ajuste manual de stock |
@@ -133,6 +137,10 @@ El código de cada producto se deriva de su identificador con el formato
 `GCOM-P-0001`. La búsqueda por código devuelve `404` si el producto no existe o
 está inactivo. Para roles distintos de `admin`, la respuesta omite
 `precio_compra`, `margen` y cualquier dato de costo.
+
+Si el código corresponde a una etiqueta (`GCOM-E-…`), la respuesta incluye el
+objeto `etiqueta` con su tipo, peso, lote y fecha de empaque. El escáner de
+ventas usa ese peso para agregar la cantidad correcta de kilos.
 
 ```http
 GET /api/v1/productos/codigo/GCOM-P-0001
@@ -151,6 +159,89 @@ Authorization: Bearer <token>
   "kilos_por_canasta": 20
 }
 ```
+
+Ejemplo de creación:
+
+```http
+POST /api/v1/productos
+Authorization: Bearer <token>
+
+{
+  "nombre": "Queso campesino",
+  "categoria_id": 2,
+  "unidad_medida": "kilo",
+  "precio_compra": 9000,
+  "precio_venta": 14000,
+  "kilos_por_canasta": null,
+  "stock_inicial": 10
+}
+```
+
+`unidad_medida` acepta `kilo`, `canasta` o `unidad`. Si es `canasta`,
+`kilos_por_canasta` es obligatorio. El `stock_inicial` se registra como un
+movimiento de ajuste para conservar la trazabilidad.
+
+## Categorías
+
+| Método | Ruta | Rol | Descripción |
+|---|---|---|---|
+| GET | `/categorias` | Todos | Categorías activas con número de productos |
+| POST | `/categorias` | Admin | Crea una categoría |
+
+La creación de producto también acepta `categoria_nombre` en lugar de
+`categoria_id`; si la categoría no existe, se crea automáticamente.
+
+## Etiquetas QR
+
+| Método | Ruta | Rol | Descripción |
+|---|---|---|---|
+| GET | `/etiquetas` | Todos | Listado con filtros `q`, `tipo`, `estado`, `lote`, `producto_id` |
+| POST | `/etiquetas` | Admin, vendedor | Genera una o varias etiquetas |
+| GET | `/etiquetas/{codigo}` | Todos | Detalle de una etiqueta |
+| POST | `/etiquetas/{codigo}/anular` | Admin, vendedor | Anula la etiqueta |
+
+Tipos válidos: `producto`, `canasta` y `lote`. Las etiquetas de canasta exigen
+`peso_kg` (si el producto tiene `kilos_por_canasta`, se usa como valor por
+defecto); las de lote exigen `lote`. `copias` admite de 1 a 50.
+
+```http
+POST /api/v1/etiquetas
+Authorization: Bearer <token>
+
+{
+  "producto_id": 3,
+  "tipo": "canasta",
+  "peso_kg": 18.5,
+  "fecha_empaque": "2026-11-04",
+  "copias": 2
+}
+```
+
+La respuesta es siempre una lista, incluso cuando se genera una sola copia:
+
+```json
+{
+  "success": true,
+  "message": "Etiqueta generada",
+  "data": [
+    {
+      "id": 1,
+      "codigo": "GCOM-E-1A2B3C4D5E",
+      "tipo": "canasta",
+      "producto_id": 3,
+      "producto": "Pescado entero",
+      "peso_kg": 18.5,
+      "lote": null,
+      "fecha_empaque": "2026-11-04",
+      "estado": "activa",
+      "contenido_qr": "GCOM-E-1A2B3C4D5E"
+    }
+  ]
+}
+```
+
+El QR contiene el código de la etiqueta. Al escanearlo desde Ventas se resuelve
+al producto; en etiquetas de canasta se agrega el peso indicado en kg.
 
 ## Ventas
 
@@ -339,6 +430,11 @@ Las fórmulas se documentan en [08 · Finanzas](08-finanzas.md).
 | GET | `/notificaciones/count` | Pendientes |
 | POST | `/notificaciones/leer-todas` | Marca todas |
 | PATCH | `/notificaciones/{id}/leer` | Marca una |
+
+Las alertas se generan automáticamente al abrir el dashboard. Una alerta marcada
+como leída **no vuelve a crearse** mientras la condición siga vigente (stock bajo
+o deuda vencida); se elimina cuando la condición se resuelve y puede reaparecer
+si vuelve a ocurrir. Existe una sola alerta por `(tipo, referencia_id)`.
 
 ## Reportes
 

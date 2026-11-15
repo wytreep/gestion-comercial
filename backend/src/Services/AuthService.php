@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Core\Config;
-use App\Repositories\BaseRepository;
 use App\Exceptions\HttpException;
 use App\Exceptions\BusinessException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
-final class AuthService extends BaseRepository
+final class AuthService extends BaseService
 {
     private string $secret;
     private int    $expiry;

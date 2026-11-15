@@ -11,7 +11,7 @@ use App\Exceptions\ValidationException;
 use App\Repositories\CobroQrRepository;
 use App\Repositories\VentaRepository;
 
-final class CobroQrService
+final class CobroQrService extends BaseService
 {
     private const VIGENCIA_MINUTOS = 15;
 

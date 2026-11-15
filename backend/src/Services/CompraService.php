@@ -11,7 +11,7 @@ use App\Exceptions\NotFoundException;
 use App\Exceptions\ValidationException;
 use App\Exceptions\BusinessException;
 
-final class CompraService
+final class CompraService extends BaseService
 {
     public function __construct(
         private readonly CompraRepository   $compraRepo,

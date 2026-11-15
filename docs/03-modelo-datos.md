@@ -130,7 +130,8 @@ erDiagram
 | `pagos` | Cobros y abonos | `monto`, `medio_pago`, `destino_dinero` |
 | `gastos_reparto` | Gastos de entrega | `venta_id`, `monto` |
 | `tipos_gasto` | Catálogo de gastos | `nombre`, `categoria` |
-| `notificaciones` | Alertas del sistema | `tipo`, `leida`, `referencia_id` |
+| `notificaciones` | Alertas del sistema | `tipo`, `leida`, `referencia_id` (único por `tipo` + `referencia_id`) |
+| `etiquetas` | Etiquetas QR por producto, canasta o lote | `codigo` único, `tipo`, `peso_kg`, `lote`, `estado` |
 | `backups_log` | Bitácora de respaldos | `nombre_archivo`, `tamanio_bytes` |
 
 ## Reglas de integridad

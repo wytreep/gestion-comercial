@@ -6,7 +6,6 @@ namespace App\Services;
 
 use App\Core\Config;
 use App\Exceptions\TooManyRequestsException;
-use App\Repositories\BaseRepository;
 
 /**
  * Rate limiting del login.
@@ -15,7 +14,7 @@ use App\Repositories\BaseRepository;
  * con varios workers de PHP-FPM. Se limita por email+IP y, además, por IP
  * para frenar el ataque de diccionario rotando correos.
  */
-final class LoginThrottleService extends BaseRepository
+final class LoginThrottleService extends BaseService
 {
     private int $maxIntentos;
     private int $maxIntentosIp;

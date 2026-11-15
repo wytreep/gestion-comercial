@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Repositories\BaseRepository;
-
-final class CarteraService extends BaseRepository
+final class CarteraService extends BaseService
 {
     public function getCartera(): array
     {

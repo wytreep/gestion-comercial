@@ -8,8 +8,10 @@ use App\Exceptions\NotFoundException;
 
 final class ProductoRepository extends BaseRepository
 {
-    public function findAll(): array
+    public function findAll(bool $incluirInactivos = false): array
     {
+        $where = $incluirInactivos ? '' : 'WHERE p.activo = 1';
+
         return $this->query(
             "SELECT p.*, c.nombre AS categoria,
                     CONCAT('GCOM-P-', LPAD(p.id, 4, '0')) AS codigo,
@@ -26,7 +28,8 @@ final class ProductoRepository extends BaseRepository
                       ELSE NULL
                     END AS margen_porcentaje
              FROM productos p JOIN categorias c ON c.id = p.categoria_id
-             WHERE p.activo = 1 ORDER BY c.id, p.nombre"
+             {$where}
+             ORDER BY c.id, p.nombre"
         );
     }
 
@@ -69,6 +72,74 @@ final class ProductoRepository extends BaseRepository
 
         $id = (int) $m[1];
         return $id > 0 ? $this->findById($id) : null;
+    }
+
+    /**
+     * Crea el producto con stock en cero. El stock inicial, si existe, se
+     * registra como movimiento para conservar la trazabilidad.
+     */
+    public function crear(array $data): int
+    {
+        return $this->insert(
+            'INSERT INTO productos
+                (categoria_id, nombre, unidad_medida, precio_compra, precio_venta,
+                 kilos_por_canasta, stock_actual, activo)
+             VALUES
+                (:categoria_id, :nombre, :unidad_medida, :precio_compra, :precio_venta,
+                 :kilos_por_canasta, 0, 1)',
+            [
+                ':categoria_id'      => $data['categoria_id'],
+                ':nombre'            => $data['nombre'],
+                ':unidad_medida'     => $data['unidad_medida'],
+                ':precio_compra'     => $data['precio_compra'],
+                ':precio_venta'      => $data['precio_venta'],
+                ':kilos_por_canasta' => $data['kilos_por_canasta'],
+            ]
+        );
+    }
+
+    public function actualizar(int $id, array $data): void
+    {
+        $this->execute(
+            'UPDATE productos SET
+                categoria_id      = :categoria_id,
+                nombre            = :nombre,
+                unidad_medida     = :unidad_medida,
+                precio_compra     = :precio_compra,
+                precio_venta      = :precio_venta,
+                kilos_por_canasta = :kilos_por_canasta
+             WHERE id = :id',
+            [
+                ':categoria_id'      => $data['categoria_id'],
+                ':nombre'            => $data['nombre'],
+                ':unidad_medida'     => $data['unidad_medida'],
+                ':precio_compra'     => $data['precio_compra'],
+                ':precio_venta'      => $data['precio_venta'],
+                ':kilos_por_canasta' => $data['kilos_por_canasta'],
+                ':id'                => $id,
+            ]
+        );
+    }
+
+    public function cambiarActivo(int $id, bool $activo): void
+    {
+        $this->execute(
+            'UPDATE productos SET activo = :activo WHERE id = :id',
+            [':activo' => $activo ? 1 : 0, ':id' => $id]
+        );
+    }
+
+    public function existeNombre(string $nombre, ?int $excluirId = null): bool
+    {
+        $sql = 'SELECT 1 FROM productos WHERE LOWER(TRIM(nombre)) = LOWER(:nombre)';
+        $params = [':nombre' => trim($nombre)];
+
+        if ($excluirId !== null) {
+            $sql .= ' AND id <> :id';
+            $params[':id'] = $excluirId;
+        }
+
+        return $this->queryOne($sql . ' LIMIT 1', $params) !== null;
     }
 
     public function updatePrecio(int $id, float $pc, float $pv, ?float $kpc): void

@@ -12,7 +12,7 @@ use App\Exceptions\BusinessException;
 use App\Exceptions\NotFoundException;
 use App\Exceptions\ValidationException;
 
-final class VentaService
+final class VentaService extends BaseService
 {
     public function __construct(
         private readonly VentaRepository    $ventaRepo,

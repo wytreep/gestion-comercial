@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Repositories\BaseRepository;
 use TCPDF;
 
-final class ReporteService extends BaseRepository
+final class ReporteService extends BaseService
 {
     // ── Reporte mensual ───────────────────────────────
 

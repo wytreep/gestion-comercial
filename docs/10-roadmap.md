@@ -17,7 +17,7 @@ códigos QR**, solicitado como siguiente evolución del producto.
 
 | Fase | Foco | Periodo estimado | Prioridad | Estado |
 |---|---|---|---|---|
-| 1 | Escáner QR y códigos de barras | Q1 2027 | P0 | Parcial: escaneo y cobro QR listos |
+| 1 | Escáner QR y códigos de barras | Q1 2027 | P0 | Parcial: escaneo, cobro y etiquetas QR listos |
 | 2 | Facturación electrónica e IVA | Q2 2027 | P0 | Planificada |
 | 3 | Inventario avanzado | Q3 2027 | P1 | Planificada |
 | 4 | Operación móvil y cliente | Q3–Q4 2027 | P1 | Planificada |
@@ -45,9 +45,9 @@ gantt
 
 ## Fase 1 · Escáner QR y códigos de barras
 
-> **Estado:** el escaneo de producto en ventas (1.1) y el cobro con QR (1.2) ya
-> están implementados en la versión 3.0.0. Las etiquetas y la consulta de
-> recibos siguen en roadmap.
+> **Estado:** el escaneo de producto en ventas (1.1), el cobro con QR (1.2) y
+> las etiquetas QR (1.3) ya están implementados. La consulta de recibos sigue
+> en roadmap.
 
 ### Objetivo
 
@@ -176,10 +176,19 @@ Implementado en la versión 3.0.0:
 
 ### 1.3 Etiquetas QR
 
+**Estado: implementado.** Disponible en **Inventario → Etiquetas QR** y desde
+el botón *Etiqueta* de cada producto.
+
 - QR por producto para conteo rápido.
-- QR por lote para trazabilidad.
-- QR por canasta con peso y fecha.
-- Impresión en etiquetas de 50 × 30 mm.
+- QR por lote para trazabilidad. El lote es texto libre hasta que exista el
+  módulo de lotes de la Fase 3.
+- QR por canasta con peso y fecha de empaque.
+- Impresión en etiquetas de 50 × 30 mm desde el navegador.
+- El código de etiqueta usa el formato `GCOM-E-XXXXXXXXXX` y se resuelve al
+  escanearlo en Ventas. Una etiqueta anulada deja de resolver.
+- Al escanear una etiqueta de canasta se agrega el peso real en kg en lugar de 1.
+- Tabla `etiquetas` en `001_schema.sql` para instalaciones nuevas y en
+  `003_etiquetas.sql` para bases existentes.
 
 ### 1.4 Consulta de venta
 
@@ -232,6 +241,29 @@ CREATE TABLE cobros_qr (
 );
 ```
 
+`cobros_qr` y `etiquetas` ya están implementadas. La tabla de etiquetas
+(incluida en `001_schema.sql` y `003_etiquetas.sql`) es:
+
+```sql
+CREATE TABLE etiquetas (
+  id            INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  codigo        VARCHAR(32)  NOT NULL UNIQUE,
+  tipo          ENUM('producto','canasta','lote') NOT NULL DEFAULT 'producto',
+  producto_id   INT UNSIGNED NOT NULL,
+  peso_kg       DECIMAL(10,3) NULL,
+  lote          VARCHAR(40)  NULL,
+  fecha_empaque DATE NOT NULL,
+  estado        ENUM('activa','anulada') NOT NULL DEFAULT 'activa',
+  usuario_id    INT UNSIGNED NULL,
+  created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (producto_id) REFERENCES productos(id),
+  FOREIGN KEY (usuario_id)  REFERENCES usuarios(id),
+  CHECK (tipo <> 'canasta' OR peso_kg > 0)
+);
+```
+
+`codigos_escaneados` queda para una etapa posterior de analítica de escaneos.
+
 ### 1.7 Criterios de aceptación
 
 - Escanear un producto lo agrega a la venta en menos de dos segundos.
@@ -242,6 +274,11 @@ CREATE TABLE cobros_qr (
   **Verificado en 3.0.0.**
 - La confirmación manual del pago actualiza la cartera.
   **Verificado en 3.0.0.**
+- Una etiqueta de producto se imprime en 50 × 30 mm y al escanearla agrega el
+  producto a la venta. **Verificado.**
+- Una etiqueta de canasta agrega su peso real en kg y conserva la fecha de
+  empaque. **Verificado.**
+- Una etiqueta anulada deja de resolver y muestra un mensaje claro. **Verificado.**
 - Funciona en móvil y escritorio.
 - No se accede a la cámara sin acción del usuario.
 

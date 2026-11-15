@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Repositories\BaseRepository;
-
-final class CajaService extends BaseRepository
+final class CajaService extends BaseService
 {
     public function getFlujo(string $desde, string $hasta): array
     {

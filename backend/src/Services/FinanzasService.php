@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Repositories\BaseRepository;
 use DateTimeImmutable;
 
 /**
@@ -21,7 +20,7 @@ use DateTimeImmutable;
  *  - No se maneja IVA en esta versión; queda preparado para agregarlo
  *    como una línea más del estado de resultados.
  */
-final class FinanzasService extends BaseRepository
+final class FinanzasService extends BaseService
 {
     private const MESES_CORTOS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
     private const MESES_LARGOS = [

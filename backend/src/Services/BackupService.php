@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Core\Config;
-use App\Repositories\BaseRepository;
 use App\Exceptions\BusinessException;
 
-final class BackupService extends BaseRepository
+final class BackupService extends BaseService
 {
     private Config $config;
 

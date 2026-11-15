@@ -246,6 +246,27 @@ CREATE TABLE IF NOT EXISTS gastos_reparto (
   FOREIGN KEY (tipo_gasto_id) REFERENCES tipos_gasto(id)
 ) ENGINE=InnoDB;
 
+-- ── Etiquetas QR (Fase 1.3) ────────────────────────
+-- QR por producto, canasta (peso) y lote (texto libre hasta la Fase 3).
+CREATE TABLE IF NOT EXISTS etiquetas (
+  id            INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  codigo        VARCHAR(32)  NOT NULL,
+  tipo          ENUM('producto','canasta','lote') NOT NULL DEFAULT 'producto',
+  producto_id   INT UNSIGNED NOT NULL,
+  peso_kg       DECIMAL(10,3) NULL,
+  lote          VARCHAR(40)  NULL,
+  fecha_empaque DATE NOT NULL,
+  estado        ENUM('activa','anulada') NOT NULL DEFAULT 'activa',
+  usuario_id    INT UNSIGNED NULL,
+  created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_etiquetas_codigo (codigo),
+  INDEX idx_etiquetas_producto_estado (producto_id, estado),
+  INDEX idx_etiquetas_lote (lote),
+  CONSTRAINT fk_etiquetas_producto FOREIGN KEY (producto_id) REFERENCES productos(id) ON DELETE CASCADE,
+  CONSTRAINT fk_etiquetas_usuario  FOREIGN KEY (usuario_id)  REFERENCES usuarios(id)  ON DELETE SET NULL,
+  CONSTRAINT chk_etiquetas_peso CHECK (tipo <> 'canasta' OR peso_kg > 0)
+) ENGINE=InnoDB;
+
 -- ── Notificaciones (NUEVO) ─────────────────────────
 CREATE TABLE IF NOT EXISTS notificaciones (
   id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -256,7 +277,8 @@ CREATE TABLE IF NOT EXISTS notificaciones (
   referencia_tipo VARCHAR(50)  NULL,
   leida           TINYINT(1)   NOT NULL DEFAULT 0,
   leida_at        DATETIME     NULL,
-  created_at      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
+  created_at      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_notificaciones_tipo_ref (tipo, referencia_id)
 ) ENGINE=InnoDB;
 
 -- ── Backups log (NUEVO) ────────────────────────────

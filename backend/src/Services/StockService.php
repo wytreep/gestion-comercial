@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Repositories\BaseRepository;
 use App\Exceptions\BusinessException;
 use App\Exceptions\NotFoundException;
 
-final class StockService extends BaseRepository
+final class StockService extends BaseService
 {
     /**
      * Convierte una cantidad "de venta/compra" a la unidad del stock.

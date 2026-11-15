@@ -8,6 +8,7 @@ use App\Controllers\{
     VentaController,
     CompraController,
     ProductoController,
+    CategoriaController,
     ClienteController,
     NotificacionController,
     ReporteController,
@@ -15,7 +16,8 @@ use App\Controllers\{
     CajaController,
     CarteraController,
     FinanzasController,
-    CobroQrController
+    CobroQrController,
+    EtiquetaController
 };
 use App\Services\{
     AuthService,
@@ -30,9 +32,21 @@ use App\Services\{
     CajaService,
     CarteraService,
     FinanzasService,
-    CobroQrService
+    CobroQrService,
+    EtiquetaService,
+    ProductoService,
+    CategoriaService,
+    ClienteService
 };
-use App\Repositories\{ProductoRepository, VentaRepository, CompraRepository, ClienteRepository, CobroQrRepository};
+use App\Repositories\{
+    ProductoRepository,
+    CategoriaRepository,
+    VentaRepository,
+    CompraRepository,
+    ClienteRepository,
+    CobroQrRepository,
+    EtiquetaRepository
+};
 use App\Middleware\{AuthMiddleware, RoleMiddleware};
 use App\Core\Database;
 
@@ -41,6 +55,10 @@ $db = Database::getInstance();
 $authService = new AuthService(new LoginThrottleService());
 $stockService = new StockService();
 $notifService = new NotificacionService();
+$productoRepo = new ProductoRepository();
+$categoriaService = new CategoriaService(new CategoriaRepository());
+$productoService = new ProductoService($productoRepo, $categoriaService, $stockService, $db);
+$etiquetaService = new EtiquetaService(new EtiquetaRepository(), $productoRepo);
 
 $authMiddleware = new AuthMiddleware($authService);
 $roleMiddleware = new RoleMiddleware();
@@ -49,12 +67,14 @@ $roleMiddleware = new RoleMiddleware();
 $authCtrl = new AuthController($authService);
 $dashCtrl = new DashboardController(new DashboardService(), $notifService);
 $ventaRepo = new VentaRepository();
-$ventaService = new VentaService($ventaRepo, new ProductoRepository(), new ClienteRepository(), $stockService, $db);
+$ventaService = new VentaService($ventaRepo, $productoRepo, new ClienteRepository(), $stockService, $db);
 $ventaCtrl = new VentaController($ventaService);
 $cobroQrCtrl = new CobroQrController(new CobroQrService(new CobroQrRepository(), $ventaRepo, $ventaService, $db));
-$compraCtrl = new CompraController(new CompraService(new CompraRepository(), new ProductoRepository(), $stockService, $db));
-$prodCtrl = new ProductoController(new ProductoRepository(), $stockService);
-$clienteCtrl = new ClienteController();
+$compraCtrl = new CompraController(new CompraService(new CompraRepository(), $productoRepo, $stockService, $db));
+$prodCtrl = new ProductoController($productoService, $etiquetaService, $stockService);
+$categoriaCtrl = new CategoriaController($categoriaService);
+$etiquetaCtrl = new EtiquetaController($etiquetaService);
+$clienteCtrl = new ClienteController(new ClienteService(new ClienteRepository()));
 $notifCtrl = new NotificacionController($notifService);
 $reporteCtrl = new ReporteController(new ReporteService());
 $backupCtrl = new BackupController(new BackupService());
@@ -88,12 +108,26 @@ $router->get('/api/v1/dashboard', $protect([$dashCtrl, 'index']));
 $router->get('/api/v1/productos', $protect([$prodCtrl, 'index']));
 $router->get('/api/v1/productos/codigo/{codigo}', $protect([$prodCtrl, 'showByCodigo']));
 $router->get('/api/v1/productos/{id}', $protect([$prodCtrl, 'show']));
+$router->post('/api/v1/productos', $protect([$prodCtrl, 'store'], $adminOnly));
+$router->put('/api/v1/productos/{id}', $protect([$prodCtrl, 'update'], $adminOnly));
+$router->delete('/api/v1/productos/{id}', $protect([$prodCtrl, 'destroy'], $adminOnly));
+$router->patch('/api/v1/productos/{id}/reactivar', $protect([$prodCtrl, 'reactivar'], $adminOnly));
 $router->put('/api/v1/productos/{id}/precio', $protect([$prodCtrl, 'updatePrecio'], $adminOnly));
 $router->get('/api/v1/productos/{id}/historial', $protect([$prodCtrl, 'historial'], $adminOnly));
 $router->patch('/api/v1/productos/{id}/stock', $protect([$prodCtrl, 'ajustarStock'], $adminOnly));
 
+// ── Categorías ────────────────────────────────────────
+$router->get('/api/v1/categorias', $protect([$categoriaCtrl, 'index']));
+$router->post('/api/v1/categorias', $protect([$categoriaCtrl, 'store'], $adminOnly));
+
 // ── Stock ─────────────────────────────────────────────
 $router->get('/api/v1/stock/movimientos', $protect([$prodCtrl, 'movimientos']));
+
+// ── Etiquetas QR (Fase 1.3) ───────────────────────────
+$router->get('/api/v1/etiquetas', $protect([$etiquetaCtrl, 'index']));
+$router->post('/api/v1/etiquetas', $protect([$etiquetaCtrl, 'store'], $noReadonly));
+$router->get('/api/v1/etiquetas/{codigo}', $protect([$etiquetaCtrl, 'show']));
+$router->post('/api/v1/etiquetas/{codigo}/anular', $protect([$etiquetaCtrl, 'anular'], $noReadonly));
 
 // ── Ventas (estáticas primero) ────────────────────────
 $router->get('/api/v1/ventas', $protect([$ventaCtrl, 'index']));

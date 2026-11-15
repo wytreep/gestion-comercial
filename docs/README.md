@@ -16,6 +16,8 @@ distribución de pescado, queso y carne.
 | [09 · Despliegue](09-despliegue.md) | Docker, configuración, respaldo y recuperación |
 | [10 · Roadmap](10-roadmap.md) | Escáner QR, facturación electrónica y mejoras |
 | [11 · Mockups](11-mockups.md) | Wireframes de las pantallas principales |
+| [12 · Integración Chulito](12-integracion-chulito.md) | Borrador de integración con Chulito |
+| [13 · Guía visual](13-guia-visual.md) | Tokens, escala tipográfica, componentes y checklist de revisión |
 
 ## Versión documentada
 

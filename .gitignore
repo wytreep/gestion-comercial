@@ -17,3 +17,5 @@ database/private/
 database/migrations/*.sql
 !database/migrations/001_schema.sql
 !database/migrations/002_cobros_qr.sql
+!database/migrations/003_etiquetas.sql
+!database/migrations/004_notificaciones_unique.sql

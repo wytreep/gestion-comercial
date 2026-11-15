@@ -53,6 +53,29 @@ flowchart TB
 | Excepciones | `backend/src/Exceptions` | Errores de negocio, validación y base de datos |
 | Configuración | `backend/config` | Rutas, entorno y arranque |
 
+### Herencia y clases base
+
+Todo el backend comparte tres clases base para evitar duplicar infraestructura
+y mantener las mismas reglas en cada módulo:
+
+| Clase base | Quién hereda | Aporte |
+|---|---|---|
+| `App\Controllers\BaseController` | Todos los controladores | `requireFields()`, `routeId()` y utilidades HTTP |
+| `App\Services\BaseService` | Todos los servicios | Validación y normalización común; conexión PDO para los servicios que aún consultan directo |
+| `App\Repositories\BaseRepository` | Todos los repositorios | `query()`, `queryOne()`, `insert()`, `execute()` y la conexión compartida |
+
+Reglas de la arquitectura:
+
+1. El controlador traduce HTTP y autoriza; no ejecuta SQL ni decide reglas.
+2. El servicio valida, aplica reglas de negocio y abre transacciones.
+3. El repositorio es el único que conoce el esquema y las consultas SQL.
+4. La inyección de dependencias se hace manualmente en `backend/config/routes.php`.
+
+Los módulos nuevos (`ProductoService`, `CategoriaService`, `ClienteService`)
+usan composición: reciben un repositorio por constructor y extienden
+`BaseService`. Los servicios históricos que aún consultan PDO directamente
+heredan la misma clase base y se irán migrando a repositorios sin romper la API.
+
 ### Flujo de una petición
 
 ```mermaid
