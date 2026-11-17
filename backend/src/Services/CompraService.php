@@ -64,7 +64,8 @@ final class CompraService extends BaseService
 
                 $this->compraRepo->insertItem($compraId, $prodId, $cantidad, $precio, $kilos);
 
-                // Stock: pescado usa kilos estimados; los demás usan cantidad.
+                // Stock: los productos por empaque usan los kilos pesados;
+                // el resto, la cantidad en su propia unidad.
                 $delta = $producto['unidad_medida'] === 'canasta'
                     ? ($kilos !== null && $kilos > 0
                         ? $kilos

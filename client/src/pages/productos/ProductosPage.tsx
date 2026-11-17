@@ -81,7 +81,7 @@ export default function ProductosPage() {
         <div className="flex items-start gap-2 rounded border border-accent/25 bg-primary-50 px-3 py-2 text-tiny text-soft">
           <Info size={14} className="mt-0.5 shrink-0 text-accent" aria-hidden="true" />
           <p>
-            <strong className="text-ink">Pescado:</strong> el margen se calcula con el precio y el costo por kg
+            <strong className="text-ink">Unidad canasta:</strong> el margen se calcula con el precio y el costo por kg
             (costo/kg ÷ precio venta/kg). Define los kg por canasta para ver el margen real.
           </p>
         </div>
@@ -145,7 +145,7 @@ export default function ProductosPage() {
                       </div>
                     </td>
                     <td>
-                      <p className="text-body">{p.unidad_medida === 'canasta' ? 'Media canasta' : p.unidad_medida}</p>
+                      <p className="text-body">{p.unidad_medida === 'canasta' ? 'Canasta' : p.unidad_medida}</p>
                       {p.unidad_medida === 'canasta' && (
                         <p className={p.kilos_por_canasta ? 'text-2xs text-muted' : 'text-2xs font-medium text-warning'}>
                           {p.kilos_por_canasta ? `${p.kilos_por_canasta} kg/canasta` : 'sin kg/canasta'}
@@ -330,7 +330,7 @@ function FormProducto({ producto, onSuccess }: { producto?: Producto; onSuccess:
             id="producto-nombre"
             type="text"
             className="input"
-            placeholder="Ej: Queso campesino"
+            placeholder="Ej: Producto de ejemplo"
             {...register('nombre', { required: true })}
           />
         </div>
@@ -450,7 +450,7 @@ function FormProducto({ producto, onSuccess }: { producto?: Producto; onSuccess:
                 setValueAs: (v) => v ? parseDecimalInput(v) : '',
               })}
             />
-            <p className="field-help mt-1">¿Cuántos kg rinde una canasta en promedio?</p>
+            <p className="field-help mt-1">¿Cuántos kg trae una canasta o empaque?</p>
           </div>
         )}
 
@@ -531,7 +531,7 @@ function QrProducto({ producto }: { producto: Producto }) {
 
 function EditarPrecio({ producto, onSuccess }: { producto: Producto; onSuccess: () => void }) {
   const [error, setError] = useState('');
-  const esPescado = producto.unidad_medida === 'canasta';
+  const esPorEmpaque = producto.unidad_medida === 'canasta';
   const esUnidad = producto.unidad_medida === 'unidad';
   const { register, handleSubmit, watch, formState: { isSubmitting } } = useForm({ defaultValues: { precio_compra: num(producto.precio_compra), precio_venta: num(producto.precio_venta), kilos_por_canasta: producto.kilos_por_canasta != null ? num(producto.kilos_por_canasta) : '', motivo: '' } });
   const vals = watch();
@@ -539,7 +539,7 @@ function EditarPrecio({ producto, onSuccess }: { producto: Producto; onSuccess: 
   const previewMargen = () => {
     const pc = num(vals.precio_compra), pv = num(vals.precio_venta), kpc = num(vals.kilos_por_canasta);
     if (!pv) return null;
-    const costoKg = esPescado && kpc > 0 ? pc / kpc : pc;
+    const costoKg = esPorEmpaque && kpc > 0 ? pc / kpc : pc;
     if (!pv || pv === 0) return null;
     return ((pv - costoKg) / pv * 100).toFixed(1);
   };
@@ -557,7 +557,7 @@ function EditarPrecio({ producto, onSuccess }: { producto: Producto; onSuccess: 
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {error && <Alert type="error" message={error} />}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="field"><label htmlFor="producto-precio-compra" className="label">{esPescado ? 'Precio compra (por canasta)' : `Precio compra (${sufijo})`} *</label><input
+        <div className="field"><label htmlFor="producto-precio-compra" className="label">{esPorEmpaque ? 'Precio compra (por canasta)' : `Precio compra (${sufijo})`} *</label><input
           id="producto-precio-compra"
           type="text"
           inputMode="numeric"
@@ -581,7 +581,7 @@ function EditarPrecio({ producto, onSuccess }: { producto: Producto; onSuccess: 
             validate: (v) => Number(v) > 0 || 'Debe ser mayor a cero',
           })}
         /></div>
-        {esPescado && <div className="field col-span-2"><label htmlFor="producto-kilos" className="label">Kilos por media canasta *</label><input
+        {esPorEmpaque && <div className="field col-span-2"><label htmlFor="producto-kilos" className="label">Kilos por canasta *</label><input
           id="producto-kilos"
           type="text"
           inputMode="decimal"
@@ -590,12 +590,12 @@ function EditarPrecio({ producto, onSuccess }: { producto: Producto; onSuccess: 
           {...register('kilos_por_canasta', {
             setValueAs: (v) => v ? parseDecimalInput(v) : '',
           })}
-        /><p className="field-help mt-1">¿Cuántos kg rinde una media canasta en promedio?</p></div>}
+        /><p className="field-help mt-1">¿Cuántos kg trae una canasta (empaque) en promedio?</p></div>}
         <div className="field col-span-2"><label htmlFor="producto-motivo" className="label">Motivo del cambio</label><input id="producto-motivo" type="text" className="input" placeholder="Ej: Alza del proveedor" {...register('motivo')} /></div>
       </div>
       {margen !== null && (
         <div className={`flex flex-wrap gap-x-5 gap-y-1 rounded-md px-3.5 py-2.5 text-xs ${+margen > 0 ? 'bg-success-soft' : 'bg-danger-soft'}`}>
-          {esPescado && num(vals.kilos_por_canasta) > 0 && <span>Costo/kg: <strong className="font-mono">{formatCOP(num(vals.precio_compra) / num(vals.kilos_por_canasta))}/kg</strong></span>}
+          {esPorEmpaque && num(vals.kilos_por_canasta) > 0 && <span>Costo/kg: <strong className="font-mono">{formatCOP(num(vals.precio_compra) / num(vals.kilos_por_canasta))}/kg</strong></span>}
           <span>Margen estimado: <strong className={+margen > 0 ? 'text-success' : 'text-danger'}>{margen}%</strong></span>
         </div>
       )}

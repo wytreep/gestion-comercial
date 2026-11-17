@@ -292,7 +292,7 @@ export function FormCompra({ compraExistente, onSuccess, conResumen = false }: {
               </thead>
               <tbody>
                 {lineas.map((l, idx) => {
-                  const esPescado = productos.find((p: Producto) => p.id === l.productoId)?.unidad_medida === 'canasta';
+                  const esPorEmpaque = productos.find((p: Producto) => p.id === l.productoId)?.unidad_medida === 'canasta';
                   return (
                     <tr key={idx}>
                       <td>
@@ -342,7 +342,7 @@ export function FormCompra({ compraExistente, onSuccess, conResumen = false }: {
                           parse={parseDecimalInput}
                           onChange={(v) => updateLinea(idx, 'kilos', v || null)}
                         />
-                        {esPescado && <p className="mt-0.5 text-2xs font-medium text-accent">Kilos reales para stock</p>}
+                        {esPorEmpaque && <p className="mt-0.5 text-2xs font-medium text-accent">Kilos reales para stock</p>}
                       </td>
                       <td className="num font-semibold text-ink">{formatCOP(l.cantidad * l.precio)}</td>
                       <td>
