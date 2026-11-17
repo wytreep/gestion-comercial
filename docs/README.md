@@ -1,7 +1,8 @@
 # Documentación — Gestión Comercial
 
-Documentación funcional, técnica y visual del sistema de gestión comercial para
-distribución de pescado, queso y carne.
+Documentación funcional, técnica y visual de un ERP ligero para cualquier
+catálogo de productos. El caso de referencia es un distribuidor de pescado,
+queso y carne; los productos y categorías son datos, no código.
 
 | Documento | Contenido |
 |---|---|

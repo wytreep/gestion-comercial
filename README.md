@@ -1,8 +1,13 @@
 # Gestión Comercial
 
-Sistema de gestión comercial para distribución de pescado, queso y carne.
-Cubre ventas, compras, inventario, cartera, caja, finanzas y reportes, con
+ERP ligero para cualquier negocio que compre, almacene y venda productos:
+catálogo con categorías, unidades y empaques; inventario por peso o por
+unidad; ventas al contado o a crédito; cartera, caja, finanzas y reportes, con
 permisos separados para administración y vendedores.
+
+El caso de referencia con el que nació el proyecto es un distribuidor de
+pescado, queso y carne, pero el modelo no depende de ese catálogo: productos y
+categorías son datos, no código.
 
 ![Panel del administrador](docs/assets/mockup-panel-admin.svg)
 

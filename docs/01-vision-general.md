@@ -2,15 +2,21 @@
 
 ## Qué es Gestión Comercial
 
-Gestión Comercial es un sistema de gestión comercial (ERP ligero) para un
-negocio de distribución de pescado, queso y carne. Cubre el ciclo completo de
-operación:
+Gestión Comercial es un ERP ligero para negocios que compran, almacenan y
+venden productos: distribuidores, despensas, ferreterías o cualquier catálogo
+con inventario. Cubre el ciclo completo de operación:
 
 1. Compra de mercancía a proveedores, con gastos de transporte y almacenamiento.
-2. Recepción y control de inventario por kilos y canastas.
+2. Recepción y control de inventario en la unidad de cada producto (peso,
+   volumen o unidades), con factor de empaque cuando se compra por caja o
+   canasta y se vende al detal.
 3. Venta a clientes, con pago total, abono o crédito.
 4. Cobro de cartera y registro de pagos por medio y destino.
 5. Cierre mensual con estado de resultados, flujo de caja y reportes.
+
+El caso de referencia es un distribuidor de pescado, queso y carne: ese es el
+catálogo con el que se probó el sistema, no una restricción del modelo. Añadir
+productos, categorías o empaques es una operación de datos.
 
 El sistema separa dos experiencias: **administración** (dueño del negocio) y
 **vendedor** (fuerza de ventas). El vendedor opera el día a día sin acceso a
@@ -23,7 +29,8 @@ costos, márgenes, utilidades ni compras.
 | Nombre | Gestión Comercial |
 | Versión | 3.0.0 |
 | Tipo | ERP ligero de distribución y comercialización |
-| Sector | Distribución de pescado, queso y carne |
+| Sector | Comercio y distribución de productos (multi-catálogo) |
+| Caso de referencia | Distribuidor de pescado, queso y carne (datos de ejemplo) |
 | Mercado | Colombia |
 | Moneda | COP |
 | Idioma | Español (Colombia) |

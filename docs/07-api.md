@@ -229,7 +229,7 @@ POST /api/v1/productos
 Authorization: Bearer <token>
 
 {
-  "nombre": "Queso campesino",
+  "nombre": "Producto de ejemplo",
   "categoria_id": 2,
   "unidad_medida": "kilo",
   "precio_compra": 9000,
@@ -239,7 +239,8 @@ Authorization: Bearer <token>
 }
 ```
 
-`unidad_medida` acepta `kilo`, `canasta` o `unidad`. Si es `canasta`,
+`unidad_medida` acepta `kilo`, `canasta` o `unidad` (el nombre del catálogo lo
+define cada negocio). Si es `canasta`,
 `kilos_por_canasta` es obligatorio. El `stock_inicial` se registra como un
 movimiento de ajuste para conservar la trazabilidad.
 
@@ -291,7 +292,7 @@ La respuesta es siempre una lista, incluso cuando se genera una sola copia:
       "codigo": "GCOM-E-1A2B3C4D5E",
       "tipo": "canasta",
       "producto_id": 3,
-      "producto": "Pescado entero",
+      "producto": "Producto de ejemplo",
       "peso_kg": 18.5,
       "lote": null,
       "fecha_empaque": "2026-11-04",

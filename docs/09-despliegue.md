@@ -102,6 +102,7 @@ gestion-comercial/
 │   └── src/
 ├── database/
 │   ├── migrations/         Esquema versionable
+│   ├── seeds/              Datos de ejemplo (carga manual)
 │   └── private/            Datos reales (no versionado)
 ├── docker/
 │   ├── nginx/              Configuración y build del frontend
@@ -141,17 +142,21 @@ docker compose exec -T php php -l src/Controllers/VentaController.php
 
 ## Datos iniciales
 
-Una instalación nueva carga solo:
+Una instalación nueva carga **solo el esquema y los tipos de gasto**. No crea
+categorías, productos, clientes, ventas ni pagos: el catálogo es de cada negocio.
 
-- Esquema.
-- Categorías base.
-- Productos base.
-- Tipos de gasto.
+Para probar con datos realistas existe un catálogo de ejemplo (el del primer
+negocio: pescado, queso y carne), que **no** se carga automáticamente:
 
-No carga clientes, ventas ni pagos.
+```bash
+docker compose cp database/seeds/demo_catalogo.sql db:/tmp/demo.sql
+docker compose exec -T db sh -c \
+  'mysql -u root -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" < /tmp/demo.sql'
+docker compose exec -T db rm -f /tmp/demo.sql
+```
 
-Los precios de los productos base son de demostración. Cámbialos en
-**Productos** antes de operar con clientes reales.
+Los precios son de demostración. Cámbialos en **Productos** antes de operar con
+clientes reales.
 
 ### Migraciones incrementales
 

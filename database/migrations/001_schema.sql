@@ -44,12 +44,14 @@ CREATE TABLE IF NOT EXISTS categorias (
   created_at DATETIME   NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
-INSERT INTO categorias (nombre, descripcion) VALUES
-  ('Pescado',       'Pescado fresco vendido por canastas o kilos'),
-  ('Queso',         'Queso blanco vendido por kilo'),
-  ('Carne Serrana', 'Carne de res serrana vendida por kilo');
+-- Categorías: sin datos por defecto. El catálogo lo define cada negocio
+-- (database/seeds/demo_catalogo.sql trae un ejemplo con productos reales).
 
 -- ── Productos ─────────────────────────────────────────
+-- El catálogo es genérico: cualquier producto con su unidad de venta
+-- (kilo, canasta o unidad) y, si se compra por empaque, su factor de
+-- conversión (kilos_por_canasta). No hay productos ni categorías
+-- precargados; database/seeds/demo_catalogo.sql trae un ejemplo.
 CREATE TABLE IF NOT EXISTS productos (
   id                INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   categoria_id      INT UNSIGNED NOT NULL,
@@ -64,13 +66,6 @@ CREATE TABLE IF NOT EXISTS productos (
   updated_at        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (categoria_id) REFERENCES categorias(id)
 ) ENGINE=InnoDB;
-
--- Precios de demostración. Reemplázalos por los de tu operación antes de usar
--- el sistema en producción; no corresponden a ningún negocio real.
-INSERT INTO productos (categoria_id, nombre, unidad_medida, precio_compra, precio_venta, kilos_por_canasta) VALUES
-  (1, 'Pescado (media canasta)', 'canasta', 120000, 15000, 20),
-  (2, 'Queso',                   'kilo',    4000,   8000,  NULL),
-  (3, 'Carne Serrana',           'kilo',    15000,  25000, NULL);
 
 -- ── Historial precios ─────────────────────────────────
 CREATE TABLE IF NOT EXISTS historial_precios (

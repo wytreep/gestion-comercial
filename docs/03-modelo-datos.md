@@ -117,7 +117,7 @@ erDiagram
 | `usuarios` | Cuentas y roles | `email` único, `rol`, `activo` |
 | `login_intentos` | Rate limiting | `email`, `ip`, `exitoso`, `created_at` |
 | `categorias` | Agrupación de productos | `nombre`, `descripcion` |
-| `productos` | Catálogo y stock | `precio_compra`, `precio_venta`, `kilos_por_canasta` |
+| `productos` | Catálogo y stock | `precio_compra`, `precio_venta`, `unidad_medida`, `kilos_por_canasta` |
 | `historial_precios` | Cambios de precio | `producto_id`, `motivo`, `fecha` |
 | `stock_movimientos` | Entradas y salidas | `tipo`, `cantidad`, `stock_anterior`, `stock_nuevo` |
 | `clientes` | Datos de clientes | `nombre`, `telefono`, `direccion` |
@@ -172,11 +172,14 @@ erDiagram
 
 ## Normalización de costos
 
-Los productos pueden venderse por kilo, canasta o unidad. Para comparar costos
-y calcular márgenes, el sistema normaliza el costo a la unidad de venta:
+La tabla `productos` es genérica: sirve para cualquier catálogo. Cada producto
+declara su **unidad de venta** (`kilo`, `canasta` o `unidad`) y, si se compra por
+empaque y se vende al detal, el **factor de empaque** (`kilos_por_canasta`:
+cuántos kilos trae una canasta o caja). Para comparar costos y calcular
+márgenes, el sistema normaliza el costo a la unidad de venta:
 
 ```
-costo_por_kg = precio_compra / kilos_por_canasta     (si es canasta)
+costo_por_kg = precio_compra / kilos_por_canasta     (si la unidad es canasta)
 costo_por_kg = precio_compra                          (si es kilo o unidad)
 ```
 
@@ -185,6 +188,26 @@ Esta misma lógica se usa en:
 - `ProductoRepository` para el margen por producto.
 - `FinanzasService` para el costo de ventas.
 - El valor del inventario en los indicadores.
+
+> Deuda conocida: los nombres `canasta` y `kilos_por_canasta` vienen del primer
+> catálogo (pescado por canastas). El concepto ya es genérico —empaque con peso
+> fijo—, pero el vocabulario no. Renombrarlos a `empaque` y
+> `contenido_por_empaque` es un cambio de esquema con migración de datos, no un
+> ajuste de texto; está en el backlog, no en la semana 1.
+
+## Escalabilidad del catálogo
+
+Hoy `ProductoRepository::findAll()` devuelve **todos** los productos activos en
+una sola consulta, sin paginación, y el cliente filtra en memoria. Con cientos
+de productos es correcto; con miles, la pantalla de productos y el selector de
+venta se vuelven lentos y la respuesta JSON crece sin límite.
+
+Trabajo planificado (semanas 3-4 del plan, con medición antes/después):
+
+1. `GET /productos` con `?page`, `?per_page`, `?search=` y `?categoria_id=`.
+2. Índice en `productos(activo, categoria_id, nombre)` y `productos(nombre)`.
+3. Búsqueda por nombre para el selector de venta (endpoint ligero, sin costos).
+4. `EXPLAIN` documentado en `docs/sql/rendimiento.md`.
 
 ## Crecimiento previsto
 
