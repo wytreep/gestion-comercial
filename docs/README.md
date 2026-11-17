@@ -19,6 +19,9 @@ distribución de pescado, queso y carne.
 | [12 · Integración Chulito](12-integracion-chulito.md) | Borrador de integración con Chulito |
 | [13 · Guía visual](13-guia-visual.md) | Tokens, escala tipográfica, componentes y checklist de revisión |
 | [14 · Seguridad](14-seguridad.md) | Cifrado, sesiones revocables, bloqueo por IP y panel de seguridad |
+| [15 · Auditoría técnica](auditoria-2026-11-16.md) | Hallazgos verificados, prioridades y línea base de calidad |
+| [16 · Progreso](progreso.md) | Estado real de las 12 semanas, métricas y revisión semanal |
+| [ADR 0001](adr/0001-tipado-estricto-enums-y-money.md) | Dinero en centavos, `strict_types` y enums de dominio |
 
 ## Versión documentada
 

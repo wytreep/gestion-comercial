@@ -4,6 +4,7 @@ backend/vendor/
 client/node_modules/
 client/dist/
 backend/coverage/
+backend/.phpunit.cache/
 .vscode/
 .idea/
 .DS_Store

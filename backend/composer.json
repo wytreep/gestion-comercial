@@ -2,6 +2,7 @@
     "name": "wytreep/gestion-comercial-backend",
     "description": "Gestión Comercial - API REST sobre PHP 8.4",
     "type": "project",
+    "license": "proprietary",
     "require": {
         "php": "^8.2",
         "firebase/php-jwt": "^6.10",
@@ -19,5 +20,13 @@
         "psr-4": {
             "Tests\\": "tests/"
         }
+    },
+    "scripts": {
+        "test": "phpunit --testsuite Unit",
+        "test:all": "phpunit",
+        "test:coverage": "phpunit --coverage-text --coverage-html coverage",
+        "audit:static": "php tools/audit.php --max=81",
+        "audit:report": "php tools/audit.php",
+        "lint": "find src bin public config tools -name '*.php' -print0 | xargs -0 -n1 -P4 php -l"
     }
 }
