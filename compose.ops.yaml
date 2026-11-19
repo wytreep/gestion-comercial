@@ -1,0 +1,71 @@
+# Entorno de OPERACIÓN — lo que usa el cliente para trabajar.
+#
+#   docker compose -f compose.ops.yaml up -d --build   -> http://localhost:8080
+#
+# Reglas (no negociables):
+#   1. Solo se despliega desde un commit limpio y probado (`git status` vacío,
+#      `composer test` en verde).
+#   2. El código va dentro de la imagen: editar archivos en el host NO cambia lo
+#      que ve el cliente. Cambiarlo exige reconstruir y volver a levantar.
+#   3. Antes de cada despliegue, copia de seguridad de la base (ver
+#      docs/09-despliegue.md). Es el único entorno con datos reales.
+#   4. Aquí no se ejecutan migraciones a mano ni pruebas de desarrollo: eso va
+#      en el entorno de desarrollo (docker-compose.yml, puerto 8081).
+name: gc-ops
+
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+    container_name: gcom_ops_nginx
+    ports: [ "${OPS_PORT:-8080}:80" ]
+    depends_on: [ php ]
+    networks: [ gcom_ops_net ]
+    restart: unless-stopped
+
+  php:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: gcom_ops_php
+    # Sin bind mount: el código y el vendor vienen de la imagen.
+    env_file: [ .env ]
+    depends_on:
+      db: { condition: service_healthy }
+    networks: [ gcom_ops_net ]
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    container_name: gcom_ops_db
+    # Sin puerto publicado: MySQL solo es accesible desde la red interna de
+    # esta pila.
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?falta DB_ROOT_PASSWORD en .env}
+      MYSQL_DATABASE: ${DB_NAME:-gestion_comercial}
+      MYSQL_USER: ${DB_USER:-gcom_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?falta DB_PASSWORD en .env}
+    volumes:
+      # Volumen existente con los datos reales del negocio. No renombrar.
+      - gcom_db_data:/var/lib/mysql
+      - ./database/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:?falta DB_ROOT_PASSWORD}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks: [ gcom_ops_net ]
+    restart: unless-stopped
+
+networks:
+  gcom_ops_net:
+    driver: bridge
+
+volumes:
+  gcom_db_data:
+    # Este nombre es el del volumen que ya tiene la operación: cambiarlo
+    # arrancaría con una base vacía y el cliente perdería de vista sus datos.
+    name: gestion-comercial-v3_gcom_db_data
+    driver: local

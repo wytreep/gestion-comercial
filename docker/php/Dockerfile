@@ -15,5 +15,11 @@ RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoload
 
 RUN addgroup -g 1000 www && adduser -u 1000 -G www -s /bin/sh -D www
 
+# El código vive dentro de la imagen. El entorno de operación (compose.ops.yaml)
+# no monta el directorio: editar archivos en el host no cambia lo que ve el
+# cliente hasta que se reconstruye y se despliega la imagen.
+COPY backend/ ./
+RUN chown -R www:www /var/www
+
 USER www
 EXPOSE 9000

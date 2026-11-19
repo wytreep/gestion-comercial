@@ -5,13 +5,82 @@
 - Docker 24 o superior.
 - Docker Compose v2.
 - 2 GB de RAM disponibles.
-- Puerto 8080 libre.
+- Puerto 8080 libre (operación) y 8081 libre (desarrollo).
 
 Para desarrollo sin Docker:
 
 - PHP 8.4.27 o superior.
 - Node.js 22 o superior.
 - MySQL 8.0.
+
+## Dos entornos
+
+El proyecto se ejecuta en dos pilas independientes que pueden estar levantadas a
+la vez:
+
+| Entorno | Archivo | Contenedores | URL | Base de datos |
+|---|---|---|---|---|
+| **Operación** (cliente) | `compose.ops.yaml` | `gcom_ops_*` | <http://localhost:8080> | volumen `gestion-comercial-v3_gcom_db_data` |
+| **Desarrollo** | `docker-compose.yml` | `gcom_dev_*` | <http://localhost:8081> (+ Vite 5173) | volumen `gc_dev_db_data` |
+
+Qué garantiza la separación:
+
+- **Datos distintos.** Probar una migración, importar un dump o borrar filas en
+  desarrollo no toca la operación.
+- **Código congelado en operación.** La imagen de operación lleva el backend
+  dentro y el SPA compilado; guardar un archivo en el host no cambia lo que ve
+  el cliente. En desarrollo el código sí va montado como volumen.
+- **Contenedores y redes distintas.** Sin colisiones de nombres ni de red.
+- **Puertos distintos.** Es imposible aterrizar en la operación por inercia.
+
+### Desplegar en operación
+
+Solo desde un commit limpio y con los tests en verde:
+
+```powershell
+git status --short                      # debe salir vacío
+docker run --rm -v "${PWD}/backend:/app" -w /app gcom-php:audit `
+  sh -lc 'composer test && composer audit:static'
+
+# Copia de seguridad obligatoria antes de tocar nada:
+New-Item -ItemType Directory -Force backups | Out-Null
+docker compose -f compose.ops.yaml exec -T db sh -c `
+  'mysqldump -uroot -p"$MYSQL_ROOT_PASSWORD" --single-transaction "$MYSQL_DATABASE"' `
+  | Set-Content "backups/gc-$(Get-Date -Format yyyyMMdd-HHmm).sql"
+
+# Desplegar:
+docker compose -f compose.ops.yaml up -d --build
+```
+
+Reglas del entorno de operación:
+
+1. No se editan archivos esperando que el cambio aparezca: hay que reconstruir.
+2. Ninguna migración se aplica a mano en operación sin copia previa y sin
+   haberla probado en desarrollo.
+3. Si algo falla, se vuelve a la imagen anterior con
+   `docker compose -f compose.ops.yaml up -d` tras reconstruir el commit previo.
+4. La base solo se toca con la pila de operación levantada.
+
+### Trabajar en desarrollo
+
+```bash
+docker compose up -d          # API + SPA compilado en http://localhost:8081
+cd client && npm run dev      # Vite en http://localhost:5173, proxy /api -> 8081
+```
+
+La primera vez, la base de desarrollo nace vacía. Para tener catálogo con el que
+probar:
+
+```bash
+docker compose cp database/seeds/demo_catalogo.sql db:/tmp/demo.sql
+docker compose exec -T db sh -c \
+  'mysql -u root -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" < /tmp/demo.sql'
+docker compose exec -T db rm -f /tmp/demo.sql
+docker compose exec php php bin/reset-admin-password.php admin@gcom.local --create
+```
+
+Si necesitas datos reales para reproducir un fallo, impórtalos en desarrollo
+desde una copia de la operación; nunca al contrario.
 
 ## Instalación con Docker
 
@@ -63,18 +132,25 @@ Docker Compose no arranca.
 docker compose up -d --build
 ```
 
-Servicios:
+Servicios del entorno de desarrollo:
 
 | Servicio | Contenedor | Puerto |
 |---|---|---|
-| nginx | `gcom_nginx` | 8080 |
-| php | `gcom_php` | interno 9000 |
-| db | `gcom_db` | interno 3306 |
+| nginx | `gcom_dev_nginx` | 8081 |
+| php | `gcom_dev_php` | interno 9000 |
+| db | `gcom_dev_db` | interno 3306 |
 
 ### 3. Crear el administrador
 
 ```bash
 docker compose exec php php bin/reset-admin-password.php admin@gcom.local --create
+```
+
+En scripts o CI, evita el prompt interactivo con `RESET_PASSWORD`:
+
+```bash
+docker compose exec -T -e RESET_PASSWORD='una-clave-larga' \
+  php php bin/reset-admin-password.php admin@gcom.local --create
 ```
 
 No existe usuario por defecto.
@@ -83,10 +159,10 @@ No existe usuario por defecto.
 
 ```bash
 docker compose ps
-curl http://localhost:8080/api/v1/auth/login
+curl http://localhost:8081/api/v1/auth/login
 ```
 
-Abre <http://localhost:8080>.
+Abre <http://localhost:8081>.
 
 ## Estructura del proyecto
 
