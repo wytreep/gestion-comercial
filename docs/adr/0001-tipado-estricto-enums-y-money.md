@@ -34,12 +34,14 @@ tiempo de ejecución.
 2. **Enums backed** en `App\Domain\Enums` para los vocabularios cerrados que ya
    existen como `ENUM` en MySQL: `Rol`, `EstadoVenta`, `EstadoPago`,
    `TipoMovimientoStock`, `TipoNotificacion`.
-3. **Value object `Money`** en `App\Domain\ValueObjects`, inmutable, que
-   almacena **enteros en centavos** y expone `fromDecimal(string)`,
-   `add`, `subtract`, `multiply`, `allocate`, `equals`, `isZero`, `toDecimal`,
-   `format`. Prohibido operar con `float` fuera de la frontera de entrada/salida.
-4. La conversión `DECIMAL (string) → Money` ocurre en el repositorio; el dominio
-   nunca ve strings monetarios crudos.
+3. **Value object `Money`** en `App\Domain`, inmutable, que almacena
+   **enteros en centavos** y expone `fromDecimal(string|int)`, `fromCents`,
+   `add`, `subtract`, `multiply`, `multiplyMilli`, `allocate`, `allocateEvenly`,
+   `equals`, `isZero`, `isNegative`, `toCents`, `toDecimal`. Prohibido operar
+   con `float` fuera de la frontera de entrada/salida.
+4. La conversión `DECIMAL (string) → Money` ocurre en la frontera de la
+   aplicación: `BaseService::importe()` para lo que entra por la API y
+   `Money::fromDecimal()` sobre las columnas monetarias que devuelve la base.
 
 ## Alternativas descartadas
 
@@ -65,8 +67,8 @@ tiempo de ejecución.
 
 **En contra**
 - Refactor amplio: repositorios, servicios, controladores y recursos JSON.
-- Hay que decidir el redondeo de `allocate` (resto al último tramo) y
-  documentarlo.
+- Redondeo de `allocate` decidido y documentado: el resto se asigna de uno en
+  uno a las primeras partes (1,00 entre 3 → 34/33/33), nunca al último tramo.
 - Riesgo de romper el contrato de la API si los importes pasan de número a
   string; se mantiene **número en JSON** para no tocar el cliente.
 

@@ -2,7 +2,8 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    # Todas las ramas: permite validar una rama antes de abrir el PR.
+    branches: ['**']
   pull_request:
     branches: [main]
 
