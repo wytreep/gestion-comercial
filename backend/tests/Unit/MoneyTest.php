@@ -44,10 +44,18 @@ final class MoneyTest extends TestCase
         self::assertSame(12000050, Money::fromDecimal('120000.5')->toCents());
     }
 
-    public function testFromDecimalConIntYFloat(): void
+    public function testFromDecimalConIntYString(): void
     {
         self::assertSame(150000, Money::fromDecimal(1500)->toCents());
-        self::assertSame(150050, Money::fromDecimal(1500.50)->toCents());
+        self::assertSame(150050, Money::fromDecimal('1500.50')->toCents());
+    }
+
+    public function testFromDecimalRechazaFloatPorDiseno(): void
+    {
+        // El texto de un float depende de `precision` del php.ini, así que el
+        // value object no lo acepta: quien convierte es el llamador.
+        $this->expectException(\TypeError::class);
+        Money::fromDecimal(0.3);
     }
 
     public function testFromDecimalNegativo(): void
@@ -109,21 +117,40 @@ final class MoneyTest extends TestCase
         self::assertSame(10000, $base->toCents());
     }
 
-    public function testMultiplicarPorEntero(): void
+    public function testMultiplicarPorUnidadesEnteras(): void
     {
-        self::assertSame(3750000, Money::fromDecimal('12500')->multiply(3)->toCents());
+        self::assertSame(3750000, Money::fromDecimal('12500')->multiplyMilli(3_000)->toCents());
     }
 
     public function testMultiplicarPorCantidadConDecimales(): void
     {
-        // 18.5 kg a 2.500 el kilo = 46.250
-        self::assertSame(4625000, Money::fromDecimal('2500')->multiply(18.5)->toCents());
+        // 18,5 kg a 2.500 el kilo = 46.250
+        self::assertSame(4625000, Money::fromDecimal('2500')->multiplyMilli(18_500)->toCents());
     }
 
     public function testMultiplicarRedondeaAlCentavoMasCercano(): void
     {
         // 0,05 × 0,5 = 0,025 -> 0,03 (half-up, no truncar)
-        self::assertSame(3, Money::fromDecimal('0.05')->multiply(0.5)->toCents());
+        self::assertSame(3, Money::fromDecimal('0.05')->multiplyMilli(500)->toCents());
+    }
+
+    public function testMultiplicarRedondeaNegativosAlejandoseDeCero(): void
+    {
+        self::assertSame(-3, Money::fromDecimal('-0.05')->multiplyMilli(500)->toCents());
+    }
+
+    public function testMultiplicarPorMilesima(): void
+    {
+        // 1,00 × 0,001 = 0,001 -> 0,00
+        self::assertSame(0, Money::fromDecimal('1')->multiplyMilli(1)->toCents());
+        // 5,00 × 0,001 = 0,005 -> 0,01
+        self::assertSame(1, Money::fromDecimal('5')->multiplyMilli(1)->toCents());
+    }
+
+    public function testMultiplicarRechazaDesbordamiento(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        Money::fromCents(PHP_INT_MAX)->multiplyMilli(1_000_000);
     }
 
     // ── Reparto ──────────────────────────────────────────

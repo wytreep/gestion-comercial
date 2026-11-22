@@ -46,13 +46,15 @@ final readonly class Money implements Stringable
 
     /**
      * Construye desde el formato decimal de la BD o de la API: "120000",
-     * "120000.5", "120000.50", "-0.50". Acepta int y float por comodidad,
-     * pero el camino recomendado es el string: el float ya trae su error.
+     * "120000.5", "120000.50", "-0.50". Acepta int y string; **no** acepta
+     * float a propósito: el float ya trae su error y su texto depende de
+     * `precision` del php.ini (con precision=17, 0.1 + 0.2 se convierte en
+     * "0.30000000000000004"). Convertir es responsabilidad del llamador.
      *
      * @throws InvalidArgumentException si el valor no es numérico, usa coma
      *         decimal o trae más de dos decimales.
      */
-    public static function fromDecimal(string|int|float $amount): self
+    public static function fromDecimal(string|int $amount): self
     {
         if (is_int($amount)) {
             if ($amount > intdiv(PHP_INT_MAX, 100) || $amount < intdiv(PHP_INT_MIN, 100)) {
@@ -62,7 +64,7 @@ final readonly class Money implements Stringable
             return new self($amount * 100);
         }
 
-        $string = trim(is_float($amount) ? (string) $amount : $amount);
+        $string = trim($amount);
 
         if (str_contains($string, ',')) {
             throw new InvalidArgumentException(
@@ -99,12 +101,25 @@ final readonly class Money implements Stringable
     }
 
     /**
-     * Multiplica por una cantidad (kilos, unidades, factor). Redondea al
-     * centavo más cercano, alejándose de cero en el medio centavo.
+     * Multiplica por una cantidad expresada en **milésimas** enteras:
+     * 18,5 kg es 18_500 y 0,1 kg es 100.
+     *
+     * Se usa milésimas porque es la precisión de `detalle_venta.cantidad`
+     * (DECIMAL(10,3)). La aritmética es toda entera; el resultado se redondea
+     * al centavo más cercano, alejándose de cero en el medio centavo.
      */
-    public function multiply(int|float|string $factor): self
+    public function multiplyMilli(int $thousandths): self
     {
-        return new self((int) round($this->cents * (float) $factor));
+        if ($thousandths !== 0
+            && abs($this->cents) > intdiv(PHP_INT_MAX, abs($thousandths))
+        ) {
+            throw new InvalidArgumentException('Importe fuera de rango.');
+        }
+
+        $producto = $this->cents * $thousandths;
+        $redondeo = $producto >= 0 ? 500 : -500;
+
+        return new self(intdiv($producto + $redondeo, 1000));
     }
 
     /**
