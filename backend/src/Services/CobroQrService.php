@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Core\Database;
+use App\Domain\Money;
 use App\Exceptions\BusinessException;
 use App\Exceptions\NotFoundException;
 use App\Exceptions\ValidationException;
@@ -42,22 +43,24 @@ final class CobroQrService extends BaseService
             throw new BusinessException('No se puede cobrar una venta cancelada.');
         }
 
-        $saldo = round((float) $venta['saldo_pendiente'], 2);
-        if ($saldo <= 0) {
+        $saldo = Money::fromDecimal($venta['saldo_pendiente']);
+        if ($saldo->toCents() <= 0) {
             throw new BusinessException('La venta no tiene saldo pendiente.');
         }
 
         $monto = (isset($data['monto']) && $data['monto'] !== '')
-            ? round((float) $data['monto'], 2)
+            ? $this->importe($data, 'monto', 'El monto')
             : $saldo;
 
-        if ($monto <= 0) {
+        if ($monto->toCents() <= 0) {
             throw new BusinessException('El monto debe ser mayor a cero.');
         }
-        if ($monto > $saldo + 0.01) {
+
+        // Sin tolerancia: antes se aceptaba un cobro un centavo mayor al saldo.
+        if ($monto->toCents() > $saldo->toCents()) {
             throw new BusinessException(
-                'El monto ($' . number_format($monto, 0, ',', '.') . ') ' .
-                'excede el saldo pendiente ($' . number_format($saldo, 0, ',', '.') . ').'
+                'El monto (' . $this->pesos($monto) . ') ' .
+                'excede el saldo pendiente (' . $this->pesos($saldo) . ').'
             );
         }
 
@@ -70,7 +73,7 @@ final class CobroQrService extends BaseService
             return $this->cobroRepo->crear([
                 'venta_id'   => $ventaId,
                 'codigo'     => $this->generarCodigo(),
-                'monto'      => $monto,
+                'monto'      => $monto->toDecimal(),
                 'expira_at'  => date('Y-m-d H:i:s', strtotime('+' . self::VIGENCIA_MINUTOS . ' minutes')),
                 'usuario_id' => $usuarioId,
             ]);
@@ -210,13 +213,15 @@ final class CobroQrService extends BaseService
 
     private function formatear(array $c): array
     {
-        $monto = (float) $c['monto'];
+        $monto = Money::fromDecimal($c['monto']);
 
         return [
             'id'           => (int) $c['id'],
             'venta_id'     => (int) $c['venta_id'],
             'codigo'       => $c['codigo'],
-            'monto'        => $monto,
+            // `monto` viaja como número porque el cliente ya lo consume así;
+            // cambiarlo a texto sería un cambio de contrato de la API.
+            'monto'        => (float) $c['monto'],
             'estado'       => $c['estado'],
             'expira_at'    => $c['expira_at'],
             'expira_en'    => max(0, strtotime($c['expira_at']) - time()),
@@ -225,11 +230,20 @@ final class CobroQrService extends BaseService
             'pago_id'      => $c['pago_id'] !== null ? (int) $c['pago_id'] : null,
             'created_at'   => $c['created_at'],
             'contenido_qr' => sprintf(
-                'GCOM-COBRO|%s|VENTA:%d|MONTO:%.2f',
+                'GCOM-COBRO|%s|VENTA:%d|MONTO:%s',
                 $c['codigo'],
                 (int) $c['venta_id'],
-                $monto
+                $monto->toDecimal()
             ),
         ];
+    }
+
+    /**
+     * Formato de pesos sin decimales para los mensajes de error ("$46.250"),
+     * igual al que ya mostraba la aplicación. Solo presentación.
+     */
+    private function pesos(Money $monto): string
+    {
+        return '$' . number_format($monto->toCents() / 100, 0, ',', '.');
     }
 }
