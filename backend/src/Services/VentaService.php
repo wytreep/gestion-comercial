@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Core\Database;
+use App\Domain\Money;
 use App\Repositories\VentaRepository;
 use App\Repositories\ProductoRepository;
 use App\Repositories\ClienteRepository;
@@ -47,13 +48,13 @@ final class VentaService extends BaseService
             // Cliente registrado o nombre libre ("cliente_nombre").
             $clienteId = $this->resolverClienteId($data);
 
-            $total = 0.0;
+            $total = Money::zero();
             foreach ($items as $item) {
                 $cantidad = (float) ($item['cantidad'] ?? 0);
-                $precio   = (float) ($item['precio_unitario'] ?? 0);
                 $prodId   = (int)   ($item['producto_id'] ?? 0);
+                $precio   = $this->importe($item, 'precio_unitario', 'El precio unitario');
 
-                if ($cantidad <= 0 || $precio <= 0 || $prodId <= 0) {
+                if ($cantidad <= 0 || $precio->toCents() <= 0 || $prodId <= 0) {
                     throw new ValidationException(['items' => 'Cantidad y precio deben ser mayores a cero.']);
                 }
 
@@ -62,11 +63,18 @@ final class VentaService extends BaseService
                     throw new NotFoundException('Producto');
                 }
 
-                $total += $cantidad * $precio;
+                // Se suma en centavos: cantidad × precio no es exacto en coma
+                // flotante y el error se arrastraba hasta el saldo del cliente.
+                $total = $total->add($precio->multiply($cantidad));
             }
 
-            $pagoInicial = (float) ($data['pago_inicial']['monto'] ?? 0);
-            if ($pagoInicial > $total + 0.01) {
+            $pagoInicial = Money::zero();
+            if (isset($data['pago_inicial']['monto']) && $data['pago_inicial']['monto'] !== '') {
+                $pagoInicial = $this->importe($data['pago_inicial'], 'monto', 'El monto del pago inicial');
+            }
+
+            // Sin tolerancia de 0,01: antes se podía pagar un centavo de más.
+            if ($pagoInicial->toCents() > $total->toCents()) {
                 throw new BusinessException('El pago inicial no puede superar el total de la venta.');
             }
 
@@ -82,13 +90,13 @@ final class VentaService extends BaseService
             // 2. Insertar items y descontar stock
             foreach ($items as $item) {
                 $cantidad = (float) ($item['cantidad'] ?? 0);
-                $precio   = (float) ($item['precio_unitario'] ?? 0);
                 $prodId   = (int)   ($item['producto_id'] ?? 0);
+                $precio   = $this->importe($item, 'precio_unitario', 'El precio unitario');
 
                 $producto = $this->productoRepo->findRaw($prodId);
                 if ($producto === null) throw new NotFoundException('Producto');
 
-                $this->ventaRepo->insertItem($ventaId, $prodId, $cantidad, $precio);
+                $this->ventaRepo->insertItem($ventaId, $prodId, $cantidad, $precio->toDecimal());
 
                 $delta = -$this->stockService->cantidadEnStock($producto, $cantidad);
 
@@ -104,8 +112,10 @@ final class VentaService extends BaseService
             }
 
             // 4. Pago inicial
-            if ($pagoInicial > 0) {
-                $this->ventaRepo->insertPago($ventaId, $data['pago_inicial']);
+            if ($pagoInicial->toCents() > 0) {
+                $pago            = $data['pago_inicial'];
+                $pago['monto']   = $pagoInicial->toDecimal();
+                $this->ventaRepo->insertPago($ventaId, $pago);
             }
 
             return $ventaId;
@@ -133,20 +143,24 @@ final class VentaService extends BaseService
             $nuevoTotal = null;
 
             if (!empty($data['items'])) {
-                $nuevoTotal = 0.0;
+                $nuevoTotal = Money::zero();
                 foreach ($data['items'] as $item) {
                     $cantidad = (float) ($item['cantidad'] ?? 0);
-                    $precio   = (float) ($item['precio_unitario'] ?? 0);
                     $prodId   = (int)   ($item['producto_id'] ?? 0);
+                    $precio   = $this->importe($item, 'precio_unitario', 'El precio unitario');
 
-                    if ($cantidad <= 0 || $precio <= 0 || $prodId <= 0) {
+                    if ($cantidad <= 0 || $precio->toCents() <= 0 || $prodId <= 0) {
                         throw new ValidationException(['items' => 'Datos de item inválidos.']);
                     }
 
-                    $nuevoTotal += $cantidad * $precio;
+                    $nuevoTotal = $nuevoTotal->add($precio->multiply($cantidad));
                 }
 
-                if ($nuevoTotal + 0.01 < (float) $venta['total_pagado']) {
+                $pagado = Money::fromDecimal($venta['total_pagado']);
+
+                // Comparación exacta: la tolerancia de 0,01 dejaba bajar el
+                // total un centavo por debajo de lo ya cobrado.
+                if ($nuevoTotal->toCents() < $pagado->toCents()) {
                     throw new BusinessException(
                         'El nuevo total no puede ser menor que el valor ya pagado de la venta.'
                     );
@@ -176,13 +190,13 @@ final class VentaService extends BaseService
 
                 foreach ($data['items'] as $item) {
                     $cantidad = (float) ($item['cantidad'] ?? 0);
-                    $precio   = (float) ($item['precio_unitario'] ?? 0);
                     $prodId   = (int)   ($item['producto_id'] ?? 0);
+                    $precio   = $this->importe($item, 'precio_unitario', 'El precio unitario');
 
                     $producto = $this->productoRepo->findRaw($prodId);
                     if (!$producto) continue;
 
-                    $this->ventaRepo->insertItem($id, $prodId, $cantidad, $precio);
+                    $this->ventaRepo->insertItem($id, $prodId, $cantidad, $precio->toDecimal());
 
                     $delta = -$this->stockService->cantidadEnStock($producto, $cantidad);
 
@@ -207,7 +221,7 @@ final class VentaService extends BaseService
             throw new BusinessException('La venta ya está cancelada.');
         }
 
-        $tienePagos = (float) ($venta['total_pagado'] ?? 0) > 0;
+        $tienePagos = Money::fromDecimal($venta['total_pagado'] ?? '0')->toCents() > 0;
 
         $this->db->transaction(function () use ($id, $venta, $tienePagos, $usuarioId) {
             // Siempre devolver el stock, tenga pagos o no
@@ -238,8 +252,8 @@ final class VentaService extends BaseService
 
     public function registrarPago(int $ventaId, array $data): int
     {
-        $monto = (float) ($data['monto'] ?? 0);
-        if ($monto <= 0) {
+        $monto = $this->importe($data, 'monto', 'El monto');
+        if ($monto->toCents() <= 0) {
             throw new BusinessException('El monto debe ser mayor a cero.');
         }
 
@@ -251,16 +265,32 @@ final class VentaService extends BaseService
                 throw new BusinessException('No se puede registrar un pago en una venta cancelada.');
             }
 
-            $saldo = (float) $venta['saldo_pendiente'];
-            if ($monto > $saldo + 0.01) {
+            $saldo = Money::fromDecimal($venta['saldo_pendiente']);
+
+            // Sin tolerancia: antes se aceptaba cobrar un centavo de más.
+            if ($monto->toCents() > $saldo->toCents()) {
                 throw new BusinessException(
-                    "El monto ($" . number_format($monto, 0, ',', '.') . ") " .
-                    "excede el saldo pendiente ($" . number_format($saldo, 0, ',', '.') . ")."
+                    'El monto (' . $this->pesos($monto) . ') ' .
+                    'excede el saldo pendiente (' . $this->pesos($saldo) . ').'
                 );
             }
 
-            return $this->ventaRepo->insertPago($ventaId, $data);
+            $pago          = $data;
+            $pago['monto'] = $monto->toDecimal();
+
+            return $this->ventaRepo->insertPago($ventaId, $pago);
         });
+    }
+
+    /**
+     * Formato de pesos para los mensajes de error: "$100" o "$99,99".
+     * Solo presentación; los decimales aparecen únicamente si existen.
+     */
+    private function pesos(Money $monto): string
+    {
+        $decimales = $monto->toCents() % 100 === 0 ? 0 : 2;
+
+        return '$' . number_format($monto->toCents() / 100, $decimales, ',', '.');
     }
 
     /**

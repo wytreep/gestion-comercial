@@ -93,7 +93,11 @@ final class VentaRepository extends BaseRepository
         $this->execute("UPDATE ventas SET " . implode(', ', $sets) . " WHERE id = :id", $params);
     }
 
-    public function insertItem(int $ventaId, int $prodId, float $cant, float $precio): int
+    /**
+     * El precio llega como decimal exacto en texto ("14000.00"): la base lo
+     * guarda en DECIMAL(12,2) y así no pasa por coma flotante.
+     */
+    public function insertItem(int $ventaId, int $prodId, float $cant, string $precio): int
     {
         return $this->insert(
             'INSERT INTO detalle_venta (venta_id,producto_id,cantidad,precio_unitario) VALUES(:v,:p,:c,:pr)',
