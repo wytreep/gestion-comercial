@@ -25,3 +25,7 @@ database/migrations/*.sql
 
 # Artefactos de auditoria visual (Hallmark: capturas y registros)
 .hallmark/
+
+# Configuracion local de herramientas del editor (no es del proyecto)
+.mcp.json
+.markdown-collab/
