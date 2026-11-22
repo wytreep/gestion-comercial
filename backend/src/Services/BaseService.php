@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Domain\Money;
 use App\Exceptions\ValidationException;
 use App\Repositories\BaseRepository;
+use InvalidArgumentException;
 
 /**
  * Base para la capa de servicios.
@@ -168,6 +170,36 @@ abstract class BaseService extends BaseRepository
         }
 
         return $value;
+    }
+
+    /**
+     * Importe monetario: número decimal con hasta dos decimales.
+     *
+     * Devuelve `Money` en centavos para que sumas, restas y comparaciones de
+     * dinero sean exactas. Rechaza tres o más decimales en lugar de redondear
+     * en silencio: si un precio trae milésimas, el error está en quien lo
+     * envía, y esconderlo con `round()` lo vuelve invisible.
+     *
+     * @param array<string,mixed> $data
+     */
+    protected function importe(
+        array $data,
+        string $field,
+        string $label,
+    ): Money {
+        $raw = $data[$field] ?? null;
+
+        if ($raw === null || $raw === '' || !is_numeric($raw)) {
+            throw new ValidationException([$field => "{$label} debe ser un número."]);
+        }
+
+        try {
+            return Money::fromDecimal(is_int($raw) ? $raw : (string) $raw);
+        } catch (InvalidArgumentException) {
+            throw new ValidationException([
+                $field => "{$label} admite máximo dos decimales, con punto como separador.",
+            ]);
+        }
     }
 
     /**
