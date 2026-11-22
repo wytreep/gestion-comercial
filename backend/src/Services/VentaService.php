@@ -65,7 +65,7 @@ final class VentaService extends BaseService
 
                 // Se suma en centavos: cantidad × precio no es exacto en coma
                 // flotante y el error se arrastraba hasta el saldo del cliente.
-                $total = $total->add($precio->multiply($cantidad));
+                $total = $total->add($precio->multiplyMilli($this->milesimas($cantidad)));
             }
 
             $pagoInicial = Money::zero();
@@ -153,7 +153,7 @@ final class VentaService extends BaseService
                         throw new ValidationException(['items' => 'Datos de item inválidos.']);
                     }
 
-                    $nuevoTotal = $nuevoTotal->add($precio->multiply($cantidad));
+                    $nuevoTotal = $nuevoTotal->add($precio->multiplyMilli($this->milesimas($cantidad)));
                 }
 
                 $pagado = Money::fromDecimal($venta['total_pagado']);
@@ -291,6 +291,17 @@ final class VentaService extends BaseService
         $decimales = $monto->toCents() % 100 === 0 ? 0 : 2;
 
         return '$' . number_format($monto->toCents() / 100, $decimales, ',', '.');
+    }
+
+    /**
+     * Cantidad decimal a milésimas enteras: `detalle_venta.cantidad` es
+     * DECIMAL(10,3), así que 18,5 kg son 18_500 y 0,1 kg son 100. Es la única
+     * conversión de cantidad que queda en el servicio; de ahí en adelante el
+     * cálculo es entero.
+     */
+    private function milesimas(float $cantidad): int
+    {
+        return (int) round($cantidad * 1000);
     }
 
     /**
