@@ -25,7 +25,7 @@
         "test": "phpunit --testsuite Unit",
         "test:all": "phpunit",
         "test:coverage": "phpunit --coverage-text --coverage-html coverage",
-        "audit:static": "php tools/audit.php --max=81",
+        "audit:static": "php tools/audit.php --max=66",
         "audit:report": "php tools/audit.php",
         "lint": "find src bin public config tools -name '*.php' -print0 | xargs -0 -n1 -P4 php -l"
     }
