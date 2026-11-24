@@ -21,7 +21,9 @@ distribución de pescado, queso y carne.
 | [14 · Seguridad](14-seguridad.md) | Cifrado, sesiones revocables, bloqueo por IP y panel de seguridad |
 | [15 · Auditoría técnica](auditoria-2026-11-16.md) | Hallazgos verificados, prioridades y línea base de calidad |
 | [16 · Progreso](progreso.md) | Estado real de las 12 semanas, métricas y revisión semanal |
+| [17 · Modelo SaaS](17-saas.md) | Una instancia por cliente: altas, actualizaciones, respaldos, precios y SLA |
 | [ADR 0001](adr/0001-tipado-estricto-enums-y-money.md) | Dinero en centavos, `strict_types` y enums de dominio |
+| [ADR 0002](adr/0002-modelo-de-tenancy.md) | Decisión de tenencia: instancia dedicada y base por cliente, sin `tenant_id` |
 
 ## Versión documentada
 
@@ -36,7 +38,8 @@ distribución de pescado, queso y carne.
 1. Si vas a instalar el sistema, empieza por el [manual de despliegue](09-despliegue.md).
 2. Si vas a usarlo, lee el manual de tu rol: [administrador](05-manual-administrador.md) o [vendedor](06-manual-vendedor.md).
 3. Si vas a mantenerlo, revisa [arquitectura](02-arquitectura.md), [modelo de datos](03-modelo-datos.md) y [API](07-api.md).
-4. Si vas a planear la siguiente etapa, revisa el [roadmap](10-roadmap.md).
+4. Si vas a venderlo a más de un negocio, revisa [modelo SaaS](17-saas.md) y el [ADR 0002](adr/0002-modelo-de-tenancy.md).
+5. Si vas a planear la siguiente etapa, revisa el [roadmap](10-roadmap.md).
 
 ## Convenciones
 

@@ -82,6 +82,14 @@ docker compose exec php php bin/reset-admin-password.php admin@gcom.local --crea
 Si necesitas datos reales para reproducir un fallo, impórtalos en desarrollo
 desde una copia de la operación; nunca al contrario.
 
+### Un cliente, una pila
+
+La pila de operación es la del primer cliente. Para dar de alta a otro negocio
+no se comparte la base: se levanta una pila completa con su propio `.env`,
+volumen, red y puerto, y se publica en su subdominio. El procedimiento, los
+límites y el modelo comercial están en [17 · Modelo SaaS](17-saas.md) y en el
+[ADR 0002](adr/0002-modelo-de-tenancy.md).
+
 ## Instalación con Docker
 
 ### 1. Configurar variables
