@@ -20,6 +20,7 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 
 use App\Core\Config;
+use App\Domain\Rol;
 
 function fail(string $message): never
 {
@@ -104,9 +105,14 @@ try {
 
         $stmt = $pdo->prepare(
             "INSERT INTO usuarios (nombre, email, password_hash, rol, activo)
-             VALUES (:nombre, :email, :hash, 'admin', 1)"
+             VALUES (:nombre, :email, :hash, :rol, 1)"
         );
-        $stmt->execute([':nombre' => $nombre, ':email' => $email, ':hash' => $hash]);
+        $stmt->execute([
+            ':nombre' => $nombre,
+            ':email'  => $email,
+            ':hash'   => $hash,
+            ':rol'    => Rol::Admin->value,
+        ]);
 
         fwrite(STDOUT, "✓ Usuario admin creado: {$email}" . PHP_EOL);
     } else {

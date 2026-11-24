@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace App\Controllers;
 use App\Core\{Request, Response};
+use App\Domain\Rol;
 use App\Services\{EtiquetaService, ProductoService, StockService};
 use App\Exceptions\NotFoundException;
 use App\Exceptions\ValidationException;
@@ -15,7 +16,7 @@ final class ProductoController extends BaseController
 
     public function index(Request $r): Response
     {
-        $incluirInactivos = $r->authRol() === 'admin'
+        $incluirInactivos = $r->authRol() === Rol::Admin->value
             && in_array($r->query('incluir_inactivos'), ['1', 'true', 'si'], true);
 
         return Response::ok($this->sinCostos($this->svc->listar($incluirInactivos), $r));
@@ -106,7 +107,7 @@ final class ProductoController extends BaseController
      */
     private function sinCostos(array $productos, Request $r): array
     {
-        if ($r->authRol() === 'admin') {
+        if ($r->authRol() === Rol::Admin->value) {
             return $productos;
         }
         foreach ($productos as &$p) {

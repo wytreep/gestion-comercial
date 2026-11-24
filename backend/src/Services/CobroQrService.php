@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Core\Database;
+use App\Domain\EstadoPedido;
 use App\Domain\Money;
 use App\Exceptions\BusinessException;
 use App\Exceptions\NotFoundException;
@@ -39,7 +40,7 @@ final class CobroQrService extends BaseService
         $venta = $this->ventaRepo->findById($ventaId);
         if ($venta === null) throw new NotFoundException('Venta');
 
-        if ($venta['estado_pedido'] === 'cancelado') {
+        if ($venta['estado_pedido'] === EstadoPedido::Cancelado->value) {
             throw new BusinessException('No se puede cobrar una venta cancelada.');
         }
 

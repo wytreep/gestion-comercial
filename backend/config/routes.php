@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Domain\Rol;
+
 use App\Controllers\{
     AuthController,
     DashboardController,
@@ -97,8 +99,8 @@ $protect = function (callable $handler, ?callable $roleCheck = null) use ($authM
     };
 };
 
-$adminOnly = $roleMiddleware->require('admin');
-$noReadonly = $roleMiddleware->require('admin', 'vendedor');
+$adminOnly = $roleMiddleware->require(Rol::Admin->value);
+$noReadonly = $roleMiddleware->require(Rol::Admin->value, Rol::Vendedor->value);
 
 // ── Rutas públicas ────────────────────────────────────
 $router->post('/api/v1/auth/login', [$authCtrl, 'login']);

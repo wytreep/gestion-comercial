@@ -6,6 +6,7 @@ namespace App\Middleware;
 
 use App\Core\Request;
 use App\Core\Response;
+use App\Domain\Rol;
 
 /**
  * RoleMiddleware — verifica que el usuario tenga uno de los roles requeridos.
@@ -21,8 +22,7 @@ use App\Core\Response;
  */
 final class RoleMiddleware
 {
-    /** Jerarquía: un rol hereda los permisos de los que están debajo */
-    private const HIERARCHY = ['admin' => 3, 'vendedor' => 2, 'readonly' => 1];
+    // La jerarquía vive en App\Domain\Rol. Aquí solo se compara el nivel.
 
     /**
      * Devuelve un closure que actúa como middleware y verifica que
@@ -51,8 +51,11 @@ final class RoleMiddleware
      */
     private function hasRole(string $userRol, string $required): bool
     {
-        $userLevel     = self::HIERARCHY[$userRol]     ?? 0;
-        $requiredLevel = self::HIERARCHY[$required]    ?? 999;
-        return $userLevel >= $requiredLevel;
+        $userLevel     = Rol::tryFrom($userRol)?->nivel() ?? 0;
+        $requiredLevel = Rol::tryFrom($required)?->nivel();
+
+        // Un rol desconocido no concede permisos y un permiso desconocido no
+        // se satisface con nada, en vez de depender de un número mágico 999.
+        return $requiredLevel !== null && $userLevel >= $requiredLevel;
     }
 }

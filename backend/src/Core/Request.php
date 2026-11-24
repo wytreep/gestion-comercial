@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Core;
 
+use App\Domain\Rol;
+
 final class Request
 {
     public readonly string $method;
@@ -84,7 +86,7 @@ final class Request
 
     public function authRol(): string
     {
-        return $this->authUser()['rol'] ?? 'readonly';
+        return $this->authUser()['rol'] ?? Rol::Readonly->value;
     }
 
     /**

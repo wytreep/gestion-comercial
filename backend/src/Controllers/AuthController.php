@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace App\Controllers;
 use App\Core\{Request, Response};
+use App\Domain\Rol;
 use App\Services\AuthService;
 
 final class AuthController extends BaseController
@@ -64,7 +65,7 @@ final class AuthController extends BaseController
     public function register(Request $r): Response
     {
         $this->requireFields($r, 'nombre', 'email', 'password');
-        $id = $this->svc->crearUsuario((string)$r->input('nombre'), (string)$r->input('email'), (string)$r->input('password'), (string)$r->input('rol', 'vendedor'));
+        $id = $this->svc->crearUsuario((string)$r->input('nombre'), (string)$r->input('email'), (string)$r->input('password'), (string)$r->input('rol', Rol::Vendedor->value));
         return Response::created(['id' => $id], 'Usuario creado');
     }
 

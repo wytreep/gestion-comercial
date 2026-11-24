@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Core\Config;
+use App\Domain\Rol;
 use App\Exceptions\HttpException;
 use App\Exceptions\BusinessException;
 use App\Exceptions\TooManyRequestsException;
@@ -342,12 +343,9 @@ final class AuthService extends BaseService
         $this->throttle->registrarEvento('sesion_revocada', '0.0.0.0', null, $adminId, "Sesión #{$id}: {$motivo}");
     }
 
-    public function crearUsuario(string $nombre, string $email, string $password, string $rol = 'vendedor'): int
+    public function crearUsuario(string $nombre, string $email, string $password, ?string $rol = null): int
     {
-        $roles = ['admin', 'vendedor', 'readonly'];
-        if (!in_array($rol, $roles, true)) {
-            throw new BusinessException("Rol '{$rol}' no válido. Valores: " . implode(', ', $roles));
-        }
+        $rol = ($rol === null || $rol === '') ? Rol::Vendedor : $this->rolDesde($rol);
 
         $existente = $this->queryOne(
             'SELECT id FROM usuarios WHERE email = :email',
@@ -363,18 +361,31 @@ final class AuthService extends BaseService
                 ':nombre' => $nombre,
                 ':email'  => $email,
                 ':hash'   => $this->hashPassword($password),
-                ':rol'    => $rol,
+                ':rol'    => $rol->value,
             ]
         );
     }
 
     public function cambiarRol(int $id, string $rol): void
     {
-        $roles = ['admin', 'vendedor', 'readonly'];
-        if (!in_array($rol, $roles, true)) {
-            throw new BusinessException("Rol '{$rol}' no válido.");
+        $rol = $this->rolDesde($rol);
+        $this->execute('UPDATE usuarios SET rol = :rol WHERE id = :id', [':rol' => $rol->value, ':id' => $id]);
+    }
+
+    /**
+     * Convierte el rol recibido por la API en un caso del enum y conserva el
+     * error de negocio (400) en lugar de dejar escapar el InvalidArgumentException
+     * del dominio, que terminaría en un 500.
+     */
+    private function rolDesde(string $valor): Rol
+    {
+        try {
+            return Rol::desde($valor);
+        } catch (\InvalidArgumentException) {
+            throw new BusinessException(
+                "Rol '{$valor}' no válido. Valores: " . implode(', ', Rol::values())
+            );
         }
-        $this->execute('UPDATE usuarios SET rol = :rol WHERE id = :id', [':rol' => $rol, ':id' => $id]);
     }
 
     /** Guarda el tema elegido (claro · oscuro · sistema) para la cuenta. */

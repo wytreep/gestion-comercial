@@ -91,6 +91,10 @@ $reglas = [
         'descripcion' => 'Strings de rol fuera de RoleMiddleware (usar enum)',
         'severidad'   => 'media',
         'evaluar'     => static function (string $ruta, string $contenido): array {
+            // El enum es la fuente de los valores: ahí sí viven los strings.
+            if (str_contains($ruta, 'Domain' . DIRECTORY_SEPARATOR . 'Rol.php')) {
+                return [];
+            }
             if (str_contains($ruta, 'Middleware' . DIRECTORY_SEPARATOR . 'RoleMiddleware.php')) {
                 return [];
             }

@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace App\Controllers;
 use App\Core\{Request, Response};
+use App\Domain\Rol;
 use App\Services\{DashboardService, NotificacionService};
 
 final class DashboardController extends BaseController
@@ -17,7 +18,7 @@ final class DashboardController extends BaseController
         $data = $this->svc->getResumen();
 
         // El rol vendedor no debe recibir información de costos ni utilidades.
-        if ($r->authRol() !== 'admin') {
+        if ($r->authRol() !== Rol::Admin->value) {
             unset(
                 $data['resumen_mes']['inversion'],
                 $data['resumen_mes']['ganancia_bruta'],

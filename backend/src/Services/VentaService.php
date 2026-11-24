@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Core\Database;
+use App\Domain\EstadoPago;
+use App\Domain\EstadoPedido;
 use App\Domain\Money;
 use App\Repositories\VentaRepository;
 use App\Repositories\ProductoRepository;
@@ -25,6 +27,20 @@ final class VentaService extends BaseService
 
     public function listar(array $filtros = []): array
     {
+        // Un filtro con un estado que no existe devolvía una lista vacía, que
+        // parece "no hay ventas". Ahora se rechaza en la frontera.
+        foreach (['estado_pedido' => EstadoPedido::class, 'estado_pago' => EstadoPago::class] as $campo => $enum) {
+            $valor = $filtros[$campo] ?? '';
+            if ($valor === '') {
+                continue;
+            }
+            if ($enum::tryFrom((string) $valor) === null) {
+                throw new ValidationException([
+                    $campo => "Valor de {$campo} no válido. Permitidos: " . implode(', ', $enum::values()) . '.',
+                ]);
+            }
+        }
+
         return $this->ventaRepo->findAll($filtros);
     }
 
@@ -84,7 +100,7 @@ final class VentaService extends BaseService
                 'fecha_venta'   => $data['fecha_venta']   ?? date('Y-m-d H:i:s'),
                 'fecha_entrega' => $data['fecha_entrega'] ?? null,
                 'observaciones' => $data['observaciones'] ?? null,
-                'estado_pedido' => $data['estado_pedido'] ?? 'nuevo',
+                'estado_pedido' => $this->estadoPedido($data)->value,
             ]);
 
             // 2. Insertar items y descontar stock
@@ -138,6 +154,16 @@ final class VentaService extends BaseService
                 $datos['cliente_id'] = $clienteId;
             } elseif (array_key_exists('cliente_id', $datos)) {
                 $datos['cliente_id'] = null;
+            }
+
+            // Un estado de pedido inventado llegaba hasta el ENUM de MySQL y
+            // salía como error 500. Se valida antes de tocar la base.
+            if (array_key_exists('estado_pedido', $datos)) {
+                if ((string) $datos['estado_pedido'] === '') {
+                    unset($datos['estado_pedido']);
+                } else {
+                    $datos['estado_pedido'] = $this->estadoPedido($datos, false)->value;
+                }
             }
 
             $nuevoTotal = null;
@@ -217,7 +243,7 @@ final class VentaService extends BaseService
         $venta = $this->ventaRepo->findById($id);
         if ($venta === null) throw new NotFoundException('Venta');
 
-        if ($venta['estado_pedido'] === 'cancelado') {
+        if ($venta['estado_pedido'] === EstadoPedido::Cancelado->value) {
             throw new BusinessException('La venta ya está cancelada.');
         }
 
@@ -261,7 +287,7 @@ final class VentaService extends BaseService
             $venta = $this->ventaRepo->findSaldoForUpdate($ventaId);
             if ($venta === null) throw new NotFoundException('Venta');
 
-            if ($venta['estado_pedido'] === 'cancelado') {
+            if ($venta['estado_pedido'] === EstadoPedido::Cancelado->value) {
                 throw new BusinessException('No se puede registrar un pago en una venta cancelada.');
             }
 
@@ -291,6 +317,34 @@ final class VentaService extends BaseService
         $decimales = $monto->toCents() % 100 === 0 ? 0 : 2;
 
         return '$' . number_format($monto->toCents() / 100, $decimales, ',', '.');
+    }
+
+    /**
+     * Estado de pedido recibido en el cuerpo.
+     *
+     * En el alta, si no viene, se usa `nuevo`; en la edición solo se valida
+     * lo que venga. Un valor fuera del enum se rechaza con 422 en lugar de
+     * llegar al ENUM de MySQL y salir como 500.
+     */
+    private function estadoPedido(array $data, bool $porDefecto = true): EstadoPedido
+    {
+        $valor = $data['estado_pedido'] ?? null;
+
+        if ($valor === null || $valor === '') {
+            if ($porDefecto) {
+                return EstadoPedido::Nuevo;
+            }
+            throw new ValidationException(['estado_pedido' => 'Estado de pedido no válido.']);
+        }
+
+        try {
+            return EstadoPedido::desde((string) $valor);
+        } catch (\InvalidArgumentException) {
+            throw new ValidationException([
+                'estado_pedido' => 'Estado de pedido no válido. Permitidos: '
+                    . implode(', ', EstadoPedido::values()) . '.',
+            ]);
+        }
     }
 
     /**

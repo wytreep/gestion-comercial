@@ -9,7 +9,7 @@
 | Semana | Fechas | Foco | Estado | Evidencia |
 |---|---|---|---|---|
 | 0 | 17 – 22 nov | Base de calidad: PHPUnit, auditoría estática, CI | En revisión | `composer test` 26/26, auditoría en 81 con trinquete, CI en verde (run 4) |
-| 1 | 23 – 29 nov | `Money`, enums `Rol` / `EstadoVenta` / `EstadoPago` | En curso | `Money` + ventas y cobro en centavos: 60 tests, auditoría en 66, tolerancias en 0 |
+| 1 | 23 – 29 nov | `Money`, enums `Rol` / `EstadoPedido` / `EstadoPago` | En revisión | `Money` + ventas y cobro en centavos; enums de rol, pedido y pago: 69 tests, auditoría en 55, tolerancias y roles mágicos en 0 |
 | 2 | 30 nov – 6 dic | Laravel: `laravel-cartera-api` v0.1 | Pendiente | — |
 | 3 | 7 – 13 dic | SQL: joins, subconsultas, vistas | Pendiente | — |
 | 4 | 14 – 20 dic | SQL: transacciones, índices, `EXPLAIN` | Pendiente | — |
@@ -24,14 +24,14 @@
 
 ## Línea base medible
 
-| Métrica | Base (17 nov) | Actual (21 nov) | Objetivo |
+| Métrica | Base (17 nov) | Actual (23 nov) | Objetivo |
 |---|---:|---:|---|
-| Tests unitarios en verde | 26 | 60 | 40 |
+| Tests unitarios en verde | 26 | 69 | 40 |
 | Tests de API / integración | 0 | 0 | 15 (semana 6) |
-| Hallazgos de auditoría estática | 81 | 66 | 0 en `strict_types`, `rol_magico` y `dinero_float` (semana 1) |
+| Hallazgos de auditoría estática | 81 | 55 | 0 en `strict_types`, `rol_magico` y `dinero_float` (semana 1) |
 | Casts monetarios a `float` | 49 | 38 | 0 |
 | Comparaciones con `0.01` | 4 | 0 | 0 |
-| Strings de rol mágicos | 11 | 11 | 0 |
+| Strings de rol mágicos | 11 | 0 | 0 |
 
 Los tests se cuentan por separado a propósito: 60 unitarios no cubren la capa
 HTTP. La fila de API sigue en 0 hasta la semana 6 y no debe leerse como avance.
@@ -42,8 +42,12 @@ Los 38 casts restantes están en los servicios de lectura (`FinanzasService`,
 `ReporteService`, `DashboardService`, `CajaService`), que convierten sumas de
 SQL para el JSON de reportes. No intervienen en lo que se cobra ni se guarda, y
 van en el PR siguiente: primero se cierra el dinero exacto donde se escribe.
-Fecha comprometida: semanas 3–4 (7–20 dic), junto con los enums `Rol`,
-`EstadoVenta` y `EstadoPago`, que cierran la semana 1 el 29 de nov.
+Fecha comprometida: semanas 3–4 (7–20 dic).
+
+Los enums `Rol`, `EstadoPedido` y `EstadoPago` ya son la única fuente de los
+valores: `RoleMiddleware`, `AuthService`, `Request`, `VentaService`,
+`CobroQrService` y el resto de la API comparan contra ellos, y
+`DomainEnumTest` falla si PHP y MySQL dejan de coincidir.
 
 ## Revisión semanal
 
