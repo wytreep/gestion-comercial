@@ -25,3 +25,18 @@ database/migrations/*.sql
 
 # Artefactos de auditoria visual (Hallmark: capturas y registros)
 .hallmark/
+
+# Configuracion local de herramientas; no forma parte del producto
+.mcp.json
+.markdown-collab/
+
+# Python
+__pycache__/
+*.pyc
+
+# Generador de entregables Word: perfil de Chrome y celdas intermedias
+docs/entregables/word/assets/diagrams/.chrome-profile/
+docs/entregables/word/assets/diagrams/*-h[0-9]*.png
+docs/entregables/word/assets/diagrams/*-g[0-9]*.png
+docs/entregables/word/assets/diagrams/*-p[0-9]*.png
+docs/entregables/word/assets/diagrams/*.html

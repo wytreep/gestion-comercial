@@ -1,0 +1,7 @@
+flowchart TB
+    R[Router] --> M[Middleware<br/>Auth + Rol]
+    M --> C[Controller]
+    C --> S[Service]
+    S --> RP[Repository]
+    RP --> D[(MySQL)]
+    S --> X[Servicios transversales<br/>Stock · Notificaciones · PDF · Backup]

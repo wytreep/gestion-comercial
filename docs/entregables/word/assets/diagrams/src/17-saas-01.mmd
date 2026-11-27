@@ -1,0 +1,11 @@
+flowchart TB
+    U[Usuario] -->|HTTPS| E[Borde: Caddy/Traefik<br/>TLS y subdominios]
+    E -->|acme.dominio.com| A1[Pila acme<br/>nginx + PHP + MySQL]
+    E -->|beta.dominio.com| A2[Pila beta<br/>nginx + PHP + MySQL]
+    E -->|gama.dominio.com| A3[Pila gama<br/>nginx + PHP + MySQL]
+    C[Plano de control<br/>inventario, versiones, respaldos] -.->|sin datos de negocio| A1
+    C -.-> A2
+    C -.-> A3
+    A1 --> B1[(Respaldo acme)]
+    A2 --> B2[(Respaldo beta)]
+    A3 --> B3[(Respaldo gama)]

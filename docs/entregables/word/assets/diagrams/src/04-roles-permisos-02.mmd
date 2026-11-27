@@ -1,0 +1,10 @@
+sequenceDiagram
+    participant V as Vendedor
+    participant UI as SPA
+    participant API as API
+    V->>UI: Abre /finanzas
+    UI->>UI: AdminOnly detecta rol
+    UI-->>V: Redirige al panel
+    V->>API: GET /api/v1/finanzas
+    API->>API: RoleMiddleware
+    API-->>V: 403

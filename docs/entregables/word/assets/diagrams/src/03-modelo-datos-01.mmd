@@ -1,0 +1,103 @@
+erDiagram
+    USUARIOS ||--o{ STOCK_MOVIMIENTOS : registra
+    CATEGORIAS ||--o{ PRODUCTOS : agrupa
+    PRODUCTOS ||--o{ HISTORIAL_PRECIOS : tiene
+    PRODUCTOS ||--o{ STOCK_MOVIMIENTOS : mueve
+    PRODUCTOS ||--o{ DETALLE_COMPRA : compone
+    PRODUCTOS ||--o{ DETALLE_VENTA : compone
+
+    PROVEEDORES ||--o{ COMPRAS : suministra
+    COMPRAS ||--o{ DETALLE_COMPRA : contiene
+    COMPRAS ||--o{ GASTOS_COMPRA : genera
+
+    CLIENTES ||--o{ VENTAS : compra
+    VENTAS ||--o{ DETALLE_VENTA : contiene
+    VENTAS ||--o{ PAGOS : recibe
+    VENTAS ||--o{ GASTOS_REPARTO : genera
+
+    TIPOS_GASTO ||--o{ GASTOS_COMPRA : clasifica
+    TIPOS_GASTO ||--o{ GASTOS_REPARTO : clasifica
+
+    USUARIOS {
+        int id PK
+        string nombre
+        string email UK
+        string password_hash
+        enum rol
+        boolean activo
+        datetime created_at
+    }
+
+    PRODUCTOS {
+        int id PK
+        int categoria_id FK
+        string nombre
+        enum unidad_medida
+        decimal precio_compra
+        decimal precio_venta
+        decimal kilos_por_canasta
+        decimal stock_actual
+        boolean activo
+    }
+
+    COMPRAS {
+        int id PK
+        int proveedor_id FK
+        date fecha_compra
+        date fecha_llegada
+        decimal total_productos
+        decimal total_gastos
+        decimal total_inversion
+        enum estado
+    }
+
+    VENTAS {
+        int id PK
+        int cliente_id FK
+        datetime fecha_venta
+        date fecha_entrega
+        decimal total
+        decimal total_pagado
+        decimal saldo_pendiente
+        enum estado_pago
+        enum estado_pedido
+    }
+
+    PAGOS {
+        int id PK
+        int venta_id FK
+        decimal monto
+        datetime fecha_pago
+        date fecha_vencimiento
+        enum medio_pago
+        enum destino_dinero
+        string referencia
+    }
+
+    STOCK_MOVIMIENTOS {
+        int id PK
+        int producto_id FK
+        enum tipo
+        decimal cantidad
+        decimal stock_anterior
+        decimal stock_nuevo
+        int referencia_id
+        int usuario_id FK
+    }
+
+    NOTIFICACIONES {
+        int id PK
+        enum tipo
+        string titulo
+        text mensaje
+        boolean leida
+        datetime created_at
+    }
+
+    BACKUPS_LOG {
+        int id PK
+        string nombre_archivo
+        int tamanio_bytes
+        text tablas_incluidas
+        datetime created_at
+    }

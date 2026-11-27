@@ -1,0 +1,8 @@
+flowchart LR
+    U[Usuario<br/>navegador] -->|HTTP :8080| N[nginx 1.27]
+    N -->|archivos estáticos| SPA[SPA React 18]
+    N -->|/api/*| P[PHP-FPM 8.4]
+    P -->|PDO| DB[(MySQL 8.0)]
+    P -->|JWT| A[Autenticación]
+    P -->|TCPDF| PDF[Reportes PDF]
+    P -->|mysqldump| BK[Respaldos SQL]

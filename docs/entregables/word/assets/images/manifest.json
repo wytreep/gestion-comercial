@@ -1,0 +1,56 @@
+[
+  {
+    "slug": "mockup-finanzas",
+    "source": "assets/mockup-finanzas.svg",
+    "png": "docs/entregables/word/assets/images/mockup-finanzas.png",
+    "width": 4320,
+    "height": 2700,
+    "css_width": 1440.0,
+    "css_height": 900.0
+  },
+  {
+    "slug": "mockup-login",
+    "source": "assets/mockup-login.svg",
+    "png": "docs/entregables/word/assets/images/mockup-login.png",
+    "width": 4320,
+    "height": 2700,
+    "css_width": 1440.0,
+    "css_height": 900.0
+  },
+  {
+    "slug": "mockup-nueva-venta",
+    "source": "assets/mockup-nueva-venta.svg",
+    "png": "docs/entregables/word/assets/images/mockup-nueva-venta.png",
+    "width": 4320,
+    "height": 2700,
+    "css_width": 1440.0,
+    "css_height": 900.0
+  },
+  {
+    "slug": "mockup-panel-admin",
+    "source": "assets/mockup-panel-admin.svg",
+    "png": "docs/entregables/word/assets/images/mockup-panel-admin.png",
+    "width": 4320,
+    "height": 2700,
+    "css_width": 1440.0,
+    "css_height": 900.0
+  },
+  {
+    "slug": "mockup-panel-vendedor",
+    "source": "assets/mockup-panel-vendedor.svg",
+    "png": "docs/entregables/word/assets/images/mockup-panel-vendedor.png",
+    "width": 4320,
+    "height": 2700,
+    "css_width": 1440.0,
+    "css_height": 900.0
+  },
+  {
+    "slug": "mockup-qr",
+    "source": "assets/mockup-qr.svg",
+    "png": "docs/entregables/word/assets/images/mockup-qr.png",
+    "width": 4320,
+    "height": 2700,
+    "css_width": 1440.0,
+    "css_height": 900.0
+  }
+]

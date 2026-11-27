@@ -1,0 +1,9 @@
+flowchart LR
+    subgraph Admin
+        A1[Panel] --- A2[Ventas] --- A3[Compras] --- A4[Cartera]
+        A4 --- A5[Finanzas] --- A6[Caja] --- A7[Reportes]
+    end
+    subgraph Vendedor
+        V1[Panel operativo] --- V2[Ventas] --- V3[Cartera]
+        V3 --- V4[Clientes] --- V5[Productos] --- V6[Stock] --- V7[Alertas]
+    end

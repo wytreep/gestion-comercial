@@ -1,0 +1,10 @@
+flowchart TB
+    APP[App.tsx] --> QP[QueryClientProvider]
+    QP --> AP[AuthProvider]
+    AP --> RT[React Router]
+    RT --> LG[Login]
+    RT --> LY[AppLayout]
+    LY --> PG[Páginas por módulo]
+    PG --> Q[TanStack Query]
+    Q --> AX[Axios]
+    AX --> API[/API REST/]

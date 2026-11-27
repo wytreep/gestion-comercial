@@ -1,0 +1,8 @@
+stateDiagram-v2
+    [*] --> pendiente
+    pendiente --> pagado: confirmación
+    pendiente --> expirado: vence
+    pendiente --> anulado: cancela
+    pagado --> [*]
+    expirado --> [*]
+    anulado --> [*]

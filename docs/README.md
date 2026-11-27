@@ -1,7 +1,8 @@
 # Documentación — Gestión Comercial
 
-Documentación funcional, técnica y visual del sistema de gestión comercial para
-distribución de pescado, queso y carne.
+Documentación funcional, técnica y visual de Gestión Comercial, un ERP
+multi-cliente para distribución y comercio. El catálogo de pescado, queso y carne
+es el del primer cliente; el producto no impone un catálogo ni un giro único.
 
 | Documento | Contenido |
 |---|---|
@@ -28,8 +29,8 @@ distribución de pescado, queso y carne.
 ## Versión documentada
 
 - **Producto:** Gestión Comercial
-- **Versión:** 3.0.0
-- **Fecha de documento:** 3 de noviembre de 2026
+- **Versión:** 3.1.0
+- **Fecha de documento:** 24 de noviembre de 2026
 - **Periodo de construcción:** septiembre – noviembre de 2026
 - **Estado:** operativo en entorno local, preparado para despliegue controlado
 
@@ -40,6 +41,53 @@ distribución de pescado, queso y carne.
 3. Si vas a mantenerlo, revisa [arquitectura](02-arquitectura.md), [modelo de datos](03-modelo-datos.md) y [API](07-api.md).
 4. Si vas a venderlo a más de un negocio, revisa [modelo SaaS](17-saas.md) y el [ADR 0002](adr/0002-modelo-de-tenancy.md).
 5. Si vas a planear la siguiente etapa, revisa el [roadmap](10-roadmap.md).
+
+## Entregables Word
+
+Los tres tomos comparten el mismo contenido y se diferencian en tipografía,
+márgenes, numeración, citas y estilo de tablas y figuras.
+
+| Edición | Archivo | Formato |
+|---|---|---|
+| IEEE | [`entregables/word/Gestion-Comercial-IEEE.docx`](entregables/word/Gestion-Comercial-IEEE.docx) | Carta, Times New Roman 10 pt, citas numéricas, secciones romanas |
+| ISO 690 | [`entregables/word/Gestion-Comercial-ISO690.docx`](entregables/word/Gestion-Comercial-ISO690.docx) | A4, Arial 10,5 pt, numeración decimal ISO 2145 |
+| APA 7 | [`entregables/word/Gestion-Comercial-APA7.docx`](entregables/word/Gestion-Comercial-APA7.docx) | Carta, Times New Roman 12 pt, doble espacio, autor-fecha |
+
+Los tomos incluyen portada, control del documento, resumen y abstract, índice,
+listas de figuras y tablas, 17 capítulos, anexos A–D, 21 figuras y 110 tablas.
+El ER se inserta en A3 y las páginas horizontales se abren solo cuando el texto
+quedaría por debajo de 6 pt. Los diagramas Mermaid y los mockups SVG se
+rasterizan antes de construir el documento.
+
+```powershell
+py -3 tools/docgen/render_diagrams.py   # Mermaid + mockups -> PNG y manifiestos
+py -3 tools/docgen/build_docs.py        # tres tomos + paquete legal
+```
+
+## Paquete legal
+
+Los documentos son borradores para revisión jurídica. Comparten placeholders de
+razón social, NIT, domicilio, representante legal y contacto.
+
+| Código | Documento |
+|---|---|
+| GC-LEG-00 | Índice del paquete legal |
+| GC-LEG-01 | Aviso legal |
+| GC-LEG-02 | Política de privacidad y tratamiento de datos personales |
+| GC-LEG-03 | Términos y condiciones de uso |
+| GC-LEG-04 | Acuerdo de encargo de tratamiento de datos personales |
+| GC-LEG-05 | Acuerdo de nivel de servicio |
+| GC-LEG-06 | Política de cookies |
+| GC-LEG-07 | Política de seguridad de la información |
+| GC-LEG-08 | Política de retención y eliminación de datos |
+| GC-LEG-09 | Acuerdo de confidencialidad |
+| GC-LEG-10 | Contrato de prestación de servicios SaaS |
+| GC-LEG-11 | Autorización de tratamiento de datos personales |
+| GC-LEG-12 | Política de gestión de incidentes de seguridad |
+| GC-LEG-13 | Anexo de subencargados del tratamiento |
+
+Las fuentes Markdown viven en [`legal/`](legal/) y los .docx en
+[`entregables/word/legal/`](entregables/word/legal/).
 
 ## Convenciones
 

@@ -1,0 +1,12 @@
+sequenceDiagram
+    participant V as Vendedor
+    participant UI as SPA
+    participant CAM as Cámara
+    participant API as API
+    V->>UI: Pulsa Escanear
+    UI->>CAM: Solicita permiso
+    CAM-->>UI: Imagen
+    UI->>UI: Decodifica código
+    UI->>API: GET /productos/codigo/{codigo}
+    API-->>UI: Producto y precio
+    UI->>UI: Agrega línea a la venta
